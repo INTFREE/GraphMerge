@@ -1,49 +1,84 @@
 package knowledgeGraph.io;
 
-import org.neo4j.driver.internal.spi.Connection;
+import knowledgeGraph.model.*;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.types.Node;
-import org.neo4j.register.Register;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
-import java.sql.DriverManager;
+import static org.neo4j.driver.v1.Values.parameters;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.neo4j.driver.v1.Values.parameters;
 
 public class Importer {
-    public static void ReadGraph(String projectName) {
-        Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "cise"));
-        ArrayList<String> userNameList = new ArrayList<String>();
-        try (Session session = driver.session()) {
-            System.out.println("neo4j connect successfully");
+    private Driver driver;
+
+    public Importer() {
+        this.driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "cise"));
+    }
+
+    public ArrayList<ModelNode> getNodeModel(String projectName) {
+        ArrayList<ModelNode> modelNodeArrayList = new ArrayList<>();
+        try (Session session = this.driver.session()) {
+            StatementResult nodeModels = session.run("MATCH (p:Project {name: $project_name})" +
+                            "MATCH (p)-[:has]->(c:Concept)" +
+                            "OPTIONAL MATCH (c)-[:has_key_attr]->(rel)" +
+                            "RETURN id(c) AS nodeId, c AS node, collect(distinct id(rel)) AS key_attr_list",
+                    parameters("project_name", projectName));
+            while (nodeModels.hasNext()) {
+                Record nodeModel = nodeModels.next();
+                Integer nodeId = nodeModel.get("nodeId").asInt();
+                Node node = nodeModel.get("node").asNode();
+                String value = node.get("value").asString();
+                String tag = node.get("tag").asString();
+                modelNodeArrayList.add(new ModelNode(nodeId, value, tag));
+            }
+        }
+        return modelNodeArrayList;
+    }
+
+    public ArrayList<ModelRelation> getRelationModel(String projectName) {
+        ArrayList<ModelRelation> modelRelationArrayList = new ArrayList<>();
+        try (Session session = this.driver.session()) {
+            StatementResult relationModels = session.run("MATCH (p:Project {name: $project_name})" +
+                            "MATCH (p)-[:has]->(r:Relation)" +
+                            "MATCH (r)-[hr:has_role]->(tgt)" +
+                            "RETURN id(r) AS relationId, r.value AS value, r.desc AS desc, hr.name AS roleName, id(tgt) AS roleId",
+                    parameters("project_name", projectName));
+            while (relationModels.hasNext()) {
+                Integer relationId = -1;
+                String relationValue = "";
+                Map<Integer, String> roles = new HashMap<>();
+                for (int i = 0; i < 2; i++) {
+                    Record relationModel = relationModels.next();
+                    relationId = relationModel.get("relationId").asInt();
+                    relationValue = relationModel.get("value").asString();
+                    String roleName = relationModel.get("roleName").asString();
+                    Integer roleId = relationModel.get("roleId").asInt();
+                    roles.put(roleId, roleName);
+                }
+                ModelRelation modelRelation = new ModelRelation(relationId, relationValue, roles);
+                modelRelationArrayList.add(modelRelation);
+            }
+        }
+        return modelRelationArrayList;
+    }
+
+    public ArrayList<String> getUser() {
+        ArrayList<String> userNameList = new ArrayList<>();
+        try (Session session = this.driver.session()) {
             StatementResult userNodes = session.run("MATCH (u:User) RETURN u.name AS name");
-            Integer count = 0;
             while (userNodes.hasNext()) {
                 Record userNode = userNodes.next();
-                String userName = userNode.get("name").toString();
+                String userName = userNode.get("name").asString();
                 userNameList.add(userName);
             }
         }
-        System.out.println(userNameList);
-        for (String userName : userNameList){
-            try (Session session = driver.session()) {
-                Map<String, Object> paras = new HashMap<String, Object>();
-                paras.put("project_name", projectName);
-                paras.put("user_name", userName);
-                StatementResult nodeCyphers = session.run("MATCH (p:Project {name: $project_name})" +
-                        "MATCH (u:User {name: $user_name})" +
-                        "MATCH (p)-[:has]->(i:Inst)<-[:refer]-(u)" +
-                        "RETURN id(i) AS nodeId, i AS node", paras);
-                while (nodeCyphers.hasNext()) {
-                    Record nodeCypher = nodeCyphers.next();
-                    System.out.println(nodeCypher.get("nodeId").asInt());
-                }
-            }
-        }
-        driver.close();
+        return userNameList;
     }
 
+    public void finishImport() {
+        this.driver.close();
+    }
 }
