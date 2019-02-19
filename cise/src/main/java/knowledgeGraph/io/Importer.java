@@ -1,6 +1,6 @@
 package knowledgeGraph.io;
 
-import knowledgeGraph.model.*;
+import knowledgeGraph.baseModel.*;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.types.Node;
 
@@ -123,12 +123,12 @@ public class Importer {
         ArrayList<InstanceOf> instanceOfArrayList = new ArrayList<>();
         try (Session session = this.driver.session()) {
             StatementResult instanceOfs = session.run("MATCH (p:Project {name: $project_name})" +
-                    "MATCH (u:User {name: $user_name})" +
-                    "MATCH (p)-[:has]->(iof:inst_of)<-[:refer]-(u)" +
-                    "MATCH (i)-[:from]->(iof)-[:to]->(j)" +
-                    "RETURN id(i) AS iId, id(j) AS jId",
+                            "MATCH (u:User {name: $user_name})" +
+                            "MATCH (p)-[:has]->(iof:inst_of)<-[:refer]-(u)" +
+                            "MATCH (i)-[:from]->(iof)-[:to]->(j)" +
+                            "RETURN id(i) AS iId, id(j) AS jId",
                     parameters("project_name", projectName, "user_name", userName));
-            while (instanceOfs.hasNext()){
+            while (instanceOfs.hasNext()) {
                 Record record = instanceOfs.next();
                 Integer iId = record.get("iId").asInt();
                 Integer jId = record.get("jId").asInt();
