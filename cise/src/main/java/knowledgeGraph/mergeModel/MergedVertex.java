@@ -2,6 +2,7 @@ package knowledgeGraph.mergeModel;
 
 import knowledgeGraph.baseModel.Vertex;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class MergedVertex {
@@ -17,8 +18,29 @@ public class MergedVertex {
         this.mergedGraph = null;
     }
 
+    public MergedVertex(Integer type, MergedGraph mergedGraph) {
+        this.modelId = type;
+        this.mergedGraph = mergedGraph;
+        this.vertexSet = new HashSet<>();
+    }
+
+
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean removeVertex(Vertex vertex) {
+        if (!this.vertexSet.contains(vertex)) {
+            return false;
+        }
+        this.vertexSet.remove(vertex);
+        return true;
+    }
+
+    public void addVertex(Vertex vertex) {
+        if (!this.vertexSet.contains(vertex)) {
+            this.vertexSet.add(vertex);
+        }
     }
 
     public String getType() {

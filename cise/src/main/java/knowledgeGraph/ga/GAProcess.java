@@ -65,7 +65,7 @@ public class GAProcess {
                 EntropyCalculator entropyCalculator = new BasicEntropyCalculator();
 
                 mergedGraphInfo.setEntropy(entropyCalculator.calculateEntropy(mergedGraphInfo));
-                System.out.println(mergedGraphInfo.getEntropy());
+//                System.out.println(mergedGraphInfo.getEntropy());
             }
         }));
         entropyExecutor.shutdown();

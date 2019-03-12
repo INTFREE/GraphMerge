@@ -59,6 +59,13 @@ public class MergedGraghInfo {
         return mergedGraph;
     }
 
+    public Set<MergedVertex> getMergedVertexByType(Integer type){
+        if (typeToVertexSetMap.containsKey(type)) {
+            return typeToVertexSetMap.get(type);
+        }
+        return new HashSet<>();
+    }
+
     public void setEntropy(double entropy) {
         this.entropy = entropy;
     }
@@ -69,6 +76,10 @@ public class MergedGraghInfo {
 
     public GraphsInfo getGraphsInfo() {
         return graphsInfo;
+    }
+
+    public Set<Integer> getAllTypes() {
+        return this.typeToVertexSetMap.keySet();
     }
 
     public void generateInitialMergeGraph() {

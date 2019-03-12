@@ -41,16 +41,17 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             for (String outType : outEdgeTypeSet) {
                 currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphSetInMV, outType, EdgeType.OUT);
             }
-//            if(mergedVertex.getType().equals("Entity")){
-//                currentEntropy += 5 * calculateVertexContentEntropy(mergedGraphInfo, graphSetInMV, mergedVertex);
-//            }
+            if(mergedVertex.getType().equals("Entity")){
+                currentEntropy += 5 * calculateVertexContentEntropy(mergedGraphInfo, graphSetInMV, mergedVertex);
+            }
             double delta = Math.log(DLT) / Math.log(2);
             delta = delta <= 2.0 ? 2.0 : delta;
-            // 形式2
+            System.out.println(currentEntropy);
             finalEntropy += (currentEntropy + delta - Math.pow(delta, (double)graphSetInMV.size() / DLT)) * edgeNum;
-
+            System.out.println(finalEntropy);
 
         }
+
         return finalEntropy;
     }
 
@@ -70,7 +71,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             double rstSumPySxy = 0.0;
             for (Vertex vY : mergedVertex.getVertexSet()) {
                 double pY = 1.0 / graphNum;
-                double sXY = VertexSimilarity.calcSimilarity(vX, vY); // 需要确定节点相似度算法
+                double sXY = VertexSimilarity.calcSimilarity(vX, vY); // 需要确定节点相似度算法，如果是0.0会报Infinity
                 rstSumPySxy += pY * sXY;
             }
             entropy += pX * Math.log(rstSumPySxy) / Math.log(2);

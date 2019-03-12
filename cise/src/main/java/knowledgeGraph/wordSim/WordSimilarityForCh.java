@@ -1,4 +1,4 @@
-package knowledgeGraph.util.wordSim;
+package knowledgeGraph.wordSim;
 
 import org.neo4j.register.Register;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
@@ -250,8 +250,8 @@ public class WordSimilarityForCh {
      * 计算两个词语的相似度
      */
     public static double simWord(String word1, String word2) {
-        if (!ALLWORDS.containsKey(word1)) System.out.println("单词: " + word1 + " 没有被收录");
-        if (!ALLWORDS.containsKey(word2)) System.out.println("单词: " + word2 + " 没有被收录");
+//        if (!ALLWORDS.containsKey(word1)) System.out.println("单词: " + word1 + " 没有被收录");
+//        if (!ALLWORDS.containsKey(word2)) System.out.println("单词: " + word2 + " 没有被收录");
 
         if (ALLWORDS.containsKey(word1) && ALLWORDS.containsKey(word2)) {
             List<WordForCh> list1 = ALLWORDS.get(word1);
@@ -377,8 +377,10 @@ public class WordSimilarityForCh {
                 }
             }
             sum += max;
-            list1.remove(index1);
-            list2.remove(index2);
+            if(index1 < list1.size())
+                list1.remove(index1);
+            if(index2 < list2.size())
+                list2.remove(index2);
             count++;
         }
         return (sum + delta * (big - N)) / big;

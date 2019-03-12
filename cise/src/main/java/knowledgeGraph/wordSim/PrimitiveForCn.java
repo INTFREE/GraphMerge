@@ -1,4 +1,4 @@
-package knowledgeGraph.util.wordSim;
+package knowledgeGraph.wordSim;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

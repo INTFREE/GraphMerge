@@ -39,6 +39,13 @@ public class MergedGraph {
         return mergedEdgeSet;
     }
 
+    public boolean addVertex(MergedVertex mergedVertex){
+        if(this.mergedVertexSet.contains(mergedVertex)){
+            return false;
+        }
+        this.mergedVertexSet.add(mergedVertex);
+        return true;
+    }
     public Set<MergedEdge> getMergedEdgeSet() {
         return mergedEdgeSet;
     }

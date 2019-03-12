@@ -1,4 +1,4 @@
-package knowledgeGraph.util.wordSim;
+package knowledgeGraph.wordSim;
 
 import java.util.ArrayList;
 import java.util.HashMap;

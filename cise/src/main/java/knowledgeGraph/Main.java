@@ -18,7 +18,6 @@ public class Main {
         ArrayList<Graph> graphArrayList = new ArrayList<>();
         for (String userName : userNameList) {
             Graph graph = graphImporter.readGraph(importer, "大话西游-电影人物关系图谱", userName);
-            System.out.println(userName);
             graphArrayList.add(graph);
         }
         importer.finishImport();
