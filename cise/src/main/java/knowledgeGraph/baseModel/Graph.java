@@ -1,33 +1,16 @@
 package knowledgeGraph.baseModel;
 
-import java.util.Set;
+import org.jgrapht.graph.DefaultDirectedGraph;
 
-public class Graph {
-    private Set<Edge> edgeSet;
-    private Set<Vertex> vertexSet;
+public class Graph extends DefaultDirectedGraph<Vertex, Edge> {
     private String userName;
 
-    public Graph(Set<Edge> edgeSet, Set<Vertex> vertexSet, String userName) {
-        this.edgeSet = edgeSet;
-        this.vertexSet = vertexSet;
+    public Graph(String userName) {
+        super(Edge.class);
         this.userName = userName;
-
-    }
-
-    @Override
-    public String toString() {
-        return "graph " + userName + " edge num " + this.edgeSet.size() + " vertex num " + this.vertexSet.size();
     }
 
     public String getUserName() {
         return userName;
-    }
-
-    public Set<Edge> getEdgeSet() {
-        return edgeSet;
-    }
-
-    public Set<Vertex> getVertexSet() {
-        return vertexSet;
     }
 }

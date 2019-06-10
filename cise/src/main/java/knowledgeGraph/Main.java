@@ -20,9 +20,10 @@ public class Main {
             Graph graph = graphImporter.readGraph(importer, "大话西游-电影人物关系图谱", userName);
             graphArrayList.add(graph);
         }
+        System.out.println(graphArrayList.size());
         importer.finishImport();
 
-        GAProcess ga = new GAProcess(1000, 0.2, 1000, 200, graphArrayList);
+        GAProcess ga = new GAProcess(1, 0.2, 1000, 200, graphArrayList);
         ga.quiet = true;
         ga.parallel = false;
         ga.Run();

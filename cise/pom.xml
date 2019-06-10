@@ -32,7 +32,23 @@
             <artifactId>neo4j-java-driver</artifactId>
             <version>1.7.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht-io</artifactId>
+            <version>1.1.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>portable-1.7.3</version>
+        </dependency>
     </dependencies>
 
 </project>

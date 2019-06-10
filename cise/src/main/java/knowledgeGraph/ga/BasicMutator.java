@@ -1,10 +1,10 @@
 package knowledgeGraph.ga;
 
+import javafx.util.Pair;
+import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
-import knowledgeGraph.mergeModel.MergedGraghInfo;
-import knowledgeGraph.mergeModel.MergedVertex;
-import knowledgeGraph.mergeModel.Mutator;
+import knowledgeGraph.mergeModel.*;
 import knowledgeGraph.util.UtilFunction.RandomUtil;
 import knowledgeGraph.util.UtilFunction.CollectionUtil;
 
@@ -12,134 +12,118 @@ import java.util.*;
 
 
 public class BasicMutator implements Mutator {
-    public double mutationRate = 0.0;
-    public double typeMutationRate = 0.5;
-
-    public BasicMutator(double rate) {
-        if (rate >= 0 && rate <= 1.0) {
-            mutationRate = rate;
-        }
-    }
 
     @Override
     public boolean mutate(MergedGraghInfo inputMergedGraph) {
-        if (!RandomUtil.randomTest(mutationRate)) {
-            return true;
+        MergedVertex mergedVertex = inputMergedGraph.getMergedGraph().getMostEntropyMergedVertex();
+        MergedGraph mergedGraph = inputMergedGraph.getMergedGraph();
+        EdgeType type = EdgeType.OUT;
+        if (mergedVertex.getType().equalsIgnoreCase("entity")) {
+            type = EdgeType.IN;
         }
-
-        // 对于每个类型的节点，进行多次次变异尝试
-
-        for (Integer type : inputMergedGraph.getAllTypes()) {
-
-            // entry不变异
-//            if (type.equals(StringType.entryType))
-//                continue;
-
-            if (!RandomUtil.randomTest(typeMutationRate)) {
-                continue;
-            }
-
-            int mutateTimes = 1;
-            while (mutateTimes > 0) {
-                mutateTimes--;
-                mutateForType(inputMergedGraph, type);
-            }
-
-            inputMergedGraph.isChanged = true;
-        }
-        // 变异完成，更新融合图信息中的映射与边融合
-//        inputMergedGraph.trim();
-//        inputMergedGraph.updateMapping();
-//        inputMergedGraph.mergeEdges();
+        Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, mergedVertex, type);
+        Set<MergedVertex> mergedVertexSet = inputMergedGraph.getMergedVertexByType(vertexSetPair.getKey().getType());
+        MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, mergedVertexSet, vertexSetPair.getValue(), type);
+        mergedGraph.mutateMergedGraph(mutateTarget, vertexSetPair.getKey());
         return true;
     }
 
-    protected void mutateForType(MergedGraghInfo mergedGraghInfo, Integer type) {
-        Set<MergedVertex> vertexSet = mergedGraghInfo.getMergedVertexByType(type);
-        // 如果这个集合是空的，也就是没有这个类型的融合节点，则不需要变异
-        if (vertexSet.isEmpty()) {
-            return;
-        }
-
-        // 否则，向节点集合中插入一个空节点，之后更新一下刚才拿到的集合
-        MergedVertex newEmptyVertex = new MergedVertex(type, mergedGraghInfo.getMergedGraph());
-        mergedGraghInfo.getMergedGraph().addVertex(newEmptyVertex);
-        vertexSet = mergedGraghInfo.getMergedVertexByType(type);
-
-
-        // 从中随机选择两个融合节点
-        List<MergedVertex> randomPickedVertexPair = new CollectionUtil<MergedVertex>()
-                .pickRandom(vertexSet, 2);
-
-        if (randomPickedVertexPair.size() < 2) {
-            return;
-        }
-
-        // 查找这两个融合节点所对应的待融合图都有哪些
-        Set<Graph> graphSet = new HashSet<>();
-        for (int i = 0; i < 2; i++) {
-            MergedVertex mVertex = randomPickedVertexPair.get(i);
-            for (Vertex v : mVertex.getVertexSet()) {
-                graphSet.add(v.getGraph());
-            }
-        }
-        int graphNum = graphSet.size();
-
-        MergedVertex mVertex0 = randomPickedVertexPair.get(0);
-        MergedVertex mVertex1 = randomPickedVertexPair.get(1);
-
-        // 表示有多大概率，在两个融合图中交换来自同一个待融合图的节点
-        // 0.5表示有一半的待融合图的节点会被交换
-        double exchangeRate = 0.5;
-        int exchangeGraphNum = (int) (exchangeRate * graphNum);
-        // 对于融合图集合中的每个图，随机交换两个融合节点中来自该图的节点
-
-        List<Graph> shuffledGraphList = new ArrayList<>(graphSet);
-        Collections.shuffle(shuffledGraphList);
-
-        for (Graph graph : shuffledGraphList) {
-//            // 生成随机数，判定是否交换这个图的节点
-//            double randomResult = new Random().nextDouble();
-//            if (randomResult > exchangeRate) {
-//                continue;
-//            }
-
-            // 进行交换，直到交换次数达到
-            if (exchangeGraphNum <= 0) {
-                break;
-            }
-            exchangeGraphNum--;
-
-            // 找到两个融合节点中，来自这个图的节点
-            // 由于同一个图的两个节点不能融合在一起，所以两个图中各自的最多找到一个
-            Vertex vFromMergedVertex0 = null;
-            Vertex vFromMergedVertex1 = null;
-            for (Vertex v : mVertex0.getVertexSet()) {
-                if (v.getGraph().equals(graph)) {
-                    vFromMergedVertex0 = v;
-                    break;
+    private MergedVertex getTargetMergedVertex(MergedGraph mergedGraph, Set<MergedVertex> baseMergedVertexSet, Set<MergedVertex> mergedVertices, EdgeType edgeInOrOut) {
+        HashMap<MergedVertex, Double> vertexDifference = new HashMap<>();
+        for (MergedVertex mergedVertex : baseMergedVertexSet) {
+            Set<MergedVertex> connectedVertexSet = new HashSet<>();
+            if (edgeInOrOut.equals((EdgeType.IN))) {
+                Set<MergedEdge> mergedEdgeSet = mergedGraph.incomingEdgesOf(mergedVertex);
+                for (MergedEdge mergedEdge : mergedEdgeSet) {
+                    connectedVertexSet.add(mergedEdge.getSource());
+                }
+            } else {
+                Set<MergedEdge> mergedEdgeSet = mergedGraph.outgoingEdgesOf(mergedVertex);
+                for (MergedEdge mergedEdge : mergedEdgeSet) {
+                    connectedVertexSet.add(mergedEdge.getTarget());
                 }
             }
-            for (Vertex v : mVertex1.getVertexSet()) {
-                if (v.getGraph().equals(graph)) {
-                    vFromMergedVertex1 = v;
-                    break;
-                }
-            }
-
-            //System.out.println("before: " + mVertex0 + mVertex1);
-
-            // 交换找到的两个节点
-            if (vFromMergedVertex0 != null) {
-                mVertex0.removeVertex(vFromMergedVertex0);
-                mVertex1.addVertex(vFromMergedVertex0);
-            }
-            if (vFromMergedVertex1 != null) {
-                mVertex1.removeVertex(vFromMergedVertex1);
-                mVertex0.addVertex(vFromMergedVertex1);
-            }
-
-            //System.out.println("After: " + mVertex0 + mVertex1);
+            vertexDifference.put(mergedVertex, getSimilarity(connectedVertexSet, mergedVertices));
         }
+        double res = Double.MAX_VALUE;
+        MergedVertex minDifferentVertex = null;
+        for (MergedVertex mergedVertex : vertexDifference.keySet()) {
+            double tmp = vertexDifference.get(mergedVertex);
+            if (tmp < res) {
+                res = tmp;
+                minDifferentVertex = mergedVertex;
+            }
+        }
+        return minDifferentVertex;
+    }
+
+    private Pair<Vertex, Set<MergedVertex>> getMostDifferentVertex(MergedGraph mergedGraph, MergedVertex mergedVertex, EdgeType edgeInOrOut) {
+        HashMap<Vertex, Set<MergedVertex>> vertexToMergedVertex = new HashMap<>();
+        Set<MergedEdge> mergedEdgeSet = new HashSet<>();
+        if (edgeInOrOut.equals(EdgeType.IN)) {
+            mergedEdgeSet = mergedGraph.incomingEdgesOf(mergedVertex);
+        } else if (edgeInOrOut.equals(EdgeType.OUT)) {
+            mergedEdgeSet = mergedGraph.outgoingEdgesOf(mergedVertex);
+        }
+        for (MergedEdge mergedEdge : mergedEdgeSet) {
+            for (Edge edge : mergedEdge.getEdgeSet()) {
+                Vertex tmpVertex;
+                if (edgeInOrOut.equals(EdgeType.IN)) {
+                    tmpVertex = edge.getTarget();
+                } else {
+                    tmpVertex = edge.getSource();
+                }
+                if (!vertexToMergedVertex.containsKey(tmpVertex)) {
+                    vertexToMergedVertex.put(tmpVertex, new HashSet<>());
+                }
+                MergedVertex tmpMergedVertex;
+                if (edgeInOrOut.equals(EdgeType.IN)) {
+                    tmpMergedVertex = mergedEdge.getSource();
+                } else {
+                    tmpMergedVertex = mergedEdge.getTarget();
+                }
+                vertexToMergedVertex.get(tmpVertex).add(tmpMergedVertex);
+            }
+        }
+        HashMap<Vertex, Double> vertexDifference = new HashMap<>();
+        for (Vertex vertex : vertexToMergedVertex.keySet()) {
+            vertexDifference.put(vertex, 0.0);
+        }
+        for (Vertex vertex : vertexToMergedVertex.keySet()) {
+            Set<MergedVertex> mergedVertices = vertexToMergedVertex.get(vertex);
+            for (Vertex vertex1 : vertexToMergedVertex.keySet()) {
+                if(vertex1.equals(vertex)){
+                    continue;
+                }
+                Set<MergedVertex> tmpSet = vertexToMergedVertex.get(vertex1);
+                double similarity = getSimilarity(mergedVertices, tmpSet);
+                System.out.println(similarity);
+                vertexDifference.put(vertex, vertexDifference.get(vertex) + similarity);
+                vertexDifference.put(vertex1, vertexDifference.get(vertex1) + similarity);
+            }
+        }
+        double res = 0.0;
+        Vertex mostDifferentVertex = null;
+        for (Vertex vertex : vertexDifference.keySet()) {
+            double tmp = vertexDifference.get(vertex);
+            if (tmp > res) {
+                res = tmp;
+                mostDifferentVertex = vertex;
+            }
+        }
+        Set<MergedVertex> mergedVertices = vertexToMergedVertex.get(mostDifferentVertex);
+        return new Pair<>(mostDifferentVertex, mergedVertices);
+    }
+
+    private double getSimilarity(Set<MergedVertex> baseSet, Set<MergedVertex> givenSet) {
+        Set<MergedVertex> result = new HashSet<>();
+        result.addAll(baseSet);
+        result.retainAll(givenSet);
+        int intersection = result.size();
+        result.clear();
+        result.addAll(baseSet);
+        result.addAll(givenSet);
+        System.out.println(result.size());
+        return intersection / result.size();
     }
 }

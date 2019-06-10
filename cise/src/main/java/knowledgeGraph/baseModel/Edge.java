@@ -24,10 +24,6 @@ public class Edge {
         return graph;
     }
 
-    public void setGraph(Graph graph) {
-        this.graph = graph;
-    }
-
     public Integer getId() {
         return id;
     }
@@ -42,6 +38,10 @@ public class Edge {
 
     public Vertex getTarget() {
         return target;
+    }
+
+    public void setGraph(Graph graph) {
+        this.graph = graph;
     }
 
     public void setId(Integer id) {

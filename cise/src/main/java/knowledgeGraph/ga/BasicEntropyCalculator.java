@@ -16,11 +16,11 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
         // 初始化熵
         double finalEntropy = 0.0;
-
+        double maxVertexEntropy = 0.0;
         // 融合图的边数
-        int edgeNum = mergedGraphInfo.getMergedGraph().getMergedEdgeSet().size();
+        int edgeNum = mergedGraphInfo.getMergedGraph().edgeSet().size();
 
-        Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().getMergedVertexSet();
+        Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
         for (MergedVertex mergedVertex : mergedVertexSet) {
             Set<Graph> graphSetInMV = new HashSet<>();
             for (Vertex vertex : mergedVertex.getVertexSet()) {
@@ -28,11 +28,11 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
             double currentEntropy = 0.0;
             Set<String> inEdgeTypeSet = new HashSet<>();
-            for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().getIncomingEdge(mergedVertex)) {
+            for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
                 inEdgeTypeSet.add(mergedEdge.getRoleName());
             }
             Set<String> outEdgeTypeSet = new HashSet<>();
-            for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().getOutcomingEdge(mergedVertex)) {
+            for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
                 outEdgeTypeSet.add(mergedEdge.getRoleName());
             }
             for (String inType : inEdgeTypeSet) {
@@ -41,14 +41,18 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             for (String outType : outEdgeTypeSet) {
                 currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphSetInMV, outType, EdgeType.OUT);
             }
-            if(mergedVertex.getType().equals("Entity")){
-                currentEntropy += 5 * calculateVertexContentEntropy(mergedGraphInfo, graphSetInMV, mergedVertex);
+//            if (mergedVertex.getType().equals("Entity")) {
+//                currentEntropy += 5 * calculateVertexContentEntropy(mergedGraphInfo, graphSetInMV, mergedVertex);
+//                if (currentEntropy > maxVertexEntropy){
+//                    mergedGraphInfo.getMergedGraph().setMostEntropyMergedVertex(mergedVertex);
+//                }
+//            }
+            if(currentEntropy > maxVertexEntropy){
+                mergedGraphInfo.getMergedGraph().setMostEntropyMergedVertex(mergedVertex);
             }
             double delta = Math.log(DLT) / Math.log(2);
             delta = delta <= 2.0 ? 2.0 : delta;
-            System.out.println(currentEntropy);
-            finalEntropy += (currentEntropy + delta - Math.pow(delta, (double)graphSetInMV.size() / DLT)) * edgeNum;
-            System.out.println(finalEntropy);
+            finalEntropy += currentEntropy * (delta - Math.pow(delta, (double) graphSetInMV.size() / DLT)) * edgeNum;
 
         }
 
@@ -94,9 +98,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         Set<MergedEdge> targetMergedEdgeSet = new HashSet<>();
 
         if (edgeInOrOut.equals(EdgeType.IN)) {
-            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().getIncomingEdge(mergedVertex);
+            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex);
         } else if (edgeInOrOut.equals(EdgeType.OUT)) {
-            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().getOutcomingEdge(mergedVertex);
+            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex);
         }
 
         // 对于目标集合中的每个融合边，

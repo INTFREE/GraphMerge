@@ -19,6 +19,7 @@ public class GraphImporter {
             vertexArrayList.add(vertex);
             vertexHashMap.put(vertex.getId(), vertex);
         }
+
         // 初始化relation数据，添加edge
         ArrayList<Edge> edgeArrayList = new ArrayList<>();
         Integer edgeId = 1;
@@ -47,13 +48,19 @@ public class GraphImporter {
                 vertex.setModelId(instanceOf.getjId());
             }
         }
-        Set<Edge> edgeSet = new HashSet<>(edgeArrayList);
         Set<Vertex> vertexSet = new HashSet<>(vertexArrayList);
-        Graph graph = new Graph(edgeSet, vertexSet, userName);
-        for (Edge edge : graph.getEdgeSet()) {
+        Set<Edge> edgeSet = new HashSet<>(edgeArrayList);
+        Graph graph = new Graph(userName);
+        for (Vertex vertex : vertexSet) {
+            graph.addVertex(vertex);
+        }
+        for (Edge edge : edgeSet) {
+            graph.addEdge(edge.getSource(), edge.getTarget(), edge);
+        }
+        for (Edge edge : graph.edgeSet()) {
             edge.setGraph(graph);
         }
-        for (Vertex vertex : graph.getVertexSet()) {
+        for (Vertex vertex : graph.vertexSet()) {
             vertex.setGraph(graph);
         }
         return graph;

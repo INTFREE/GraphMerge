@@ -1,11 +1,14 @@
 package knowledgeGraph.baseModel;
 
+import knowledgeGraph.mergeModel.MergedVertex;
+
 public class Vertex {
     private Integer id;
     private String type;   // type分为entity, value, relation
     private String value;
     private Integer modelId;
     private Graph graph;
+    private MergedVertex mergedVertex;
 
     public Vertex(Integer id, String type, String value) {
         this.id = id;
@@ -13,6 +16,7 @@ public class Vertex {
         this.value = value;
         this.modelId = -1;
         this.graph = null;
+        this.mergedVertex = null;
     }
 
     public Vertex(Integer id, String type) {
@@ -28,10 +32,6 @@ public class Vertex {
         return "graph" + this.graph.getUserName() + this.id.toString() + " " + this.type + " " + this.value + " " + this.modelId.toString();
     }
 
-    public Graph getGraph() {
-        return graph;
-    }
-
     public void setGraph(Graph graph) {
         this.graph = graph;
     }
@@ -42,6 +42,15 @@ public class Vertex {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public Integer getId() {
@@ -60,12 +69,16 @@ public class Vertex {
         return value;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public Graph getGraph() {
+        return graph;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setMergedVertex(MergedVertex mergedVertex) {
+        this.mergedVertex = mergedVertex;
+    }
+
+    public MergedVertex getMergedVertex() {
+        return mergedVertex;
     }
 }
 

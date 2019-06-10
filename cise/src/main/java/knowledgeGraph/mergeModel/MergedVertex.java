@@ -6,10 +6,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MergedVertex {
+    private Integer id;
     private Set<Vertex> vertexSet;
     private String type;
     private Integer modelId;
     private MergedGraph mergedGraph;
+
+    public static Integer idCounter = 0;
+
+    public MergedVertex(String type) {
+        this.id = ++idCounter;
+        this.vertexSet = new HashSet<>();
+        this.type = type;
+        this.modelId = -1;
+        this.mergedGraph = null;
+    }
 
     public MergedVertex(Set<Vertex> vertexSet, String type, Integer modelId) {
         this.vertexSet = vertexSet;
@@ -24,6 +35,10 @@ public class MergedVertex {
         this.vertexSet = new HashSet<>();
     }
 
+    @Override
+    public String toString() {
+        return "vertex set " + this.vertexSet.size() + "type " + this.type;
+    }
 
     public void setType(String type) {
         this.type = type;
@@ -42,6 +57,7 @@ public class MergedVertex {
             this.vertexSet.add(vertex);
         }
     }
+
 
     public String getType() {
         return type;
@@ -73,5 +89,9 @@ public class MergedVertex {
 
     public boolean containsVertex(Vertex vertex) {
         return this.vertexSet.contains(vertex);
+    }
+
+    public Integer getId() {
+        return id;
     }
 }

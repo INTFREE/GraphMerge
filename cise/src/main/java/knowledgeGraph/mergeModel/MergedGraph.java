@@ -1,64 +1,55 @@
 package knowledgeGraph.mergeModel;
 
 import knowledgeGraph.baseModel.Edge;
+import knowledgeGraph.baseModel.Vertex;
+import org.jgrapht.graph.DefaultDirectedGraph;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class MergedGraph {
-    private Set<MergedVertex> mergedVertexSet;
-    private Set<MergedEdge> mergedEdgeSet;
+public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> {
+    private MergedVertex mostEntropyMergedVertex;
 
     public MergedGraph() {
-        this.mergedEdgeSet = new HashSet<>();
-        this.mergedEdgeSet = new HashSet<>();
+        super(MergedEdge.class);
     }
 
-    @Override
-    public String toString() {
-        return "merged graph has " + this.mergedEdgeSet.size() + " edges and " + this.mergedVertexSet.size() + "vertex";
+    public void setMostEntropyMergedVertex(MergedVertex mostEntropyMergedVertex) {
+        this.mostEntropyMergedVertex = mostEntropyMergedVertex;
     }
 
-    public Set<MergedEdge> getIncomingEdge(MergedVertex mergedVertex) {
-        Set<MergedEdge> mergedEdgeSet = new HashSet<>();
-        for (MergedEdge mergedEdge : this.mergedEdgeSet) {
-            if (mergedEdge.getTarget().equals(mergedVertex)) {
-                mergedEdgeSet.add(mergedEdge);
+    public MergedVertex getMostEntropyMergedVertex() {
+        return mostEntropyMergedVertex;
+    }
+
+    public void mutateMergedGraph(MergedVertex targetMergedVertex, Vertex sourceVertex) {
+        MergedVertex source = sourceVertex.getMergedVertex();
+        Set<MergedEdge> changedMergedEdge = new HashSet<>();
+        if (source.getType().equalsIgnoreCase("entity")) {
+            changedMergedEdge = this.incomingEdgesOf(source);
+        } else {
+            changedMergedEdge = this.outgoingEdgesOf(source);
+        }
+        for (MergedEdge mergedEdge : changedMergedEdge) {
+            for (Edge edge : mergedEdge.getEdgeSet()) {
+                if (edge.getSource() == sourceVertex) {
+                    MergedEdge newMergedEdge = new MergedEdge(targetMergedVertex, mergedEdge.getTarget(), edge.getRoleName());
+                    newMergedEdge.addEdge(edge);
+                    this.addEdge(newMergedEdge.getSource(), newMergedEdge.getTarget(), newMergedEdge);
+                    mergedEdge.getEdgeSet().remove(edge);
+                } else if (edge.getTarget() == sourceVertex) {
+                    MergedEdge newMergedEdge = new MergedEdge(mergedEdge.getSource(), targetMergedVertex, edge.getRoleName());
+                    newMergedEdge.addEdge(edge);
+                    this.addEdge(newMergedEdge.getSource(), newMergedEdge.getTarget(), newMergedEdge);
+                    mergedEdge.getEdgeSet().remove(edge);
+                }
+            }
+            if (mergedEdge.getEdgeSet().isEmpty()) {
+                this.removeEdge(mergedEdge);
             }
         }
-        return mergedEdgeSet;
+        source.removeVertex(sourceVertex);
+        targetMergedVertex.addVertex(sourceVertex);
     }
 
-    public Set<MergedEdge> getOutcomingEdge(MergedVertex mergedVertex) {
-        Set<MergedEdge> mergedEdgeSet = new HashSet<>();
-        for (MergedEdge mergedEdge : this.mergedEdgeSet) {
-            if (mergedEdge.getSource().equals(mergedVertex)) {
-                mergedEdgeSet.add(mergedEdge);
-            }
-        }
-        return mergedEdgeSet;
-    }
-
-    public boolean addVertex(MergedVertex mergedVertex){
-        if(this.mergedVertexSet.contains(mergedVertex)){
-            return false;
-        }
-        this.mergedVertexSet.add(mergedVertex);
-        return true;
-    }
-    public Set<MergedEdge> getMergedEdgeSet() {
-        return mergedEdgeSet;
-    }
-
-    public Set<MergedVertex> getMergedVertexSet() {
-        return mergedVertexSet;
-    }
-
-    public void setMergedEdgeSet(Set<MergedEdge> mergedEdgeSet) {
-        this.mergedEdgeSet = mergedEdgeSet;
-    }
-
-    public void setMergedVertexSet(Set<MergedVertex> mergedVertexSet) {
-        this.mergedVertexSet = mergedVertexSet;
-    }
 }

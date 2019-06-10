@@ -56,16 +56,17 @@ public class GAProcess {
         graphsInfo = new GraphsInfo(graphSet);
         this.threadNum = threadNum;
     }
+
     public void calcAllEntropy() {
 
-        ExecutorService entropyExecutor = Executors.newFixedThreadPool(parallel?threadNum:1);
+        ExecutorService entropyExecutor = Executors.newFixedThreadPool(parallel ? threadNum : 1);
         population.forEach(mergedGraphInfo -> entropyExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 EntropyCalculator entropyCalculator = new BasicEntropyCalculator();
 
                 mergedGraphInfo.setEntropy(entropyCalculator.calculateEntropy(mergedGraphInfo));
-//                System.out.println(mergedGraphInfo.getEntropy());
+                System.out.println(mergedGraphInfo.getEntropy());
             }
         }));
         entropyExecutor.shutdown();
@@ -75,6 +76,11 @@ public class GAProcess {
         }
 
     }
+
+    public void sortByEntropy() {
+        population.sort((o1, o2) -> new Double(o1.getEntropy()).compareTo(o2.getEntropy()));
+    }
+
     /**
      * 初始化种群
      */
@@ -84,14 +90,19 @@ public class GAProcess {
         individual.generateInitialMergeGraph();
         population.add(individual);
     }
-    public void Run(){
+
+    public void Run() {
         long startTime = System.currentTimeMillis();
 
-        initialize();
-        if (!quiet) {
-            System.out.println("Initialize Finish");
-        }
+        MergedGraghInfo individual = new MergedGraghInfo(graphsInfo);
+        individual.generateInitialMergeGraph();
         // 计算适应度
+        EntropyCalculator entropyCalculator = new BasicEntropyCalculator();
+        individual.setEntropy(entropyCalculator.calculateEntropy(individual));
+        System.out.println(individual.getEntropy());
+        BasicMutator mutator = new BasicMutator();
+        mutator.mutate(individual);
         calcAllEntropy();
+
     }
 }

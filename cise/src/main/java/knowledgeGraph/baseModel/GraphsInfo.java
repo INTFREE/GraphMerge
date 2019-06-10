@@ -12,7 +12,7 @@ public class GraphsInfo {
     /**
      * 存放待融合图中所有节点类型
      */
-    Set<Integer> vertexTypeSet;
+    Set<String> vertexTypeSet;
 
     /**
      * 存放所有待融合图的边类型
@@ -22,7 +22,7 @@ public class GraphsInfo {
     /**
      * 节点类型到对应节点集合的映射
      */
-    private Map<Integer, Set<Vertex>> typeToVertexSetMap;
+    private Map<String, Set<Vertex>> typeToVertexSetMap;
 
     /**
      * 构造函数
@@ -35,22 +35,22 @@ public class GraphsInfo {
         edgeTypeSet = new HashSet<>();
         typeToVertexSetMap = new HashMap<>();
 
-        // 更新上面那些集合的信息
+        // 更新上面那些集合的信息，TODO
         for (Graph g : graphSet) {
-            for (Vertex v : g.getVertexSet()) {
-                vertexTypeSet.add(v.getId());
-                if (!typeToVertexSetMap.containsKey(v.getId())) {
-                    typeToVertexSetMap.put(v.getId(), new HashSet<>());
+            for (Vertex v : g.vertexSet()) {
+                vertexTypeSet.add(v.getType());
+                if (!typeToVertexSetMap.containsKey(v.getType())) {
+                    typeToVertexSetMap.put(v.getType(), new HashSet<>());
                 }
-                typeToVertexSetMap.get(v.getId()).add(v);
+                typeToVertexSetMap.get(v.getType()).add(v);
             }
-            for (Edge e : g.getEdgeSet()) {
+            for (Edge e : g.edgeSet()) {
                 edgeTypeSet.add(e.getRoleName());
             }
         }
     }
 
-    public Map<Integer, Set<Vertex>> getTypeToVertexSetMap() {
+    public Map<String, Set<Vertex>> getTypeToVertexSetMap() {
         return typeToVertexSetMap;
     }
 
@@ -58,7 +58,7 @@ public class GraphsInfo {
         return graphSet;
     }
 
-    public Set<Integer> getVertexTypeSet() {
+    public Set<String> getVertexTypeSet() {
         return vertexTypeSet;
     }
 
@@ -74,11 +74,11 @@ public class GraphsInfo {
         this.graphSet = graphSet;
     }
 
-    public void setTypeToVertexSetMap(Map<Integer, Set<Vertex>> typeToVertexSetMap) {
+    public void setTypeToVertexSetMap(Map<String, Set<Vertex>> typeToVertexSetMap) {
         this.typeToVertexSetMap = typeToVertexSetMap;
     }
 
-    public void setVertexTypeSet(Set<Integer> vertexTypeSet) {
+    public void setVertexTypeSet(Set<String> vertexTypeSet) {
         this.vertexTypeSet = vertexTypeSet;
     }
 
