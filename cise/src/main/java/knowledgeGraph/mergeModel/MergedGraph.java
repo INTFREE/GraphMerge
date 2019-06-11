@@ -23,6 +23,7 @@ public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> 
     }
 
     public void mutateMergedGraph(MergedVertex targetMergedVertex, Vertex sourceVertex) {
+        System.out.println(targetMergedVertex.toString());
         MergedVertex source = sourceVertex.getMergedVertex();
         Set<MergedEdge> changedMergedEdge = new HashSet<>();
         if (source.getType().equalsIgnoreCase("entity")) {

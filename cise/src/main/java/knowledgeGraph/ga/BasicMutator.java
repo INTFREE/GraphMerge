@@ -102,11 +102,11 @@ public class BasicMutator implements Mutator {
                 vertexDifference.put(vertex1, vertexDifference.get(vertex1) + similarity);
             }
         }
-        double res = 0.0;
+        double res = Double.MAX_VALUE;
         Vertex mostDifferentVertex = null;
         for (Vertex vertex : vertexDifference.keySet()) {
             double tmp = vertexDifference.get(vertex);
-            if (tmp > res) {
+            if (tmp < res) {
                 res = tmp;
                 mostDifferentVertex = vertex;
             }
