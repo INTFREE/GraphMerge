@@ -11,6 +11,7 @@ public class MergedVertex {
     private String type;
     private Integer modelId;
     private MergedGraph mergedGraph;
+    private String name; // for file test
 
     public static Integer idCounter = 0;
 
@@ -23,16 +24,20 @@ public class MergedVertex {
     }
 
     public MergedVertex(Set<Vertex> vertexSet, String type, Integer modelId) {
+        this.id = ++idCounter;
         this.vertexSet = vertexSet;
         this.type = type;
         this.modelId = modelId;
         this.mergedGraph = null;
     }
 
-    public MergedVertex(Integer type, MergedGraph mergedGraph) {
-        this.modelId = type;
-        this.mergedGraph = mergedGraph;
-        this.vertexSet = new HashSet<>();
+    public MergedVertex(Set<Vertex> vertexSet, String type, String name) {
+        this.id = ++idCounter;
+        this.vertexSet = vertexSet;
+        this.type = type;
+        this.mergedGraph = null;
+        this.modelId = -1;
+        this.name = name;
     }
 
     @Override
@@ -93,5 +98,13 @@ public class MergedVertex {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

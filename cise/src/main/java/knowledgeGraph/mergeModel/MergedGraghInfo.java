@@ -181,4 +181,77 @@ public class MergedGraghInfo {
         }
     }
 
+    public void generateMergeGraphByMatch(HashMap<String, HashSet<Vertex>> mergeVertexToVertex) {
+        this.mergedGraph = new MergedGraph();
+        Set<MergedVertex> mergedVertexSet = new HashSet<>();
+        // initialize entity mergeVertex according to given match.
+        for (String name : mergeVertexToVertex.keySet()) {
+            HashSet<Vertex> vertices = mergeVertexToVertex.get(name);
+            MergedVertex mergedVertex = new MergedVertex(vertices, "Entity", name);
+            for (Vertex vertex : vertices) {
+                vertex.setMergedVertex(mergedVertex);
+            }
+            mergedVertexSet.add(mergedVertex);
+        }
+
+        // initialize value mergeVertex
+        Set<Vertex> valueVertexSet = this.graphsInfo.getTypeToVertexSetMap().get("Value");
+        HashMap<String, HashSet<Vertex>> valueMergeVertexSet = new HashMap<>();
+
+        for (Vertex vertex : valueVertexSet) {
+            if (!valueMergeVertexSet.keySet().contains(vertex.getValue())) {
+                valueMergeVertexSet.put(vertex.getValue(), new HashSet<>());
+
+            }
+            valueMergeVertexSet.get(vertex.getValue()).add(vertex);
+        }
+        for (String value : valueMergeVertexSet.keySet()) {
+            MergedVertex mergedVertex = new MergedVertex(valueMergeVertexSet.get(value), "Value", value);
+            for (Vertex vertex : valueMergeVertexSet.get(value)) {
+                vertex.setMergedVertex(mergedVertex);
+            }
+            mergedVertexSet.add(mergedVertex);
+        }
+
+        // initialize relation mergeVertex. use the attr value.
+        Set<Vertex> relationVertexSet = this.graphsInfo.getTypeToVertexSetMap().get("Relation");
+        HashSet<MergedVertex> relationMergeVertexSet = new HashSet<>();
+        for (Vertex vertex : relationVertexSet) {
+            boolean flag = false;
+            HashSet<Vertex> connectedVertexSet = vertex.getGraph().getRelationToVertex().get(vertex);
+            HashSet<MergedVertex> connectedMergeVertexSet = new HashSet<>();
+            for (Vertex vertex1 : connectedVertexSet){
+                connectedMergeVertexSet.add(vertex1.getMergedVertex());
+            }
+            for (MergedVertex mergedVertex : relationMergeVertexSet){
+                if(!mergedVertex.getName().equalsIgnoreCase(vertex.getValue())){
+                    continue;
+                }
+                Vertex tempVertex = mergedVertex.getVertexSet().iterator().next();
+                HashSet<Vertex> tempVertexSet = tempVertex.getGraph().getRelationToVertex().get(tempVertex);
+                HashSet<MergedVertex> temp = new HashSet<>();
+                for (Vertex vertex1 : tempVertexSet){
+                    temp.add(vertex1.getMergedVertex());
+                }
+                if(temp.containsAll(connectedMergeVertexSet)){
+                    flag = true;
+                    mergedVertex.addVertex(vertex);
+                    vertex.setMergedVertex(mergedVertex);
+                    System.out.println("1111");
+                    break;
+                }
+            }
+            if(!flag){
+                MergedVertex mergedVertex = new MergedVertex("Relation");
+                mergedVertex.setName(vertex.getValue());
+                mergedVertex.addVertex(vertex);
+                vertex.setMergedVertex(mergedVertex);
+                relationMergeVertexSet.add(mergedVertex);
+            }
+
+        }
+        mergedVertexSet.addAll(relationMergeVertexSet);
+
+    }
+
 }

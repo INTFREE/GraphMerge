@@ -6,11 +6,13 @@ import knowledgeGraph.baseModel.Vertex;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class FileImporter {
     HashMap<String, Vertex> vertexHashMap;
     String data_path = System.getProperty("user.dir") + "/src/entropy_calc/data/";
+    String match_path = System.getProperty("user.dir") + "/src/entropy_calc/match/";
     Integer vertexId = 1;
     Integer edgeId = 1;
     Graph graph;
@@ -26,8 +28,6 @@ public class FileImporter {
         readVertex();
         readAttr();
         readRelation();
-        System.out.println(this.graph.vertexSet().size());
-        System.out.println(this.graph.edgeSet().size());
         return this.graph;
     }
 
@@ -56,6 +56,14 @@ public class FileImporter {
                 graph.addVertex(entity);
                 graph.addVertex(value);
                 graph.addVertex(relation);
+
+                entity.setGraph(graph);
+                value.setGraph(graph);
+                relation.setGraph(graph);
+
+                graph.getRelationToVertex().put(relation, new HashSet<>());
+                graph.getRelationToVertex().get(relation).add(entity);
+                graph.getRelationToVertex().get(relation).add(value);
                 //init Edge
                 Edge entityEdge = new Edge(edgeId++, relation, entity, "name-source");
                 Edge valueEdge = new Edge(edgeId++, relation, value, "name-target");
@@ -95,6 +103,13 @@ public class FileImporter {
                 Vertex valueVertex = new Vertex(vertexId++, "Value", value);
                 graph.addVertex(valueVertex);
                 graph.addVertex(relationVertex);
+
+                valueVertex.setGraph(graph);
+                relationVertex.setGraph(graph);
+
+                graph.getRelationToVertex().put(relationVertex, new HashSet<>());
+                graph.getRelationToVertex().get(relationVertex).add(entity);
+                graph.getRelationToVertex().get(relationVertex).add(valueVertex);
 
                 //init Edge
                 Edge entityEdge = new Edge(edgeId++, relationVertex, entity, attr + "-source");
@@ -136,6 +151,12 @@ public class FileImporter {
                 Vertex relationVertex = new Vertex(vertexId++, "Relation", attr);
                 graph.addVertex(relationVertex);
 
+                relationVertex.setGraph(graph);
+
+                graph.getRelationToVertex().put(relationVertex, new HashSet<>());
+                graph.getRelationToVertex().get(relationVertex).add(entity1);
+                graph.getRelationToVertex().get(relationVertex).add(entity2);
+
                 //init Edge
                 Edge entityEdge1 = new Edge(edgeId++, relationVertex, entity1, attr + "-source");
                 Edge entityEdge2 = new Edge(edgeId++, relationVertex, entity2, attr + "-target");
@@ -151,5 +172,38 @@ public class FileImporter {
             System.out.println("read file error" + e.toString());
         }
     }
+
+    public HashMap<String, HashSet<Vertex>> readMatch(Integer match_order) {
+        InputStream inputStream;
+        HashMap<String, HashSet<Vertex>> mergeVertexToVertex = new HashMap<>();
+        try {
+            // read vertex file
+            String vertexFileName = match_path + match_order.toString();
+            File vertexFile = new File(vertexFileName);
+            inputStream = new FileInputStream(vertexFile);
+            Reader reader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                // init vertex
+                String vertexKey = line.split("\\|")[0];
+                String mergeVertexId = line.split("\\|")[1];
+                Vertex vertex = vertexHashMap.get(vertexKey);
+                if (vertex == null) {
+                    System.out.println("vertex not exists");
+                }
+                if (!mergeVertexToVertex.containsKey(mergeVertexId)) {
+                    mergeVertexToVertex.put(mergeVertexId, new HashSet<>());
+                }
+                mergeVertexToVertex.get(mergeVertexId).add(vertex);
+            }
+            bufferedReader.close();
+
+        } catch (Exception e) {
+            System.out.println("read file error" + e.toString());
+        }
+        return mergeVertexToVertex;
+    }
+
 
 }
