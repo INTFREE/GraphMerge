@@ -1,5 +1,6 @@
 package knowledgeGraph;
 
+import knowledgeGraph.ga.BasicEntropyCalculator;
 import knowledgeGraph.ga.GAProcess;
 import knowledgeGraph.io.FileImporter;
 import knowledgeGraph.io.GraphImporter;
@@ -39,9 +40,16 @@ public class Main {
         HashSet<Graph> graphHashSet = new HashSet<>();
         graphHashSet.add(graph1);
         graphHashSet.add(graph2);
+        long startTime = System.currentTimeMillis();
         GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo);
         mergedGraghInfo.generateMergeGraphByMatch(mergeVertexToVertexSet);
+        long endTime = System.currentTimeMillis();
+        System.out.println("time");
+        System.out.println(endTime - startTime);
+        BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator();
+        basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+        
     }
 
 

@@ -13,11 +13,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/Main.java">
+      <file leaf-file-name="GAProcess.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/GAProcess.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="36" column="41" selection-start-line="36" selection-start-column="41" selection-end-line="36" selection-end-column="41" />
+            <state relative-caret-position="228">
+              <caret line="94" column="52" lean-forward="true" selection-start-line="94" selection-start-column="8" selection-end-line="94" selection-end-column="52" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -25,11 +25,35 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MergedGraghInfo.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/Main.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="427">
+              <caret line="51" column="8" selection-start-line="51" selection-start-column="8" selection-end-line="51" selection-end-column="8" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MergedGraghInfo.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/mergeModel/MergedGraghInfo.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="239">
-              <caret line="239" column="44" selection-start-line="239" selection-start-column="44" selection-end-line="239" selection-end-column="44" />
+            <state relative-caret-position="2033">
+              <caret line="217" column="47" lean-forward="true" selection-start-line="217" selection-start-column="47" selection-end-line="217" selection-end-column="47" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BasicEntropyCalculator.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/BasicEntropyCalculator.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="643">
+              <caret line="60" column="28" lean-forward="true" selection-start-line="60" selection-start-column="28" selection-end-line="60" selection-end-column="28" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -69,8 +93,12 @@
       <file leaf-file-name="GraphsInfo.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/baseModel/GraphsInfo.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-319">
-              <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+            <state relative-caret-position="538">
+              <caret line="64" column="23" selection-start-line="64" selection-start-column="23" selection-end-line="64" selection-end-column="23" />
+              <folding>
+                <element signature="e#1451#1452#0" expanded="true" />
+                <element signature="e#1485#1486#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -121,7 +149,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>310</find>
       <find>61</find>
       <find>2</find>
       <find>out.</find>
@@ -151,6 +178,7 @@
       <find>roleName</find>
       <find>Relation</find>
       <find>1</find>
+      <find>System</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -196,7 +224,6 @@
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/mergeModel/NewMergedGraph.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/VertexSimilarity.java" />
-        <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/BasicEntropyCalculator.java" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/baseModel/Vertex.java" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/GAProcess.java" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/BasicMutator.java" />
@@ -204,9 +231,10 @@
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/io/GraphImporter.java" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/baseModel/Graph.java" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/io/FileImporter.java" />
-        <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/Main.java" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/mergeModel/MergedVertex.java" />
         <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/mergeModel/MergedGraghInfo.java" />
+        <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/BasicEntropyCalculator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/knowledgeGraph/Main.java" />
       </list>
     </option>
   </component>
@@ -296,6 +324,15 @@
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="knowledgeGraph" type="462c0819:PsiDirectoryNode" />
               <item name="baseModel" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="cise" type="b2602c69:ProjectViewProjectNode" />
+              <item name="cise" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="knowledgeGraph" type="462c0819:PsiDirectoryNode" />
+              <item name="ga" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="cise" type="b2602c69:ProjectViewProjectNode" />
@@ -446,12 +483,12 @@
       <workItem from="1552272571162" duration="4099000" />
       <workItem from="1552906896771" duration="4347000" />
       <workItem from="1555463550867" duration="54701000" />
-      <workItem from="1563610778249" duration="22732000" />
+      <workItem from="1563610778249" duration="26117000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="224573000" />
+    <option name="totallyTimeSpent" value="227958000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
@@ -467,12 +504,13 @@
       <window_info anchor="right" id="Maven Projects" order="7" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="11" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Run" order="3" visible="true" weight="0.27448276" />
+      <window_info anchor="bottom" id="Run" order="3" visible="true" weight="0.27448276" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32965517" />
       <window_info id="Capture Tool" order="3" />
       <window_info id="Designer" order="2" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23021002" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23021002" />
       <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="bottom" id="Find" order="2" weight="0.32965517" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="4" />
@@ -485,7 +523,6 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="2" weight="0.32965517" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -681,16 +718,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/GAProcess.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="67" column="65" selection-start-line="67" selection-start-column="65" selection-end-line="67" selection-end-column="65" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/src.zip!/java/lang/String.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="158">
@@ -767,23 +794,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/BasicEntropyCalculator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1135">
-          <caret line="77" column="49" selection-start-line="77" selection-start-column="49" selection-end-line="77" selection-end-column="49" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/baseModel/GraphsInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-319">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/baseModel/Vertex.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="109">
@@ -809,28 +819,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/io/FileImporter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-421">
-          <caret line="155" column="81" lean-forward="true" selection-start-line="155" selection-start-column="81" selection-end-line="155" selection-end-column="81" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#592#593#0" expanded="true" />
-            <element signature="e#644#645#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
-          <caret line="36" column="41" selection-start-line="36" selection-start-column="41" selection-end-line="36" selection-end-column="41" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/mergeModel/MergedVertex.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1077">
@@ -848,10 +836,63 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/baseModel/GraphsInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="538">
+          <caret line="64" column="23" selection-start-line="64" selection-start-column="23" selection-end-line="64" selection-end-column="23" />
+          <folding>
+            <element signature="e#1451#1452#0" expanded="true" />
+            <element signature="e#1485#1486#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/GAProcess.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="94" column="52" lean-forward="true" selection-start-line="94" selection-start-column="8" selection-end-line="94" selection-end-column="52" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/mergeModel/MergedGraghInfo.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="239" column="44" selection-start-line="239" selection-start-column="44" selection-end-line="239" selection-end-column="44" />
+        <state relative-caret-position="2033">
+          <caret line="217" column="47" lean-forward="true" selection-start-line="217" selection-start-column="47" selection-end-line="217" selection-end-column="47" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/ga/BasicEntropyCalculator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="643">
+          <caret line="60" column="28" lean-forward="true" selection-start-line="60" selection-start-column="28" selection-end-line="60" selection-end-column="28" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/io/FileImporter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-421">
+          <caret line="155" column="81" lean-forward="true" selection-start-line="155" selection-start-column="81" selection-end-line="155" selection-end-column="81" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#592#593#0" expanded="true" />
+            <element signature="e#644#645#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/knowledgeGraph/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="427">
+          <caret line="51" column="8" selection-start-line="51" selection-start-column="8" selection-end-line="51" selection-end-column="8" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
