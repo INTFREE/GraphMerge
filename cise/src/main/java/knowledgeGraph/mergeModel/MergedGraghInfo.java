@@ -280,4 +280,114 @@ public class MergedGraghInfo {
         System.out.println(this.mergedGraph.edgeSet().size());
     }
 
+    public void generateMergeGraphByMatch2() {
+
+        this.mergedGraph = new MergedGraph();
+        Set<MergedVertex> mergedVertexSet = new HashSet<>();
+        HashSet<MergedEdge> mergedEdgeHashSet = new HashSet<>();
+
+        // initialize entity mergeVertex
+        Set<Vertex> entityVertexSet = this.graphsInfo.getTypeToVertexSetMap().get("Entity");
+        HashMap<Integer, HashSet<Vertex>> entityMergeVertexSet = new HashMap<>();
+        for (Vertex vertex : entityVertexSet) {
+            if (!entityMergeVertexSet.keySet().contains(vertex.getId())) {
+                entityMergeVertexSet.put(vertex.getId(), new HashSet<>());
+            }
+            entityMergeVertexSet.get(vertex.getId()).add(vertex);
+        }
+        for (Integer id : entityMergeVertexSet.keySet()) {
+            MergedVertex mergedVertex = new MergedVertex(entityMergeVertexSet.get(id), "Entity", "");
+            for (Vertex vertex : entityMergeVertexSet.get(id)) {
+                mergedVertex = new MergedVertex(entityMergeVertexSet.get(id), "Entity", vertex.getValue());
+                break;
+            }
+            for (Vertex vertex : entityMergeVertexSet.get(id)) {
+                vertex.setMergedVertex(mergedVertex);
+            }
+            mergedVertexSet.add(mergedVertex);
+        }
+        System.out.println("initialize entity vertex");
+
+        // initialize value mergeVertex
+        Set<Vertex> valueVertexSet = this.graphsInfo.getTypeToVertexSetMap().get("Value");
+        HashMap<Integer, HashSet<Vertex>> valueMergeVertexSet = new HashMap<>();
+        for (Vertex vertex : valueVertexSet) {
+            if (!valueMergeVertexSet.keySet().contains(vertex.getId())) {
+                valueMergeVertexSet.put(vertex.getId(), new HashSet<>());
+            }
+            valueMergeVertexSet.get(vertex.getId()).add(vertex);
+        }
+        for (Integer id : valueMergeVertexSet.keySet()) {
+            MergedVertex mergedVertex = new MergedVertex(valueMergeVertexSet.get(id), "Value", "");
+            for (Vertex vertex : valueMergeVertexSet.get(id)) {
+                mergedVertex = new MergedVertex(valueMergeVertexSet.get(id), "Value", vertex.getValue());
+                break;
+            }
+            for (Vertex vertex : valueMergeVertexSet.get(id)) {
+                vertex.setMergedVertex(mergedVertex);
+            }
+            mergedVertexSet.add(mergedVertex);
+        }
+        System.out.println("initialize value vertex");
+
+        // initialize relation mergeVertex
+        Set<Vertex> relationVertexSet = this.graphsInfo.getTypeToVertexSetMap().get("Relation");
+        HashMap<Integer, HashSet<Vertex>> relationMergeVertexSet = new HashMap<>();
+        for (Vertex vertex : relationVertexSet) {
+            if (!relationMergeVertexSet.keySet().contains(vertex.getId())) {
+                relationMergeVertexSet.put(vertex.getId(), new HashSet<>());
+            }
+            relationMergeVertexSet.get(vertex.getId()).add(vertex);
+        }
+        for (Integer id : relationMergeVertexSet.keySet()) {
+            MergedVertex mergedVertex = new MergedVertex(relationMergeVertexSet.get(id), "Value", "");
+            for (Vertex vertex : relationMergeVertexSet.get(id)) {
+                mergedVertex = new MergedVertex(relationMergeVertexSet.get(id), "Value", vertex.getValue());
+                break;
+            }
+            for (Vertex vertex : relationMergeVertexSet.get(id)) {
+                vertex.setMergedVertex(mergedVertex);
+            }
+            mergedVertexSet.add(mergedVertex);
+        }
+        System.out.println("initialize relation vertex");
+
+        for(MergedVertex mergedVertex : mergedVertexSet){
+            this.mergedGraph.addVertex(mergedVertex);
+        }
+
+        //Generate mergeEdge
+        HashMap<Integer, HashSet<Edge>> mergeEdgeSet = new HashMap<>();
+        for (Graph graph : this.getGraphsInfo().getGraphSet()) {
+            for (Edge edge : graph.edgeSet()) {
+                if (!mergeEdgeSet.keySet().contains(edge.getId())) {
+                    mergeEdgeSet.put(edge.getId(), new HashSet<>());
+                }
+                mergeEdgeSet.get(edge.getId()).add(edge);
+            }
+        }
+        for (Integer id : mergeEdgeSet.keySet()) {
+            MergedVertex s = new MergedVertex("");
+            MergedVertex t = new MergedVertex("");
+            String r = "";
+            for (Edge edge : mergeEdgeSet.get(id)) {
+                s = edge.getSource().getMergedVertex();
+                t = edge.getTarget().getMergedVertex();
+                r = edge.getRoleName();
+                break;
+            }
+            MergedEdge mergedEdge = new MergedEdge(s, t, r);
+            for (Edge edge : mergeEdgeSet.get(id)) {
+                mergedEdge.addEdge(edge);
+            }
+            mergedEdgeHashSet.add(mergedEdge);
+        }
+
+        for(MergedEdge mergedEdge : mergedEdgeHashSet){
+            this.mergedGraph.addEdge(mergedEdge.getSource(), mergedEdge.getTarget(), mergedEdge);
+        }
+        System.out.println(this.mergedGraph.vertexSet().size());
+        System.out.println(this.mergedGraph.edgeSet().size());
+    }
+
 }
