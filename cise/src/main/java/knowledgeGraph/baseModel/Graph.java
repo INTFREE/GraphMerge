@@ -26,4 +26,5 @@ public class Graph extends DefaultDirectedGraph<Vertex, Edge> {
     public void setRelationToVertex(HashMap<Vertex, HashSet<Vertex>> relationToVertex) {
         this.relationToVertex = relationToVertex;
     }
+
 }

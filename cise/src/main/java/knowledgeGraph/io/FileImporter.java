@@ -17,9 +17,19 @@ public class FileImporter {
     Integer edgeId = 1;
     Graph graph;
     Integer order;
+    HashMap<String, Integer> Entity2Id;
+    HashMap<String, Integer> Val2Id;
+    HashMap<String, Integer> Rel2Id;
+    HashMap<String, Integer> Edge2Id;
+    HashMap<String, Vertex> Vaule2Vertex;
 
     public FileImporter() {
         this.vertexHashMap = new HashMap<>();
+        this.Entity2Id = new HashMap<>();
+        this.Val2Id = new HashMap<>();
+        this.Rel2Id = new HashMap<>();
+        this.Edge2Id = new HashMap<>();
+        this.Vaule2Vertex = new HashMap<>();
     }
 
     public Graph readGraph(Integer order) {
@@ -28,6 +38,7 @@ public class FileImporter {
         readVertex();
         readAttr();
         readRelation();
+        System.out.println(graph.vertexSet().size());
         return this.graph;
     }
 

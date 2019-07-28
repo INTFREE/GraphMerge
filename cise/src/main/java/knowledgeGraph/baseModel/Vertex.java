@@ -29,7 +29,7 @@ public class Vertex {
 
     @Override
     public String toString() {
-        return "graph" + this.graph.getUserName() + this.id.toString() + " " + this.type + " " + this.value + " " + this.modelId.toString();
+        return "graph" + this.graph.getUserName() + " " +  this.id.toString() + " " + this.type + " " + this.value + " " + this.modelId.toString();
     }
 
     public void setGraph(Graph graph) {

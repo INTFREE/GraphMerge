@@ -47,25 +47,14 @@ public class Main2 {
 //        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo);
 //        mergedGraghInfo.generateMergeGraphByMatch(mergeVertexToVertexSet);
 
-        FileImporter2 importer = new FileImporter2();
+
 
         for (Integer i = 1; i <= 3; i++) {
-            HashMap<String, Integer> Entity2Id = new HashMap<>();
-            HashMap<String, Integer> Val2Id = new HashMap<>();
-            HashMap<String, Integer> Rel2Id = new HashMap<>();
-            HashMap<String, Integer> Edge2Id = new HashMap<>();
+            FileImporter2 importer = new FileImporter2();
+            Graph graph1 = importer.readGraph(1, i);
 
-            Graph graph1 = importer.readGraph(1, i, Entity2Id, Val2Id, Rel2Id, Edge2Id);
-//            System.out.println(Entity2Id.size());
-//            System.out.println(Val2Id.size());
-//            System.out.println(Rel2Id.size());
-//            System.out.println(Edge2Id.size());
+            Graph graph2 = importer.readGraph(2, i);
 
-            Graph graph2 = importer.readGraph(2, i, Entity2Id, Val2Id, Rel2Id, Edge2Id);
-//            System.out.println(Entity2Id.size());
-//            System.out.println(Val2Id.size());
-//            System.out.println(Rel2Id.size());
-//            System.out.println(Edge2Id.size());
             System.out.println("read finished");
 
             ArrayList<Graph> graphArrayList = new ArrayList<>();

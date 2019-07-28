@@ -21,6 +21,11 @@ public class MergedEdge {
         this.mergedGraph = null;
     }
 
+    @Override
+    public String toString() {
+        return "source " + source.getId().toString() + " target " + target.getId().toString() + "edgeSet size " + this.edgeSet.size();
+    }
+
     public String getRoleName() {
         return roleName;
     }

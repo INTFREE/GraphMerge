@@ -97,7 +97,6 @@ public class BasicMutator implements Mutator {
                 }
                 Set<MergedVertex> tmpSet = vertexToMergedVertex.get(vertex1);
                 double similarity = getSimilarity(mergedVertices, tmpSet);
-                System.out.println(similarity);
                 vertexDifference.put(vertex, vertexDifference.get(vertex) + similarity);
                 vertexDifference.put(vertex1, vertexDifference.get(vertex1) + similarity);
             }

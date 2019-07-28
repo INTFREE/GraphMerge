@@ -49,7 +49,7 @@ public class Main {
         System.out.println(endTime - startTime);
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator();
         basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-        
+
     }
 
 
