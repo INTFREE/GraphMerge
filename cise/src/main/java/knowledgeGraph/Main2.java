@@ -48,11 +48,11 @@ public class Main2 {
 //        mergedGraghInfo.generateMergeGraphByMatch(mergeVertexToVertexSet);
 
 
+        long startTime, endTime;
 
         for (Integer i = 1; i <= 3; i++) {
-            FileImporter2 importer = new FileImporter2();
+            FileImporter2 importer = new FileImporter2(10000);
             Graph graph1 = importer.readGraph(1, i);
-
             Graph graph2 = importer.readGraph(2, i);
 
             System.out.println("read finished");
@@ -64,15 +64,20 @@ public class Main2 {
             HashSet<Graph> graphHashSet = new HashSet<>();
             graphHashSet.add(graph1);
             graphHashSet.add(graph2);
-            long startTime = System.currentTimeMillis();
+            startTime = System.currentTimeMillis();
             GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
             MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo);
             mergedGraghInfo.generateMergeGraphByMatch2();
-            long endTime = System.currentTimeMillis();
-            System.out.println("time");
-            System.out.println(endTime - startTime);
+            endTime = System.currentTimeMillis();
+            System.out.println("merge time:" + (endTime - startTime));
+
+            startTime = System.currentTimeMillis();
             BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator();
             double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+            endTime = System.currentTimeMillis();
+            System.out.println("entropy calculating time:" + (endTime - startTime));
+
+            System.out.println("==================" + i + "==================");
             System.out.println(etr);
         }
     }

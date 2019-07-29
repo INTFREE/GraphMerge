@@ -12,7 +12,8 @@ import java.util.Iterator;
 
 public class FileImporter2 {
     HashMap<String, Vertex> vertexHashMap;
-    String data_path = System.getProperty("user.dir") + "/src/entropy_calc/data/";
+//    String data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_10000/";
+    String data_path;
     String match_path = System.getProperty("user.dir") + "/src/entropy_calc/match/";
     Integer vertexId = 0;
     Integer edgeId = 0;
@@ -25,12 +26,13 @@ public class FileImporter2 {
     HashMap<String, Vertex> Vaule2Vertex;
 
 
-    public FileImporter2() {
+    public FileImporter2(Integer data_size) {
         this.vertexHashMap = new HashMap<>();
         this.Entity2Id = new HashMap<>();
         this.Val2Id = new HashMap<>();
         this.Edge2Id = new HashMap<>();
         this.Rel2Id = new HashMap<>();
+        this.data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_"+ data_size +"/";
     }
 
     public Graph readGraph(Integer order, Integer mOrder) {
@@ -44,9 +46,9 @@ public class FileImporter2 {
         System.out.println("edgeId start: " + edgeId);
         readVertex();
         System.out.println("vertex finish");
-//        readAttr();
-//        System.out.println("attr finish");
-//        readRelation();
+        readAttr();
+        System.out.println("attr finish");
+        readRelation();
         System.out.println("vertexSet:" + this.graph.vertexSet().size());
         System.out.println("edgeSet:" + this.graph.edgeSet().size());
         return this.graph;
@@ -95,8 +97,8 @@ public class FileImporter2 {
                 if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
                 p = Rel2Id.get(tmp);
                 Vertex relation = new Vertex(p, "Relation", "name");
-                System.out.println(entity.getId());
-                System.out.println(value.getValue());
+//                System.out.println(entity.getId());
+//                System.out.println(value.getValue());
                 graph.addVertex(entity);
                 graph.addVertex(value); //这样是可以的吧，因为如果已包含会返回false
                 graph.addVertex(relation);
