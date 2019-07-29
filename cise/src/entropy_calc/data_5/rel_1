@@ -1,0 +1,10 @@
+Tha_Carter_II|rel28|Rosmah_Mansor
+Tha_Carter_II|rel16|Bank_of_America
+The_Witman_Boys|rel26|Rosmah_Mansor
+The_Witman_Boys|rel19|Prince_Aymeric_of_Belgium
+Prince_Aymeric_of_Belgium|rel11|The_Witman_Boys
+Prince_Aymeric_of_Belgium|rel13|Tha_Carter_II
+Bank_of_America|rel33|Prince_Aymeric_of_Belgium
+Bank_of_America|rel28|Tha_Carter_II
+Rosmah_Mansor|rel26|The_Witman_Boys
+Rosmah_Mansor|rel13|Prince_Aymeric_of_Belgium
