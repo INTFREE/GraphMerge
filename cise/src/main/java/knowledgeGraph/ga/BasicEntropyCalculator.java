@@ -7,6 +7,8 @@ import knowledgeGraph.mergeModel.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,9 +25,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         double edgeEntropy = 0.0;
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
         for (MergedVertex mergedVertex : mergedVertexSet) {
-            Set<Graph> graphSetInMV = new HashSet<>();
+            //Set<Graph> graphSetInMV = new HashSet<>();
+            List<Graph> graphListInMV = new ArrayList<>();
             for (Vertex vertex : mergedVertex.getVertexSet()) {
-                graphSetInMV.add(vertex.getGraph());
+                graphListInMV.add(vertex.getGraph());
             }
 
             double currentEntropy = 0.0;
@@ -40,10 +43,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
 
             for (String inType : inEdgeTypeSet) {
-                currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphSetInMV, inType, EdgeType.IN);
+                currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphListInMV, inType, EdgeType.IN);
             }
             for (String outType : outEdgeTypeSet) {
-                currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphSetInMV, outType, EdgeType.OUT);
+                currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphListInMV, outType, EdgeType.OUT);
             }
             edgeEntropy += currentEntropy;
 //            if (mergedVertex.getType().equals("Entity")) {
@@ -93,14 +96,14 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
     private double calculateEdgeEntropyForVertex(MergedGraghInfo mergedGraphInfo,
                                                  MergedVertex mergedVertex,
-                                                 Set<Graph> graphInThisMV,
+                                                 List<Graph> graphInThisMV,
                                                  String type,
                                                  EdgeType edgeInOrOut) {
 
         /**
          * 每个被融合图引用的融合边集合
          */
-        Map<Graph, Set<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
+        Map<Graph, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
 
         Set<MergedEdge> targetMergedEdgeSet = new HashSet<>();
 
@@ -113,10 +116,12 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
         // 对于目标集合中的每个融合边，
         for (MergedEdge me : targetMergedEdgeSet) {
+            // 找到me的类型与type是否一致
+            if (me.getRoleName() != type) continue;
             // 找到其包含的被融合边集合
             Set<Edge> edgeSet = me.getEdgeSet();
             // 找到这些被融合边来自的被融合图的集合
-            Set<Graph> referencedGraphSet = new HashSet<>();
+            List<Graph> referencedGraphSet = new ArrayList<>();
             for (Edge edge : edgeSet) {
                 referencedGraphSet.add(edge.getGraph());
             }
@@ -124,29 +129,29 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             for (Graph graph : referencedGraphSet) {
                 // 将当前的融合边添加到它引用的融合边集合中
                 if (!graphToReferencedMergedEdgeSetMap.containsKey(graph)) {
-                    graphToReferencedMergedEdgeSetMap.put(graph, new HashSet<>());
+                    graphToReferencedMergedEdgeSetMap.put(graph, new ArrayList<>());
                 }
                 graphToReferencedMergedEdgeSetMap.get(graph).add(me);
             }
         }
 
         // 逆置这个映射，对于每个“融合边的组合”，计算引用了这个组合的被融合图的集合
-        Map<Set<MergedEdge>, Set<Graph>> mergedEdgeSetToReferenceGraphSetMap = new HashMap<>();
+        Map<List<MergedEdge>, List<Graph>> mergedEdgeSetToReferenceGraphSetMap = new HashMap<>();
 
-        Set<MergedEdge> emptyEdgeSet = new HashSet<>();
+        List<MergedEdge> emptyEdgeSet = new ArrayList<>();
 
         for (Graph graph : graphInThisMV) {
-            Set<MergedEdge> mergedEdges;
+            List<MergedEdge> mergedEdges;
             mergedEdges = graphToReferencedMergedEdgeSetMap.getOrDefault(graph, emptyEdgeSet);
             if (!mergedEdgeSetToReferenceGraphSetMap.containsKey(mergedEdges)) {
-                mergedEdgeSetToReferenceGraphSetMap.put(mergedEdges, new HashSet<>());
+                mergedEdgeSetToReferenceGraphSetMap.put(mergedEdges, new ArrayList<>());
             }
             mergedEdgeSetToReferenceGraphSetMap.get(mergedEdges).add(graph);
 
         }
 
-        int graphNum = graphInThisMV.size();
-
+//        int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
+        int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
 
         /*
          * 下面是计算熵的数学部分
@@ -155,15 +160,15 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
         double entropy = 0;
 
-        Set<Map.Entry<Set<MergedEdge>, Set<Graph>>> allEdgeComb = mergedEdgeSetToReferenceGraphSetMap.entrySet();
-        for (Map.Entry<Set<MergedEdge>, Set<Graph>> edgeCombinationX : allEdgeComb) {
-            Set<Graph> usersX = edgeCombinationX.getValue();
+        Set<Map.Entry<List<MergedEdge>, List<Graph>>> allEdgeComb = mergedEdgeSetToReferenceGraphSetMap.entrySet();
+        for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationX : allEdgeComb) {
+            List<Graph> usersX = edgeCombinationX.getValue();
             double pX = ((double) usersX.size()) / graphNum;
 
             double rstSumPySxy = 0.0;
 
-            for (Map.Entry<Set<MergedEdge>, Set<Graph>> edgeCombinationY : allEdgeComb) {
-                Set<Graph> usersY = edgeCombinationY.getValue();
+            for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationY : allEdgeComb) {
+                List<Graph> usersY = edgeCombinationY.getValue();
                 double pY = ((double) usersY.size()) / graphNum;
                 double similarity;
 
