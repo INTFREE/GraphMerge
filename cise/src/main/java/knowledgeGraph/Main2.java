@@ -72,7 +72,8 @@ public class Main2 {
             System.out.println("merge time:" + (endTime - startTime));
 
             startTime = System.currentTimeMillis();
-            BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator();
+            boolean optFor2Graph = true;
+            BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(optFor2Graph);
             double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
             endTime = System.currentTimeMillis();
             System.out.println("entropy calculating time:" + (endTime - startTime));

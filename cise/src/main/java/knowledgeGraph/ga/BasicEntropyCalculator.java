@@ -13,6 +13,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class BasicEntropyCalculator implements EntropyCalculator {
+
+    boolean opt = false;
+    public BasicEntropyCalculator() {}
+    public BasicEntropyCalculator(boolean opt) {
+        this.opt = opt;
+    }
     @Override
     public double calculateEntropy(MergedGraghInfo mergedGraphInfo) {
         System.out.println("enter entropy calculate");
@@ -24,7 +30,12 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         int edgeNum = mergedGraphInfo.getMergedGraph().edgeSet().size();
         double edgeEntropy = 0.0;
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
+
         for (MergedVertex mergedVertex : mergedVertexSet) {
+
+            if (opt && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
+            if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
+
             //Set<Graph> graphSetInMV = new HashSet<>();
             List<Graph> graphListInMV = new ArrayList<>();
             for (Vertex vertex : mergedVertex.getVertexSet()) {
