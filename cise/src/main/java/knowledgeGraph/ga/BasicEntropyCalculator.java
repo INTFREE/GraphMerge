@@ -68,7 +68,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             for (String outType : outEdgeTypeHash.keySet()) {
                 currentEntropy += calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType));
             }
-
             /*
             Set<String> inEdgeTypeSet = new HashSet<>();
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
@@ -248,7 +247,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         /**
          * 每个被融合图引用的融合边集合
          */
-          Map<Graph, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
+          //Map<Graph, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
+          Map<String, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
+
 //
 //        Set<MergedEdge> targetMergedEdgeSet = new HashSet<>();
 //
@@ -269,13 +270,13 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             List<Graph> referencedGraphSet = new ArrayList<>();
             for (Edge edge : edgeSet) {
                 Graph graph = edge.getGraph(); //Merged Edge中不存在来自于同一个图的多条边
-                if (!graphToReferencedMergedEdgeSetMap.containsKey(graph)) {
-                    graphToReferencedMergedEdgeSetMap.put(graph, new ArrayList<>());
+                String graphId = graph.getUserName();
+                if (!graphToReferencedMergedEdgeSetMap.containsKey(graphId)) {
+                    graphToReferencedMergedEdgeSetMap.put(graphId, new ArrayList<>());
                 }
-                graphToReferencedMergedEdgeSetMap.get(graph).add(me);
+                graphToReferencedMergedEdgeSetMap.get(graphId).add(me);
             }
         }
-
         // 逆置这个映射，对于每个“融合边的组合”，计算引用了这个组合的被融合图的集合
         Map<List<MergedEdge>, List<Graph>> mergedEdgeSetToReferenceGraphSetMap = new HashMap<>();
 
@@ -283,14 +284,13 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
         for (Graph graph : graphInThisMV) {
             List<MergedEdge> mergedEdges;
-            mergedEdges = graphToReferencedMergedEdgeSetMap.getOrDefault(graph, emptyEdgeSet);
+            mergedEdges = graphToReferencedMergedEdgeSetMap.getOrDefault(graph.getUserName(), emptyEdgeSet);
             if (!mergedEdgeSetToReferenceGraphSetMap.containsKey(mergedEdges)) {
                 mergedEdgeSetToReferenceGraphSetMap.put(mergedEdges, new ArrayList<>());
             }
             mergedEdgeSetToReferenceGraphSetMap.get(mergedEdges).add(graph);
 
         }
-
 //        int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
         int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
 
@@ -339,7 +339,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             // 将log换位2为底
             entropy += pX * Math.log(rstSumPySxy) / Math.log(2);
         }
-
 
         return Math.abs(entropy);
     }
