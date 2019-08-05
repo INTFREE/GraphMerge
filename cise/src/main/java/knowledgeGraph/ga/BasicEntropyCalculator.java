@@ -45,7 +45,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         for (MergedVertex mergedVertex : mergedVertexSet) {
 
             if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
-            if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
+            //if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
             if (opt && !calcValue && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
 
             //Set<Graph> graphSetInMV = new HashSet<>();
@@ -67,7 +67,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
             for (String inType : inEdgeTypeHash.keySet()) {
                 if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
-                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType));
+                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType), inType, EdgeType.IN);
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
                     if (inType.substring(0, 4).equals("name")) pos += 0;
@@ -93,7 +93,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
             for (String outType : outEdgeTypeHash.keySet()) {
                 if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
-                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType));
+                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType), outType, EdgeType.OUT);
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
                     if (outType.substring(0, 4).equals("name")) pos += 0;
@@ -287,33 +287,63 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         return Math.abs(entropy);
     }
 
+    public static int ld(String s, String t) {
+        int d[][];
+        int sLen = s.length();
+        int tLen = t.length();
+        int si;
+        int ti;
+        char ch1;
+        char ch2;
+        int cost;
+        if (sLen == 0) {
+            return tLen;
+        }
+        if (tLen == 0) {
+            return sLen;
+        }
+        d = new int[sLen+1][tLen+1];
+        for (si=0; si<=sLen; si++) {
+            d[si][0] = si;
+        }
+        for (ti=0; ti<=tLen; ti++) {
+            d[0][ti] = ti;
+        }
+        for (si=1; si<=sLen; si++) {
+            ch1 = s.charAt(si-1);
+            for(ti=1; ti<=tLen; ti++) {
+                ch2 = t.charAt(ti-1);
+                if(ch1 == ch2) {
+                    cost = 0;
+                } else {
+                    cost = 1;
+                }
+                d[si][ti] = Math.min(Math.min(d[si-1][ti]+1, d[si][ti-1]+1),d[si-1][ti-1]+cost);
+            }
+        }
+        return d[sLen][tLen];
+    }
+
+    private double getSimilarity(String src, String tar) {
+        int ld = ld(src, tar);
+        return 1 - (double) ld / Math.max(src.length(), tar.length());
+    }
+
     private double calculateEdgeEntropyForVertex(List<Graph> graphInThisMV,
-                                                 List<MergedEdge> targetMergedEdgeSet) {
+                                                 List<MergedEdge> targetMergedEdgeSet,
+                                                 String type,
+                                                 EdgeType edgeInOrOut) {
 
         /**
          * 每个被融合图引用的融合边集合
          */
-          //Map<Graph, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
-          Map<String, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
-
-//
-//        Set<MergedEdge> targetMergedEdgeSet = new HashSet<>();
-//
-//        if (edgeInOrOut.equals(EdgeType.IN)) {
-//            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex);
-//
-//        } else if (edgeInOrOut.equals(EdgeType.OUT)) {
-//            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex);
-//        }
+        Map<String, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
 
         // 对于目标集合中的每个融合边，
         for (MergedEdge me : targetMergedEdgeSet) {
-            // 找到me的类型与type是否一致
-            //if (me.getRoleName() != type) continue;
             // 找到其包含的被融合边集合
             Set<Edge> edgeSet = me.getEdgeSet();
             // 找到这些被融合边来自的被融合图的集合
-            List<Graph> referencedGraphSet = new ArrayList<>();
             for (Edge edge : edgeSet) {
                 Graph graph = edge.getGraph(); //Merged Edge中不存在来自于同一个图的多条边
                 String graphId = graph.getUserName();
@@ -337,7 +367,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             mergedEdgeSetToReferenceGraphSetMap.get(mergedEdges).add(graph);
 
         }
-//        int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
+        //int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
         int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
 
         /*
@@ -366,6 +396,24 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 // 如果其中一方为空，则相似度为0
                 else if (edgeCombinationX.getKey().isEmpty() || edgeCombinationY.getKey().isEmpty()) {
                     similarity = 0;
+                }
+
+                // 如果是两个值节点，计算值的相似度（编辑距离）
+                else if  (edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 && edgeInOrOut.equals(EdgeType.OUT)) {//OUT指向多个值节点
+                    MergedVertex mv1 = edgeCombinationX.getKey().iterator().next().getTarget();
+                    MergedVertex mv2 = edgeCombinationY.getKey().iterator().next().getTarget();
+
+                    if (mv1.getType() == "Value" && mv2.getType() == "Value") {
+                        String s1 = mv1.getVertexSet().iterator().next().getValue();
+                        String s2 = mv2.getVertexSet().iterator().next().getValue();
+                        similarity = getSimilarity(s1, s2);
+
+                        //System.out.println("Similarity: " + s1 + "-" + s2 + "-" + similarity);
+                    } else {
+                        // 两个无值的节点，所以相似度只能是0
+                        similarity = 0;
+                    }
+
                 }
 
                 // 否则，二者相似度等于 交集大小/并集大小
