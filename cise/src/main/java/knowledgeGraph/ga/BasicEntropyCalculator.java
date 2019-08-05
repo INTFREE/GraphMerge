@@ -15,14 +15,21 @@ import java.util.Set;
 public class BasicEntropyCalculator implements EntropyCalculator {
 
     boolean opt = false;
+    boolean detailed = false;
+
 
     public BasicEntropyCalculator() {}
-    public BasicEntropyCalculator(boolean opt) {
+    public BasicEntropyCalculator(boolean opt, boolean detailed) {
         this.opt = opt;
+        this.detailed = detailed;
     }
 
     @Override
     public double calculateEntropy(MergedGraghInfo mergedGraphInfo) {
+
+        int[] count = {0,0,0,0,0,0};
+        double[] partEntropy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
         System.out.println("enter entropy calculate");
         int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
         // 初始化熵
@@ -46,6 +53,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
 
             double currentEntropy = 0.0;
+            double tmpEntropy = 0.0;
             HashMap<String, List<MergedEdge>> inEdgeTypeHash = new HashMap<>();
             HashMap<String, List<MergedEdge>> outEdgeTypeHash = new HashMap<>();
 
@@ -56,7 +64,22 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
 
             for (String inType : inEdgeTypeHash.keySet()) {
-                currentEntropy += calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType));
+                tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType));
+                if (detailed && tmpEntropy != 0) {
+                    int pos = 0;
+                    if (inType.substring(0, 4).equals("name")) pos += 0;
+                    else if (inType.substring(0, 4).equals("attr")) pos += 2;
+                    else if (inType.substring(0, 3).equals("rel")) pos += 4;
+                    else System.out.println("Error1: " + inType + (inType.substring(0, 4) == "name"));
+
+                    if (inType.substring(inType.length()-6, inType.length()).equals("source")) pos += 0;
+                    else if (inType.substring(inType.length()-6, inType.length()).equals("target")) pos += 1;
+                    else System.out.println("Error2:" + inType.substring(inType.length()-6, inType.length()));
+
+                    count[pos]++;
+                    partEntropy[pos] += tmpEntropy;
+                }
+                currentEntropy += tmpEntropy;
             }
 
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
@@ -66,7 +89,22 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
 
             for (String outType : outEdgeTypeHash.keySet()) {
-                currentEntropy += calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType));
+                tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType));
+                if (detailed && tmpEntropy != 0) {
+                    int pos = 0;
+                    if (outType.substring(0, 4).equals("name")) pos += 0;
+                    else if (outType.substring(0, 4).equals("attr")) pos += 2;
+                    else if (outType.substring(0, 3).equals("rel")) pos += 4;
+                    else System.out.println("Error3: " + outType + (outType.substring(0, 4) == "name"));
+
+                    if (outType.substring(outType.length()-6, outType.length()).equals("source")) pos += 0;
+                    else if (outType.substring(outType.length()-6, outType.length()).equals("target")) pos += 1;
+                    else System.out.println("Error4" + outType);
+
+                    count[pos]++;
+                    partEntropy[pos] += tmpEntropy;
+                }
+                currentEntropy += tmpEntropy;
             }
             /*
             Set<String> inEdgeTypeSet = new HashSet<>();
@@ -86,6 +124,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphListInMV, outType, EdgeType.OUT);
             }
             */
+
             edgeEntropy += currentEntropy;
 //            if (mergedVertex.getType().equals("Entity")) {
 //                currentEntropy += 5 * calculateVertexContentEntropy(mergedGraphInfo, graphSetInMV, mergedVertex);
@@ -101,6 +140,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 //            finalEntropy += currentEntropy * (delta - Math.pow(delta, (double) graphSetInMV.size() / DLT)) * edgeNum;
             finalEntropy += currentEntropy * edgeNum;
 
+        }
+        if (detailed) {
+            for (int i = 0; i < 6; i++) System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);
         }
         System.out.println("edge entropy " + edgeEntropy);
         System.out.println("final entropy" + finalEntropy);
