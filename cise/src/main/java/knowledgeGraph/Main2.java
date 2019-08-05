@@ -51,7 +51,7 @@ public class Main2 {
         long startTime, endTime;
 
         for (Integer i = 1; i <= 3; i++) {
-            FileImporter2 importer = new FileImporter2(100000);
+            FileImporter2 importer = new FileImporter2(100000, true);
             Graph graph1 = importer.readGraph(1, i);
             Graph graph2 = importer.readGraph(2, i);
 
@@ -72,9 +72,7 @@ public class Main2 {
             System.out.println("merge time:" + (endTime - startTime));
 
             startTime = System.currentTimeMillis();
-            boolean optFor2Graph = true;
-            boolean detailed = true;
-            BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(optFor2Graph, detailed);
+            BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(true, true, true);
             double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
             endTime = System.currentTimeMillis();
             System.out.println("entropy calculating time:" + (endTime - startTime));

@@ -15,12 +15,14 @@ import java.util.Set;
 public class BasicEntropyCalculator implements EntropyCalculator {
 
     boolean opt = false;
+    boolean calcValue = true;
     boolean detailed = false;
 
 
     public BasicEntropyCalculator() {}
-    public BasicEntropyCalculator(boolean opt, boolean detailed) {
+    public BasicEntropyCalculator(boolean opt, boolean calcValue, boolean detailed) {
         this.opt = opt;
+        this.calcValue = calcValue;
         this.detailed = detailed;
     }
 
@@ -42,9 +44,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
         for (MergedVertex mergedVertex : mergedVertexSet) {
 
-            if (opt && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
+            if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
             if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
-            //if (opt && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
+            if (opt && !calcValue && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
 
             //Set<Graph> graphSetInMV = new HashSet<>();
             List<Graph> graphListInMV = new ArrayList<>();
@@ -64,7 +66,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
 
             for (String inType : inEdgeTypeHash.keySet()) {
-                tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType));
+                if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
+                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType));
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
                     if (inType.substring(0, 4).equals("name")) pos += 0;
@@ -89,7 +92,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
 
             for (String outType : outEdgeTypeHash.keySet()) {
-                tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType));
+                if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
+                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType));
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
                     if (outType.substring(0, 4).equals("name")) pos += 0;
