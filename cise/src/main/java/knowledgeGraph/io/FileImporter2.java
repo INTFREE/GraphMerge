@@ -19,6 +19,7 @@ public class FileImporter2 {
     Integer edgeId = 0;
     Graph graph;
     Integer order;
+    boolean mergeAttr = false;
     HashMap<String, Integer> Entity2Id;
     HashMap<String, Integer> Val2Id;
     HashMap<String, Integer> Rel2Id;
@@ -26,13 +27,23 @@ public class FileImporter2 {
     HashMap<String, Vertex> Vaule2Vertex;
 
 
-    public FileImporter2(Integer data_size) {
+    private void init(){
         this.vertexHashMap = new HashMap<>();
         this.Entity2Id = new HashMap<>();
         this.Val2Id = new HashMap<>();
         this.Edge2Id = new HashMap<>();
         this.Rel2Id = new HashMap<>();
+    }
+
+    public FileImporter2(Integer data_size) {
+        init();
         this.data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_"+ data_size +"/";
+    }
+
+    public FileImporter2(Integer data_size, boolean mergeAttr) {
+        init();
+        this.data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_"+ data_size +"/";
+        this.mergeAttr = mergeAttr;
     }
 
     public Graph readGraph(Integer order, Integer mOrder) {
@@ -94,6 +105,8 @@ public class FileImporter2 {
                 value = Vaule2Vertex.get(vertexName);
                 //处理Relation
                 String tmp = s+"|"+"name"+"|"+o;
+                if (mergeAttr) tmp = s+"|"+"name"+"|";
+
                 if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
                 p = Rel2Id.get(tmp);
                 Vertex relation = new Vertex(p, "Relation", "name");
@@ -166,6 +179,8 @@ public class FileImporter2 {
                 valueVertex = Vaule2Vertex.get(value);
 
                 String tmp = s+"|"+attr+"|"+o;
+                //if (mergeAttr) tmp = s+"|"+attr+"|"; 存在同名属性比较复杂
+
                 if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
                 p = Rel2Id.get(tmp);
                 Vertex relationVertex = new Vertex(p, "Relation", attr);
