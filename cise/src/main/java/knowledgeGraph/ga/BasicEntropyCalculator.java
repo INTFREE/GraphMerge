@@ -31,6 +31,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
         int[] count = {0,0,0,0,0,0};
         double[] partEntropy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        int unusuals = 0;
+        double threshold = 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ;
 
         System.out.println("enter entropy calculate");
         int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
@@ -110,46 +112,32 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 }
                 currentEntropy += tmpEntropy;
             }
-            /*
-            Set<String> inEdgeTypeSet = new HashSet<>();
-            for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
-                inEdgeTypeSet.add(mergedEdge.getRoleName());
-            }
 
-            Set<String> outEdgeTypeSet = new HashSet<>();
-            for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
-                outEdgeTypeSet.add(mergedEdge.getRoleName());
+            if (currentEntropy > threshold) {
+//                unusuals++;
+                if (mergedVertex.getType() == "Entity") {
+                    int intersection = 0;
+                    for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
+                        if(mergedEdge.getEdgeSet().size() == 2) {
+                            intersection++;
+                        }
+                    }
+                    if (intersection <= 1) {
+                        unusuals++;
+                        System.out.println("Unusual Vertex "  + mergedVertex.getVertexSet().iterator().next().getValue() + ": " + currentEntropy);
+                    }
+                }
             }
-
-            for (String inType : inEdgeTypeSet) {
-                currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphListInMV, inType, EdgeType.IN);
-            }
-            for (String outType : outEdgeTypeSet) {
-                currentEntropy += calculateEdgeEntropyForVertex(mergedGraphInfo, mergedVertex, graphListInMV, outType, EdgeType.OUT);
-            }
-            */
-
             edgeEntropy += currentEntropy;
-//            if (mergedVertex.getType().equals("Entity")) {
-//                currentEntropy += 5 * calculateVertexContentEntropy(mergedGraphInfo, graphSetInMV, mergedVertex);
-//                if (currentEntropy > maxVertexEntropy){
-//                    mergedGraphInfo.getMergedGraph().setMostEntropyMergedVertex(mergedVertex);
-//                }
-//            }
-//            if(currentEntropy > maxVertexEntropy){
-//                mergedGraphInfo.getMergedGraph().setMostEntropyMergedVertex(mergedVertex);
-//            }
-//            double delta = Math.log(DLT) / Math.log(2);
-//            delta = delta <= 2.0 ? 2.0 : delta;
-//            finalEntropy += currentEntropy * (delta - Math.pow(delta, (double) graphSetInMV.size() / DLT)) * edgeNum;
             finalEntropy += currentEntropy * edgeNum;
 
         }
         if (detailed) {
             for (int i = 0; i < 6; i++) System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);
         }
+        System.out.println("Unusual Count " + unusuals);
         System.out.println("edge entropy " + edgeEntropy);
-        System.out.println("final entropy" + finalEntropy);
+        System.out.println("final entropy " + finalEntropy);
         return finalEntropy;
     }
 
