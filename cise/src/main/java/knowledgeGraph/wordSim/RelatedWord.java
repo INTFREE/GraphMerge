@@ -5,22 +5,21 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class WordEmbedding {
-    HashMap<String, Double[]> embedding; // 直接这么操作会溢出
+public class RelatedWord {
+    HashMap<String, String[]> relatedWord; // 直接这么操作会溢出
 
-    String file_path = System.getProperty("user.dir") + "/src/offline_data/" + "glove.6B.200d.txt";
+    String file_path = System.getProperty("user.dir") + "/src/offline_data/" + "related_words.txt";
 
-    public WordEmbedding() {
-        System.out.println("Test Embedding");
-        embedding = new HashMap<String, Double[]>();
+    public RelatedWord() {
+        relatedWord = new HashMap<String, String[]>();
     }
 
-    public WordEmbedding(String file_name) {
+    public RelatedWord(String file_name) {
         this.file_path = System.getProperty("user.dir") + "/src/offline_data/" + file_name;
-        embedding = new HashMap<String, Double[]>();
+        relatedWord = new HashMap<String, String[]>();
     }
 
-    public HashMap<String, Double[]> setEmbedding() {
+    public HashMap<String, String[]> setRelatedWord() {
         InputStream inputStream;
         try {
             // read embedding file
@@ -31,33 +30,28 @@ public class WordEmbedding {
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                Double[] vector = new  Double[200];
                 String [] arr = line.split("\\s+");
                 String w = arr[0];
+                String[] relates = new  String[5];
 
-                if (arr.length != 201) {
+                if (arr.length != 6) {
                     System.out.println("ERROR EMBEDDING LENGTH:" + arr.length);
                     continue;
                 }
 
-                for (int i = 0; i < 200; i++) {
-                    vector[i] =  Double.valueOf(arr[i+1]);
-                }
+                System.arraycopy(arr, 1, relates, 0, 5);
 
-                if (embedding.get(w) == null) embedding.put(w, vector);
+                if (relatedWord.get(w) == null) relatedWord.put(w, relates);
             }
             bufferedReader.close();
         } catch (Exception e) {
             System.out.println("read file error" + e.toString());
         }
-        return this.embedding;
+        return this.relatedWord;
     }
 
-    public HashMap<String, Double[]> getEmbedding() {
-        if (this.embedding.size() == 0) this.setEmbedding();
-        return this.embedding;
+    public HashMap<String, String[]> getRelatedWord() {
+        if (this.relatedWord.size() == 0) this.setRelatedWord();
+        return this.relatedWord;
     }
 }
-
-
-

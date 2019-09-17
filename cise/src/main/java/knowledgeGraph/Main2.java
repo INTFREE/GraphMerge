@@ -50,15 +50,13 @@ public class Main2 {
 //        mergedGraghInfo.generateMergeGraphByMatch(mergeVertexToVertexSet);
         WordEmbedding embedding = new WordEmbedding();
         HashMap<String, Double[]> result = embedding.getEmbedding();
-
-        Iterator iter = result.entrySet().iterator();
+//        测试用
         System.out.println(result.size());
-        while (iter.hasNext()) {
-            HashMap.Entry entry = (HashMap.Entry) iter.next();
-            Object key = entry.getKey();
-            Object val = entry.getValue();
+        for (String key : result.keySet()) {
             System.out.println(key);
-            System.out.println(val);
+            System.out.println(result.get(key));
+            System.out.println(result.get(key).length);
+            System.out.println(result.get(key)[0]);
             break;
         }
         return ;
