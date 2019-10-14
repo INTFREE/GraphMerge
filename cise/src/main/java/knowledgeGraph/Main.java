@@ -7,11 +7,13 @@ import knowledgeGraph.io.GraphImporter;
 import knowledgeGraph.io.Importer;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.MergedGraghInfo;
+import org.jgrapht.alg.interfaces.MatchingAlgorithm;
+import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.alg.interfaces.MatchingAlgorithm.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 
 public class Main {
@@ -40,6 +42,7 @@ public class Main {
         HashSet<Graph> graphHashSet = new HashSet<>();
         graphHashSet.add(graph1);
         graphHashSet.add(graph2);
+
         long startTime = System.currentTimeMillis();
         GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo);
@@ -47,8 +50,15 @@ public class Main {
         long endTime = System.currentTimeMillis();
         System.out.println("time");
         System.out.println(endTime - startTime);
+
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator();
         basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+
+        Bigraph bigraph = mergedGraghInfo.getBiGraph();
+        MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
+                = new MaximumWeightBipartiteMatching<>(bigraph, graph1.vertexSet(), graph2.vertexSet());
+        Matching<Vertex, DefaultWeightedEdge> matchings = bipartiteMatching.getMatching();
+        System.out.println(matchings.getEdges().size());
 
     }
 

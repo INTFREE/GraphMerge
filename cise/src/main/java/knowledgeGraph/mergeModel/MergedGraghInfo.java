@@ -1,11 +1,9 @@
 package knowledgeGraph.mergeModel;
 
 import com.sun.scenario.effect.Merge;
-import knowledgeGraph.baseModel.Edge;
-import knowledgeGraph.baseModel.Graph;
-import knowledgeGraph.baseModel.GraphsInfo;
-import knowledgeGraph.baseModel.Vertex;
+import knowledgeGraph.baseModel.*;
 import knowledgeGraph.util.UtilFunction;
+import org.jgrapht.graph.SimpleWeightedGraph;
 import org.neo4j.register.Register;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.omg.Messaging.SyncScopeHelper;
@@ -37,6 +35,16 @@ public class MergedGraghInfo {
     double entropy = -1;
 
     /**
+     * 融合图是否是二部图
+     */
+    boolean isBiGraph = false;
+
+    /**
+     *  融合图所需要的二部图
+     */
+    Bigraph biGraph;
+
+    /**
      * 构造函数，接收一组待融合图信息作为参数
      *
      * @param graphsInfo 待融合图信息
@@ -49,6 +57,18 @@ public class MergedGraghInfo {
         edgeToMergedEdgeMap = new HashMap<>();
     }
 
+    public MergedGraghInfo(GraphsInfo graphsInfo, boolean isBiGraph) {
+        this.graphsInfo = graphsInfo;
+        this.mergedGraph = new MergedGraph();
+        this.isBiGraph = isBiGraph;
+        typeToVertexSetMap = new HashMap<>();
+        vertexToMergedVertexMap = new HashMap<>();
+        edgeToMergedEdgeMap = new HashMap<>();
+        if (this.isBiGraph){
+            biGraph = new Bigraph();
+        }
+    }
+
     public double getEntropy() {
         return entropy;
     }
@@ -59,6 +79,10 @@ public class MergedGraghInfo {
 
     public MergedGraph getMergedGraph() {
         return mergedGraph;
+    }
+
+    public Bigraph getBiGraph() {
+        return biGraph;
     }
 
     public Set<MergedVertex> getMergedVertexByType(String type) {
@@ -84,6 +108,9 @@ public class MergedGraghInfo {
         return this.typeToVertexSetMap.keySet();
     }
 
+    public boolean isBiGraph() {
+        return isBiGraph;
+    }
 
     public void generateInitialMergeGraph() {
         this.mergedGraph = new MergedGraph();
@@ -267,14 +294,14 @@ public class MergedGraghInfo {
                         break;
                     }
                 }
-                if(!flag){
+                if (!flag) {
                     MergedEdge mergedEdge = new MergedEdge(edge.getSource().getMergedVertex(), edge.getTarget().getMergedVertex(), edge.getRoleName());
                     mergedEdge.addEdge(edge);
                     mergedEdgeHashSet.add(mergedEdge);
                 }
             }
         }
-        for(MergedEdge mergedEdge : mergedEdgeHashSet){
+        for (MergedEdge mergedEdge : mergedEdgeHashSet) {
             this.mergedGraph.addEdge(mergedEdge.getSource(), mergedEdge.getTarget(), mergedEdge);
         }
         System.out.println(this.mergedGraph.vertexSet().size());
@@ -351,7 +378,7 @@ public class MergedGraghInfo {
         }
         System.out.println("initialize relation vertex");
 
-        for(MergedVertex mergedVertex : mergedVertexSet){
+        for (MergedVertex mergedVertex : mergedVertexSet) {
             this.mergedGraph.addVertex(mergedVertex);
         }
 
@@ -375,9 +402,9 @@ public class MergedGraghInfo {
             mergedEdgeHashSet.add(mergedEdge);
         }
 
-        for(MergedEdge mergedEdge : mergedEdgeHashSet){
+        for (MergedEdge mergedEdge : mergedEdgeHashSet) {
             HashSet<String> typeSet = new HashSet<>();
-            for(Edge edge: mergedEdge.getEdgeSet()){
+            for (Edge edge : mergedEdge.getEdgeSet()) {
                 typeSet.add(edge.getRoleName());
             }
             this.mergedGraph.addEdge(mergedEdge.getSource(), mergedEdge.getTarget(), mergedEdge);
@@ -386,7 +413,7 @@ public class MergedGraghInfo {
         System.out.println("merge graph info");
         System.out.println("vertexSet size " + this.mergedGraph.vertexSet().size());
         System.out.println("edgeSet size " + this.mergedGraph.edgeSet().size());
-        for(String type : typeToVertexSetMap.keySet()){
+        for (String type : typeToVertexSetMap.keySet()) {
             System.out.println(type + " " + typeToVertexSetMap.get(type).size());
         }
 

@@ -1,5 +1,6 @@
 package knowledgeGraph.ga;
 
+import knowledgeGraph.baseModel.Bigraph;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
@@ -19,7 +20,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
     boolean detailed = false;
 
 
-    public BasicEntropyCalculator() {}
+    public BasicEntropyCalculator() {
+    }
+
     public BasicEntropyCalculator(boolean opt, boolean calcValue, boolean detailed) {
         this.opt = opt;
         this.calcValue = calcValue;
@@ -29,11 +32,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
     @Override
     public double calculateEntropy(MergedGraghInfo mergedGraphInfo) {
 
-        int[] count = {0,0,0,0,0,0};
+        int[] count = {0, 0, 0, 0, 0, 0};
         double[] partEntropy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         int unusuals = 0;
-        double threshold = 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ;
-
+        double threshold = 0;
         System.out.println("enter entropy calculate");
         int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
         // 初始化熵
@@ -63,13 +65,14 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
                 String roleName = mergedEdge.getRoleName();
-                if(inEdgeTypeHash.get(roleName) == null) inEdgeTypeHash.put(roleName, new ArrayList<>());
+                if (inEdgeTypeHash.get(roleName) == null) inEdgeTypeHash.put(roleName, new ArrayList<>());
                 inEdgeTypeHash.get(roleName).add(mergedEdge);
             }
 
             for (String inType : inEdgeTypeHash.keySet()) {
                 if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
-                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType), inType, EdgeType.IN);
+                else
+                    tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType), inType, EdgeType.IN);
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
                     if (inType.substring(0, 4).equals("name")) pos += 0;
@@ -77,9 +80,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     else if (inType.substring(0, 3).equals("rel")) pos += 4;
                     else System.out.println("Error1: " + inType + (inType.substring(0, 4) == "name"));
 
-                    if (inType.substring(inType.length()-6, inType.length()).equals("source")) pos += 0;
-                    else if (inType.substring(inType.length()-6, inType.length()).equals("target")) pos += 1;
-                    else System.out.println("Error2:" + inType.substring(inType.length()-6, inType.length()));
+                    if (inType.substring(inType.length() - 6, inType.length()).equals("source")) pos += 0;
+                    else if (inType.substring(inType.length() - 6, inType.length()).equals("target")) pos += 1;
+                    else System.out.println("Error2:" + inType.substring(inType.length() - 6, inType.length()));
 
                     count[pos]++;
                     partEntropy[pos] += tmpEntropy;
@@ -89,13 +92,14 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
                 String roleName = mergedEdge.getRoleName();
-                if(outEdgeTypeHash.get(roleName) == null) outEdgeTypeHash.put(roleName, new ArrayList<>());
+                if (outEdgeTypeHash.get(roleName) == null) outEdgeTypeHash.put(roleName, new ArrayList<>());
                 outEdgeTypeHash.get(roleName).add(mergedEdge);
             }
 
             for (String outType : outEdgeTypeHash.keySet()) {
                 if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
-                else tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType), outType, EdgeType.OUT);
+                else
+                    tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType), outType, EdgeType.OUT);
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
                     if (outType.substring(0, 4).equals("name")) pos += 0;
@@ -103,8 +107,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     else if (outType.substring(0, 3).equals("rel")) pos += 4;
                     else System.out.println("Error3: " + outType + (outType.substring(0, 4) == "name"));
 
-                    if (outType.substring(outType.length()-6, outType.length()).equals("source")) pos += 0;
-                    else if (outType.substring(outType.length()-6, outType.length()).equals("target")) pos += 1;
+                    if (outType.substring(outType.length() - 6, outType.length()).equals("source")) pos += 0;
+                    else if (outType.substring(outType.length() - 6, outType.length()).equals("target")) pos += 1;
                     else System.out.println("Error4" + outType);
 
                     count[pos]++;
@@ -112,19 +116,28 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 }
                 currentEntropy += tmpEntropy;
             }
+            // 设置二部图相关参数
+            if (mergedGraphInfo.isBiGraph()) {
+                Bigraph biGraph = mergedGraphInfo.getBiGraph();
+                List<Vertex> vertexList = new ArrayList<>(mergedVertex.getVertexSet());
+                biGraph.addVertex(vertexList.get(0));
+                biGraph.addVertex(vertexList.get(1));
+                biGraph.setEdgeWeight(biGraph.addEdge(vertexList.get(0), vertexList.get(1)), currentEntropy);
+
+            }
 
             if (currentEntropy > threshold) {
 //                unusuals++;
                 if (mergedVertex.getType() == "Entity") {
                     int intersection = 0;
                     for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
-                        if(mergedEdge.getEdgeSet().size() == 2) {
+                        if (mergedEdge.getEdgeSet().size() == 2) {
                             intersection++;
                         }
                     }
                     if (intersection <= 1) {
                         unusuals++;
-                        System.out.println("Unusual Vertex "  + mergedVertex.getVertexSet().iterator().next().getValue() + ": " + currentEntropy);
+                        System.out.println("Unusual Vertex " + mergedVertex.getVertexSet().iterator().next().getValue() + ": " + currentEntropy);
                     }
                 }
             }
@@ -133,7 +146,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
         }
         if (detailed) {
-            for (int i = 0; i < 6; i++) System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);
+            for (int i = 0; i < 6; i++)
+                System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);
         }
         System.out.println("Unusual Count " + unusuals);
         System.out.println("edge entropy " + edgeEntropy);
@@ -290,23 +304,23 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         if (tLen == 0) {
             return sLen;
         }
-        d = new int[sLen+1][tLen+1];
-        for (si=0; si<=sLen; si++) {
+        d = new int[sLen + 1][tLen + 1];
+        for (si = 0; si <= sLen; si++) {
             d[si][0] = si;
         }
-        for (ti=0; ti<=tLen; ti++) {
+        for (ti = 0; ti <= tLen; ti++) {
             d[0][ti] = ti;
         }
-        for (si=1; si<=sLen; si++) {
-            ch1 = s.charAt(si-1);
-            for(ti=1; ti<=tLen; ti++) {
-                ch2 = t.charAt(ti-1);
-                if(ch1 == ch2) {
+        for (si = 1; si <= sLen; si++) {
+            ch1 = s.charAt(si - 1);
+            for (ti = 1; ti <= tLen; ti++) {
+                ch2 = t.charAt(ti - 1);
+                if (ch1 == ch2) {
                     cost = 0;
                 } else {
                     cost = 1;
                 }
-                d[si][ti] = Math.min(Math.min(d[si-1][ti]+1, d[si][ti-1]+1),d[si-1][ti-1]+cost);
+                d[si][ti] = Math.min(Math.min(d[si - 1][ti] + 1, d[si][ti - 1] + 1), d[si - 1][ti - 1] + cost);
             }
         }
         return d[sLen][tLen];
@@ -387,7 +401,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 }
 
                 // 如果是两个值节点，计算值的相似度（编辑距离）
-                else if  (edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 && edgeInOrOut.equals(EdgeType.OUT)) {//OUT指向多个值节点
+                else if (edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 && edgeInOrOut.equals(EdgeType.OUT)) {//OUT指向多个值节点
                     MergedVertex mv1 = edgeCombinationX.getKey().iterator().next().getTarget();
                     MergedVertex mv2 = edgeCombinationY.getKey().iterator().next().getTarget();
 
