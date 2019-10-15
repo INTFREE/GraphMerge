@@ -31,8 +31,8 @@ public class WordEmbedding {
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                Double[] vector = new  Double[200];
-                String [] arr = line.split("\\s+");
+                Double[] vector = new Double[200];
+                String[] arr = line.split("\\s+");
                 String w = arr[0];
 
                 if (arr.length != 201) {
@@ -41,7 +41,7 @@ public class WordEmbedding {
                 }
 
                 for (int i = 0; i < 200; i++) {
-                    vector[i] =  Double.valueOf(arr[i+1]);
+                    vector[i] = Double.valueOf(arr[i + 1]);
                 }
 
                 if (embedding.get(w) == null) embedding.put(w, vector);

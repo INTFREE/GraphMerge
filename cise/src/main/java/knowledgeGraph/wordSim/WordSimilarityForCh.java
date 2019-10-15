@@ -151,7 +151,7 @@ public class WordSimilarityForCh {
                 String[] strs = parts[i].split("=");
                 relationalPrimitiveKey = strs[0];
                 String value = strs[1];
-                if(value.contains("\\|")){
+                if (value.contains("\\|")) {
                     value = strs[1].split("\\|")[1];
                 }
                 wordForCh.addRelationalPrimitive(relationalPrimitiveKey, value);
@@ -377,9 +377,9 @@ public class WordSimilarityForCh {
                 }
             }
             sum += max;
-            if(index1 < list1.size())
+            if (index1 < list1.size())
                 list1.remove(index1);
-            if(index2 < list2.size())
+            if (index2 < list2.size())
                 list2.remove(index2);
             count++;
         }

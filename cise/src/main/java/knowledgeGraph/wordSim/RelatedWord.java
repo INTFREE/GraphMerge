@@ -30,9 +30,9 @@ public class RelatedWord {
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String [] arr = line.split("\\s+");
+                String[] arr = line.split("\\s+");
                 String w = arr[0];
-                String[] relates = new  String[5];
+                String[] relates = new String[5];
 
                 if (arr.length != 6) {
                     System.out.println("ERROR EMBEDDING LENGTH:" + arr.length);

@@ -40,7 +40,7 @@ public class MergedGraghInfo {
     boolean isBiGraph = false;
 
     /**
-     *  融合图所需要的二部图
+     * 融合图所需要的二部图
      */
     Bigraph biGraph;
 
@@ -64,7 +64,7 @@ public class MergedGraghInfo {
         typeToVertexSetMap = new HashMap<>();
         vertexToMergedVertexMap = new HashMap<>();
         edgeToMergedEdgeMap = new HashMap<>();
-        if (this.isBiGraph){
+        if (this.isBiGraph) {
             biGraph = new Bigraph();
         }
     }

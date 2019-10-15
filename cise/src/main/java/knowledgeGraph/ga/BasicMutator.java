@@ -92,7 +92,7 @@ public class BasicMutator implements Mutator {
         for (Vertex vertex : vertexToMergedVertex.keySet()) {
             Set<MergedVertex> mergedVertices = vertexToMergedVertex.get(vertex);
             for (Vertex vertex1 : vertexToMergedVertex.keySet()) {
-                if(vertex1.equals(vertex)){
+                if (vertex1.equals(vertex)) {
                     continue;
                 }
                 Set<MergedVertex> tmpSet = vertexToMergedVertex.get(vertex1);

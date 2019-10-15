@@ -57,8 +57,8 @@ public class Main {
         Bigraph bigraph = mergedGraghInfo.getBiGraph();
         MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
                 = new MaximumWeightBipartiteMatching<>(bigraph, graph1.vertexSet(), graph2.vertexSet());
-        Matching<Vertex, DefaultWeightedEdge> matchings = bipartiteMatching.getMatching();
-        System.out.println(matchings.getEdges().size());
+        Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
+        System.out.println(matching.getEdges().size());
 
     }
 

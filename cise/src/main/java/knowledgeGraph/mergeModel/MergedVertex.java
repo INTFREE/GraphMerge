@@ -43,7 +43,7 @@ public class MergedVertex {
     @Override
     public String toString() {
         String tmp = this.id.toString() + " vertex set " + this.vertexSet.size() + " type " + this.type + '\n';
-        for(Vertex vertex : this.getVertexSet()) {
+        for (Vertex vertex : this.getVertexSet()) {
             tmp += vertex.toString() + '\n';
         }
         return tmp;

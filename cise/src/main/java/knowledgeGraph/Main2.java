@@ -59,7 +59,7 @@ public class Main2 {
             System.out.println(result.get(key)[0]);
             break;
         }
-        return ;
+        return;
 //        int data_size = 100000; // 数据集大小
 //        boolean mergeAttr = true; // 是否对Entity的Name进行了
 //        boolean withOutRelation = false; // 图中是否包含relation节点

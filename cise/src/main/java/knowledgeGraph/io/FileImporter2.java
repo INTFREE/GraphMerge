@@ -12,7 +12,7 @@ import java.util.Iterator;
 
 public class FileImporter2 {
     HashMap<String, Vertex> vertexHashMap;
-//    String data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_10000/";
+    //    String data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_10000/";
     String data_path;
     String match_path = System.getProperty("user.dir") + "/src/entropy_calc/match/";
     Integer vertexId = 0;
@@ -28,7 +28,7 @@ public class FileImporter2 {
     HashMap<String, Vertex> Vaule2Vertex;
 
 
-    private void init(){
+    private void init() {
         this.vertexHashMap = new HashMap<>();
         this.Entity2Id = new HashMap<>();
         this.Val2Id = new HashMap<>();
@@ -38,12 +38,12 @@ public class FileImporter2 {
 
     public FileImporter2(Integer data_size) {
         init();
-        this.data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_"+ data_size +"/";
+        this.data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_" + data_size + "/";
     }
 
     public FileImporter2(Integer data_size, boolean mergeAttr, boolean withOutRelation) {
         init();
-        this.data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_"+ data_size +"/";
+        this.data_path = System.getProperty("user.dir") + "/src/entropy_calc/data_" + data_size + "/";
         this.mergeAttr = mergeAttr;
         this.withOutRelation = withOutRelation;
     }
@@ -54,7 +54,7 @@ public class FileImporter2 {
         this.Vaule2Vertex = new HashMap<>();
         //好丑
         this.Entity2Id = readMatch(mOrder);
-        if(!withOutRelation) {
+        if (!withOutRelation) {
             System.out.println("vertexId start: " + vertexId);
             System.out.println("edgeId start: " + edgeId);
             readVertex();
@@ -118,8 +118,8 @@ public class FileImporter2 {
                 }
                 value = Vaule2Vertex.get(vertexName);
                 //处理Relation
-                String tmp = s+"|"+"name"+"|"+o;
-                if (mergeAttr) tmp = s+"|"+"name"+"|";
+                String tmp = s + "|" + "name" + "|" + o;
+                if (mergeAttr) tmp = s + "|" + "name" + "|";
 
                 if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
                 p = Rel2Id.get(tmp);
@@ -138,11 +138,11 @@ public class FileImporter2 {
                 graph.getRelationToVertex().get(relation).add(entity);
                 graph.getRelationToVertex().get(relation).add(value);
                 //init Edge
-                tmp = p+"|name-source|"+s;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                tmp = p + "|name-source|" + s;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge = new Edge(Edge2Id.get(tmp), relation, entity, "name-source");
-                tmp = p+"|name-target|"+o;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                tmp = p + "|name-target|" + o;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge valueEdge = new Edge(Edge2Id.get(tmp), relation, value, "name-target");
 
                 graph.addEdge(relation, entity, entityEdge);
@@ -192,7 +192,7 @@ public class FileImporter2 {
                 }
                 valueVertex = Vaule2Vertex.get(value);
 
-                String tmp = s+"|"+attr+"|"+o;
+                String tmp = s + "|" + attr + "|" + o;
                 //if (mergeAttr) tmp = s+"|"+attr+"|"; 存在同名属性比较复杂
 
                 if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
@@ -210,11 +210,11 @@ public class FileImporter2 {
                 graph.getRelationToVertex().get(relationVertex).add(valueVertex);
 
                 //init Edge
-                tmp = p+"|"+attr+"-source|"+s;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                tmp = p + "|" + attr + "-source|" + s;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge = new Edge(Edge2Id.get(tmp), relationVertex, entity, attr + "-source");
-                tmp = p+"|"+attr+"-target|"+o;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                tmp = p + "|" + attr + "-target|" + o;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge valueEdge = new Edge(Edge2Id.get(tmp), relationVertex, valueVertex, attr + "-target");
 
                 graph.addEdge(relationVertex, entity, entityEdge);
@@ -257,7 +257,7 @@ public class FileImporter2 {
                     return;
                 }
 
-                String tmp = s+"|"+attr+"|"+o;
+                String tmp = s + "|" + attr + "|" + o;
                 if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
                 p = Rel2Id.get(tmp);
                 Vertex relationVertex = new Vertex(p, "Relation", attr);
@@ -270,11 +270,11 @@ public class FileImporter2 {
                 graph.getRelationToVertex().get(relationVertex).add(entity2);
 
                 //init Edge
-                tmp = p+"|"+attr+"-source|"+s;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                tmp = p + "|" + attr + "-source|" + s;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge1 = new Edge(Edge2Id.get(tmp), relationVertex, entity1, attr + "-source");
-                tmp = p+"|"+attr+"-target|"+o;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                tmp = p + "|" + attr + "-target|" + o;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge2 = new Edge(Edge2Id.get(tmp), relationVertex, entity2, attr + "-target");
 
                 graph.addEdge(relationVertex, entity1, entityEdge1);
@@ -339,7 +339,7 @@ public class FileImporter2 {
 
                 //init Edge
                 String tmp = s + "|name|" + o;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge = new Edge(Edge2Id.get(tmp), entity, value, "name");
 
                 graph.addEdge(entity, value, entityEdge);
@@ -404,8 +404,8 @@ public class FileImporter2 {
 //                graph.getRelationToVertex().get(relationVertex).add(valueVertex);
 
                 //init Edge
-                String tmp = s+"|"+attr+"|"+o;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                String tmp = s + "|" + attr + "|" + o;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge = new Edge(Edge2Id.get(tmp), entity, valueVertex, attr + "-source");
 
                 graph.addEdge(entity, valueVertex, entityEdge);
@@ -457,8 +457,8 @@ public class FileImporter2 {
 //                graph.getRelationToVertex().get(relationVertex).add(entity2);
 
                 //init Edge
-                String tmp = s +"|"+attr+"-source|"+ o;
-                if(Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
+                String tmp = s + "|" + attr + "-source|" + o;
+                if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge1 = new Edge(Edge2Id.get(tmp), entity1, entity2, attr + "-source");
 
                 graph.addEdge(entity1, entity2, entityEdge1);

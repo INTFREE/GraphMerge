@@ -1,8 +1,8 @@
-cise/target
 cise/.idea/
 cise/.idea/workspace.xml
 cise/src/offline_data
 .DS_Store
+cise/target/
 target/
 pom.xml.tag
 pom.xml.releaseBackup
