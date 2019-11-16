@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 public class BasicEntropyCalculator implements EntropyCalculator {
 
     boolean opt = false;
@@ -45,7 +46,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         int edgeNum = mergedGraphInfo.getMergedGraph().edgeSet().size();
         double edgeEntropy = 0.0;
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
-
+        HashMap<MergedVertex, Double> mergedVertexEntropy = new HashMap<>();
         for (MergedVertex mergedVertex : mergedVertexSet) {
 
             if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
@@ -123,7 +124,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 biGraph.addVertex(vertexList.get(0));
                 biGraph.addVertex(vertexList.get(1));
                 biGraph.setEdgeWeight(biGraph.addEdge(vertexList.get(0), vertexList.get(1)), currentEntropy);
-
             }
 
             if (currentEntropy > threshold) {
@@ -141,10 +141,12 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     }
                 }
             }
+            mergedVertexEntropy.put(mergedVertex, currentEntropy);
             edgeEntropy += currentEntropy;
             finalEntropy += currentEntropy * edgeNum;
 
         }
+        mergedGraphInfo.setMergedVertexToEntropy(mergedVertexEntropy);
         if (detailed) {
             for (int i = 0; i < 6; i++)
                 System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);

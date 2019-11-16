@@ -70,4 +70,10 @@ public class MergedEdge {
         this.edgeSet.addAll(edgeCollection);
     }
 
+    public void deleteEdge(Edge edge) {
+        if (getEdgeSet().contains(edge)) {
+            this.edgeSet.remove(edge);
+        }
+    }
+
 }

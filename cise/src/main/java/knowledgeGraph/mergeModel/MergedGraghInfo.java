@@ -8,10 +8,7 @@ import org.neo4j.register.Register;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.omg.Messaging.SyncScopeHelper;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MergedGraghInfo {
     private GraphsInfo graphsInfo;
@@ -45,6 +42,11 @@ public class MergedGraghInfo {
     Bigraph biGraph;
 
     /**
+     * 按熵值大小排序的MergedVertexToEntropy
+     */
+    List<Map.Entry<MergedVertex, Double>> mergedVertexToEntropy;
+
+    /**
      * 构造函数，接收一组待融合图信息作为参数
      *
      * @param graphsInfo 待融合图信息
@@ -55,6 +57,7 @@ public class MergedGraghInfo {
         typeToVertexSetMap = new HashMap<>();
         vertexToMergedVertexMap = new HashMap<>();
         edgeToMergedEdgeMap = new HashMap<>();
+        mergedVertexToEntropy = new ArrayList<>();
     }
 
     public MergedGraghInfo(GraphsInfo graphsInfo, boolean isBiGraph) {
@@ -418,6 +421,22 @@ public class MergedGraghInfo {
         }
 
 
+    }
+
+    public List<Map.Entry<MergedVertex, Double>> getMergedVertexToEntropy() {
+        return mergedVertexToEntropy;
+    }
+
+    public void setMergedVertexToEntropy(HashMap<MergedVertex, Double> mergedVertexToEntropy) {
+        List<Map.Entry<MergedVertex, Double>> sortedEntropy =
+                new ArrayList<>(mergedVertexToEntropy.entrySet());
+        Collections.sort(sortedEntropy, new Comparator<Map.Entry<MergedVertex, Double>>() {
+            public int compare(Map.Entry<MergedVertex, Double> o1,
+                               Map.Entry<MergedVertex, Double> o2) {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+        this.mergedVertexToEntropy = sortedEntropy;
     }
 
 }
