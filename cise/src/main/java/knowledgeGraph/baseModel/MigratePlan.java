@@ -5,6 +5,10 @@ import java.util.ArrayList;
 public class MigratePlan {
     private ArrayList<Plan> planArrayList;
 
+    public MigratePlan() {
+        this.planArrayList = new ArrayList<>();
+    }
+
     public ArrayList<Plan> getPlanArrayList() {
         return planArrayList;
     }

@@ -26,7 +26,8 @@ public class SimlarityMigratePlanner implements MigratePlanner {
             Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, entry.getKey(), type);
             Set<MergedVertex> mergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
             MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, mergedVertexSet, vertexSetPair.getValue(), type);
-            migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(),mutateTarget));
+            migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
+            break;
         }
         return migratePlan;
     }
