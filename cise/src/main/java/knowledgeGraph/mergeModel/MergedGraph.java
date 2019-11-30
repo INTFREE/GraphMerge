@@ -3,6 +3,7 @@ package knowledgeGraph.mergeModel;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Vertex;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,22 @@ public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> 
 
     public void setMostEntropyMergedVertex(MergedVertex mostEntropyMergedVertex) {
         this.mostEntropyMergedVertex = mostEntropyMergedVertex;
+    }
+
+    @Override
+    public String toString() {
+        System.out.println("MergedGraph Info");
+        System.out.println("merged vertex " + this.vertexSet().size());
+
+        for (MergedVertex mergedVertex : this.vertexSet()) {
+            System.out.println(mergedVertex.getVertexSet().size());
+        }
+
+        System.out.println("merged edge " + this.edgeSet().size());
+        for (MergedEdge mergedEdge : this.edgeSet()) {
+            System.out.println(mergedEdge.getEdgeSet().size());
+        }
+        return "";
     }
 
     public MergedVertex getMostEntropyMergedVertex() {

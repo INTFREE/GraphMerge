@@ -13,31 +13,38 @@ import java.util.*;
 public class SimlarityMigratePlanner implements MigratePlanner {
     @Override
     public MigratePlan getVertexMigratePlan(MergedGraghInfo mergedGraghInfo) {
+        System.out.println(">>>>>>> get Migrate Plan");
         MigratePlan migratePlan = new MigratePlan();
         MergedGraph mergedGraph = mergedGraghInfo.getMergedGraph();
         // 计算相似度
+        // 迁移10%且熵值小于某个阈值
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy();
         for (HashMap.Entry<MergedVertex, Double> entry : mergedVertexArrayList) {
-
+            System.out.println("Source " + entry.getKey().getVertexSet().size());
             EdgeType type = EdgeType.OUT;
-            if (entry.getKey().getType().equalsIgnoreCase("entity")) {
-                type = EdgeType.IN;
-            }
+//            System.out.println("type " + entry.getKey().getType());
+//            if (entry.getKey().getType().equalsIgnoreCase("entity")) {
+//                type = EdgeType.IN;
+//            }
             Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, entry.getKey(), type);
-            Set<MergedVertex> mergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
-            MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, mergedVertexSet, vertexSetPair.getValue(), type);
+            Set<MergedVertex> sameTypeMergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
+            MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, entry.getKey(), sameTypeMergedVertexSet, vertexSetPair.getValue(), type);
             migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
             break;
         }
         return migratePlan;
     }
 
+    // 去除源节点
     private MergedVertex getTargetMergedVertex(MergedGraph mergedGraph,
+                                               MergedVertex baseMergedVertex,
                                                Set<MergedVertex> baseMergedVertexSet,
                                                Set<MergedVertex> mergedVertices,
                                                EdgeType edgeInOrOut) {
         HashMap<MergedVertex, Double> vertexDifference = new HashMap<>();
         for (MergedVertex mergedVertex : baseMergedVertexSet) {
+            if (mergedVertex.equals(baseMergedVertex))
+                continue;
             Set<MergedVertex> connectedVertexSet = new HashSet<>();
             if (edgeInOrOut.equals((EdgeType.IN))) {
                 Set<MergedEdge> mergedEdgeSet = mergedGraph.incomingEdgesOf(mergedVertex);
@@ -52,16 +59,16 @@ public class SimlarityMigratePlanner implements MigratePlanner {
             }
             vertexDifference.put(mergedVertex, getSimilarity(connectedVertexSet, mergedVertices));
         }
-        double res = Double.MAX_VALUE;
-        MergedVertex minDifferentVertex = null;
+        double res = Double.MIN_VALUE;
+        MergedVertex mostLikeMergedVertex = null;
         for (MergedVertex mergedVertex : vertexDifference.keySet()) {
             double tmp = vertexDifference.get(mergedVertex);
-            if (tmp < res) {
+            if (tmp > res) {
                 res = tmp;
-                minDifferentVertex = mergedVertex;
+                mostLikeMergedVertex = mergedVertex;
             }
         }
-        return minDifferentVertex;
+        return mostLikeMergedVertex;
     }
 
     private Pair<Vertex, Set<MergedVertex>> getMostDifferentVertex(MergedGraph mergedGraph, MergedVertex mergedVertex, EdgeType edgeInOrOut) {
@@ -129,7 +136,6 @@ public class SimlarityMigratePlanner implements MigratePlanner {
         result.clear();
         result.addAll(baseSet);
         result.addAll(givenSet);
-        System.out.println(result.size());
         return intersection / result.size();
     }
 }

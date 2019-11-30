@@ -44,14 +44,15 @@ public class BasicPlanExecutor implements PlanExecutor {
     public void doExecutePlan(Vertex vertex, MergedVertex source, MergedVertex target) {
         MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
         // 删除源节点的相邻边
-        Set<MergedEdge> allMergedEdges = mergedGraph.incomingEdgesOf(source);
-        allMergedEdges.addAll(mergedGraph.outgoingEdgesOf(source));
+        Set<MergedEdge> relatedMergedEdges = new HashSet<>();
+        relatedMergedEdges.addAll(mergedGraph.incomingEdgesOf(source));
+        relatedMergedEdges.addAll(mergedGraph.outgoingEdgesOf(source));
 
         // 记录所有和迁移节点有关系的边
         Set<Pair<Vertex, Edge>> relatedVertexAndEdge = new HashSet<>();
         String type = "";
 
-        for (MergedEdge mergedEdge : allMergedEdges) {
+        for (MergedEdge mergedEdge : relatedMergedEdges) {
             for (Edge edge : mergedEdge.getEdgeSet()) {
                 if (edge.getTarget().equals(vertex)) {
                     type = "IN";

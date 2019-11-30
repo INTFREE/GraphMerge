@@ -448,9 +448,10 @@ public class MergedGraghInfo {
         Collections.sort(sortedEntropy, new Comparator<Map.Entry<MergedVertex, Double>>() {
             public int compare(Map.Entry<MergedVertex, Double> o1,
                                Map.Entry<MergedVertex, Double> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
+                return (o2.getValue()).compareTo(o1.getValue());
             }
         });
+
         this.mergedVertexToEntropy = sortedEntropy;
     }
 
