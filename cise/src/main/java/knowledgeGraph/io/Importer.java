@@ -15,7 +15,7 @@ public class Importer {
     private Driver driver;
 
     public Importer() {
-        this.driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "cise"));
+        this.driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "test1234"));
     }
 
     public ArrayList<NodeModel> getNodeModel(String projectName) {

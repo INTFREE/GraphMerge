@@ -1,10 +1,14 @@
 package knowledgeGraph.io;
 
 import knowledgeGraph.baseModel.*;
+import org.neo4j.register.Register;
 
 import java.util.*;
 
 public class GraphImporter {
+    static HashMap<Vertex, Integer> Neo4jVertexToId = new HashMap<>();
+    static Integer edgeId = 1;
+
     public Graph readGraph(Importer importer, String projectName, String userName) {
 //        ArrayList<NodeModel> nodeModelArrayList = importer.getNodeModel("大话西游-电影人物关系图谱");
 //        ArrayList<RelationModel> relationModelArrayList = importer.getRelationModel("大话西游-电影人物关系图谱");
@@ -16,13 +20,14 @@ public class GraphImporter {
         HashMap<Integer, Vertex> vertexHashMap = new HashMap<>();
         for (NodeInstance nodeInstance : nodeInstanceArrayList) {
             Vertex vertex = new Vertex(nodeInstance.id, nodeInstance.type, nodeInstance.value);
+            //System.out.println(nodeInstance.id + " " + nodeInstance.type + " " + nodeInstance.value);
             vertexArrayList.add(vertex);
             vertexHashMap.put(vertex.getId(), vertex);
+            Neo4jVertexToId.put(vertex, vertex.getId());
         }
 
         // 初始化relation数据，添加edge
         ArrayList<Edge> edgeArrayList = new ArrayList<>();
-        Integer edgeId = 1;
         for (RelationInstance relationInstance : relationInstanceArrayList) {
             Vertex relationVertex = vertexHashMap.get(relationInstance.id);
             if (relationVertex == null) {

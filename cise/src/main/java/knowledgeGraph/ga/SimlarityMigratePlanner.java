@@ -21,13 +21,14 @@ public class SimlarityMigratePlanner implements MigratePlanner {
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy();
         for (HashMap.Entry<MergedVertex, Double> entry : mergedVertexArrayList) {
             System.out.println("Source " + entry.getKey().getVertexSet().size());
-            EdgeType type = EdgeType.OUT;
-//            System.out.println("type " + entry.getKey().getType());
-//            if (entry.getKey().getType().equalsIgnoreCase("entity")) {
-//                type = EdgeType.IN;
-//            }
+            EdgeType type = EdgeType.IN;
+            System.out.println("type " + entry.getKey().getType());
+            if (entry.getKey().getType().equalsIgnoreCase("relation")) {
+                type = EdgeType.OUT;
+            }
             Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, entry.getKey(), type);
             Set<MergedVertex> sameTypeMergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
+            System.out.println("111 " + sameTypeMergedVertexSet.size());
             MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, entry.getKey(), sameTypeMergedVertexSet, vertexSetPair.getValue(), type);
             migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
             break;
@@ -59,8 +60,10 @@ public class SimlarityMigratePlanner implements MigratePlanner {
             }
             vertexDifference.put(mergedVertex, getSimilarity(connectedVertexSet, mergedVertices));
         }
-        double res = Double.MIN_VALUE;
+        System.out.println("GetTarget");
+        double res = -1;
         MergedVertex mostLikeMergedVertex = null;
+        // TODO: 都是0需要处理
         for (MergedVertex mergedVertex : vertexDifference.keySet()) {
             double tmp = vertexDifference.get(mergedVertex);
             if (tmp > res) {
@@ -68,6 +71,7 @@ public class SimlarityMigratePlanner implements MigratePlanner {
                 mostLikeMergedVertex = mergedVertex;
             }
         }
+        System.out.println(mostLikeMergedVertex.getId());
         return mostLikeMergedVertex;
     }
 
@@ -115,6 +119,7 @@ public class SimlarityMigratePlanner implements MigratePlanner {
                 vertexDifference.put(vertex1, vertexDifference.get(vertex1) + similarity);
             }
         }
+        //TODO: 如果不同度都是0需要跳过
         double res = Double.MAX_VALUE;
         Vertex mostDifferentVertex = null;
         for (Vertex vertex : vertexDifference.keySet()) {

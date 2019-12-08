@@ -38,7 +38,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         int unusuals = 0;
         double threshold = 0;
         System.out.println("enter entropy calculate");
-        int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
+        //int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
+        int DLT = 2;
         // 初始化熵
         double finalEntropy = 0.0;
         double maxVertexEntropy = 0.0;
@@ -141,6 +142,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     }
                 }
             }
+            // Question
             mergedVertexEntropy.put(mergedVertex, currentEntropy);
             edgeEntropy += currentEntropy;
             finalEntropy += currentEntropy * edgeNum;

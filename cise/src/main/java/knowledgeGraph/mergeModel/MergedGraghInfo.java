@@ -73,7 +73,9 @@ public class MergedGraghInfo {
     }
 
     public MergedGraghInfo(MergedGraph mergedGraph) {
+        System.out.println(">>>>>> Initialize MergedGraphInfo");
         this.mergedGraph = mergedGraph;
+
         typeToVertexSetMap = new HashMap<>();
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (!typeToVertexSetMap.containsKey(mergedVertex.getType())) {
@@ -85,6 +87,11 @@ public class MergedGraghInfo {
             System.out.println("type: " + type + " " + typeToVertexSetMap.get(type).size());
         }
         edgeToMergedEdgeMap = new HashMap<>();
+        for (MergedEdge mergedEdge : mergedGraph.edgeSet()) {
+            for (Edge edge : mergedEdge.getEdgeSet()) {
+                edgeToMergedEdgeMap.put(edge, mergedEdge);
+            }
+        }
     }
 
     public double getEntropy() {
