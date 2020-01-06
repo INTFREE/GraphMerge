@@ -8,6 +8,14 @@ import java.util.*;
 public class GraphImporter {
     static HashMap<Vertex, Integer> Neo4jVertexToId = new HashMap<>();
     static Integer edgeId = 1;
+    static Set<String> keyNames;
+
+    public GraphImporter() {
+        keyNames = new HashSet<>();
+        keyNames.add("姓名");
+        keyNames.add("片名");
+        keyNames.add("名称");
+    }
 
     public Graph readGraph(Importer importer, String projectName, String userName) {
 //        ArrayList<NodeModel> nodeModelArrayList = importer.getNodeModel("大话西游-电影人物关系图谱");
@@ -67,6 +75,23 @@ public class GraphImporter {
         }
         for (Vertex vertex : graph.vertexSet()) {
             vertex.setGraph(graph);
+        }
+        for (Vertex vertex : vertexSet) {
+            if (vertex.getType().equalsIgnoreCase("entity")) {
+                Vertex relationVertex = null;
+                Set<Edge> edgeHashSet = graph.incomingEdgesOf(vertex);
+                for (Edge edge : edgeHashSet) {
+                    if (edge.getRoleName().isEmpty()) {
+                        relationVertex = edge.getSource();
+                    }
+                }
+                for (Edge edge : graph.outgoingEdgesOf(relationVertex)) {
+                    if (keyNames.contains(edge.getRoleName())) {
+                        vertex.setValue(edge.getTarget().getValue());
+                    }
+                }
+            }
+
         }
         return graph;
     }

@@ -20,6 +20,9 @@ public class SimlarityMigratePlanner implements MigratePlanner {
         // 迁移10%且熵值小于某个阈值
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy();
         for (HashMap.Entry<MergedVertex, Double> entry : mergedVertexArrayList) {
+            if (!entry.getKey().getType().equalsIgnoreCase("entity")) {
+                continue;
+            }
             System.out.println("Source " + entry.getKey().getVertexSet().size());
             EdgeType type = EdgeType.IN;
             System.out.println("type " + entry.getKey().getType());
@@ -28,8 +31,8 @@ public class SimlarityMigratePlanner implements MigratePlanner {
             }
             Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, entry.getKey(), type);
             Set<MergedVertex> sameTypeMergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
-            System.out.println("111 " + sameTypeMergedVertexSet.size());
             MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, entry.getKey(), sameTypeMergedVertexSet, vertexSetPair.getValue(), type);
+            System.out.println("Target " + mutateTarget.getVertexSet().size());
             migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
             break;
         }

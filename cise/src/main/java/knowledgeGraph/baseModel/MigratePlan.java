@@ -1,6 +1,7 @@
 package knowledgeGraph.baseModel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class MigratePlan {
     private ArrayList<Plan> planArrayList;
@@ -19,5 +20,9 @@ public class MigratePlan {
 
     public void addPlan(Plan plan) {
         this.planArrayList.add(plan);
+    }
+
+    public void addPlans(Collection<? extends Plan> plans) {
+        planArrayList.addAll(plans);
     }
 }

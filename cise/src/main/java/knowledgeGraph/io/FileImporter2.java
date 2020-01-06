@@ -117,6 +117,7 @@ public class FileImporter2 {
                     Vaule2Vertex.put(vertexName, value);
                 }
                 value = Vaule2Vertex.get(vertexName);
+                entity.setValue(value.getValue());
                 //处理Relation
                 String tmp = s + "|" + "name" + "|" + o;
                 if (mergeAttr) tmp = s + "|" + "name" + "|";
@@ -137,6 +138,10 @@ public class FileImporter2 {
                 graph.getRelationToVertex().put(relation, new HashSet<>());
                 graph.getRelationToVertex().get(relation).add(entity);
                 graph.getRelationToVertex().get(relation).add(value);
+
+                // set entity value = key_value
+                entity.setValue(value.getValue());
+
                 //init Edge
                 tmp = p + "|name-source|" + s;
                 if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
@@ -174,6 +179,7 @@ public class FileImporter2 {
                 String attr = line.split("\\|")[1];
                 String value = line.split("\\|")[2];
                 //处理实体
+
                 Vertex entity = this.vertexHashMap.get(vertexKey);
                 if (entity == null) {
 
@@ -335,6 +341,7 @@ public class FileImporter2 {
                 graph.addVertex(value); //这样是可以的吧，因为如果已包含会返回false
 
                 entity.setGraph(graph);
+                entity.setValue(value.getValue());
                 value.setGraph(graph);
 
                 //init Edge
@@ -355,7 +362,7 @@ public class FileImporter2 {
     private void readAttr2() {
         InputStream inputStream;
         try {
-            // read vertex file
+            // read attr file
             String vertexFileName = data_path + "attr_" + this.order.toString();
             File vertexFile = new File(vertexFileName);
             inputStream = new FileInputStream(vertexFile);
@@ -386,25 +393,25 @@ public class FileImporter2 {
                 }
                 valueVertex = Vaule2Vertex.get(value);
 
-//                String tmp = s+"|"+attr+"|"+o;
-//                //if (mergeAttr) tmp = s+"|"+attr+"|"; 存在同名属性比较复杂
-//
-//                if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
-//                p = Rel2Id.get(tmp);
-//                Vertex relationVertex = new Vertex(p, "Relation", attr);
+                String tmp = s + "|" + attr + "|" + o;
+                //if (mergeAttr) tmp = s+"|"+attr+"|"; 存在同名属性比较复杂
+
+                if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
+                p = Rel2Id.get(tmp);
+                Vertex relationVertex = new Vertex(p, "Relation", attr);
 
                 graph.addVertex(valueVertex);
-//                graph.addVertex(relationVertex);
+                graph.addVertex(relationVertex);
 
                 valueVertex.setGraph(graph);
-//                relationVertex.setGraph(graph);
+                relationVertex.setGraph(graph);
 
-//                graph.getRelationToVertex().put(relationVertex, new HashSet<>());
-//                graph.getRelationToVertex().get(relationVertex).add(entity);
-//                graph.getRelationToVertex().get(relationVertex).add(valueVertex);
+                graph.getRelationToVertex().put(relationVertex, new HashSet<>());
+                graph.getRelationToVertex().get(relationVertex).add(entity);
+                graph.getRelationToVertex().get(relationVertex).add(valueVertex);
 
                 //init Edge
-                String tmp = s + "|" + attr + "|" + o;
+                tmp = s + "|" + attr + "|" + o;
                 if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge = new Edge(Edge2Id.get(tmp), entity, valueVertex, attr + "-source");
 
@@ -444,20 +451,20 @@ public class FileImporter2 {
                     return;
                 }
 
-//                String tmp = s+"|"+attr+"|"+o;
-//                if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
-//                p = Rel2Id.get(tmp);
-//                Vertex relationVertex = new Vertex(p, "Relation", attr);
-//                graph.addVertex(relationVertex);
+                String tmp = s + "|" + attr + "|" + o;
+                if (Rel2Id.get(tmp) == null) Rel2Id.put(tmp, vertexId++);
+                p = Rel2Id.get(tmp);
+                Vertex relationVertex = new Vertex(p, "Relation", attr);
+                graph.addVertex(relationVertex);
 
-//                relationVertex.setGraph(graph);
+                relationVertex.setGraph(graph);
 
-//                graph.getRelationToVertex().put(relationVertex, new HashSet<>());
-//                graph.getRelationToVertex().get(relationVertex).add(entity1);
-//                graph.getRelationToVertex().get(relationVertex).add(entity2);
+                graph.getRelationToVertex().put(relationVertex, new HashSet<>());
+                graph.getRelationToVertex().get(relationVertex).add(entity1);
+                graph.getRelationToVertex().get(relationVertex).add(entity2);
 
                 //init Edge
-                String tmp = s + "|" + attr + "-source|" + o;
+                tmp = s + "|" + attr + "-source|" + o;
                 if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge1 = new Edge(Edge2Id.get(tmp), entity1, entity2, attr + "-source");
 

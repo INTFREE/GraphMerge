@@ -49,7 +49,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
         HashMap<MergedVertex, Double> mergedVertexEntropy = new HashMap<>();
         for (MergedVertex mergedVertex : mergedVertexSet) {
-
+//            System.out.println(">>>>>> calculate entropy");
+//            System.out.println(">>>>>> vertex type " + mergedVertex.getType());
+//            System.out.println(">>>>>> vertex Id " + mergedVertex.getId());
             if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
             //if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
             if (opt && !calcValue && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
@@ -373,9 +375,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             mergedEdgeSetToReferenceGraphSetMap.get(mergedEdges).add(graph);
 
         }
-        //int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
+        // int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
         int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
-
+        // For test
+        // int graphNum = 2;
         /*
          * 下面是计算熵的数学部分
          * 公式是SUM(x in allEdgeSet, p(x) * log(SUM(y_in_allEdgeSet, p(y) * s(x,y))))

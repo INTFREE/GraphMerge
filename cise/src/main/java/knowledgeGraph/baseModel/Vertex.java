@@ -5,7 +5,7 @@ import knowledgeGraph.mergeModel.MergedVertex;
 public class Vertex {
     private Integer id;
     private String type;   // type分为entity, value, relation
-    private String value;
+    private String value;  // value节点的value属性即为值，entity节点为核心属性值节点的值
     private Integer modelId;
     private Graph graph;
     private MergedVertex mergedVertex;

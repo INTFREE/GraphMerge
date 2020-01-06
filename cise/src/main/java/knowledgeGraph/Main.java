@@ -27,8 +27,8 @@ public class Main {
     public static void main(String argv[]) {
         Importer importer = new Importer();
         ArrayList<String> userNameList = new ArrayList<>();
-        userNameList.add("user1@mail");
-        userNameList.add("user2@mail");
+        userNameList.add("jiangy@pku.edu.cn");
+        userNameList.add("weiyh@pku.edu.cn");
         GraphImporter graphImporter = new GraphImporter();
         ArrayList<Graph> graphArrayList = new ArrayList<>();
         for (String userName : userNameList) {
@@ -38,11 +38,16 @@ public class Main {
             System.out.println("Vertex size " + graph.vertexSet().size());
             System.out.println("Edge size " + graph.edgeSet().size());
             graphArrayList.add(graph);
+            for (Vertex vertex : graph.vertexSet()) {
+                if (vertex.getType().equalsIgnoreCase("entity")) {
+                    System.out.println(vertex.getValue());
+                }
+            }
         }
         importer.finishImport();
 
         MergedGraph mergedGraph = new MergedGraph();
-        initMergedGraph(mergedGraph, graphArrayList);
+        initMergedGraph2(mergedGraph, graphArrayList);
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(mergedGraph);
 
         System.out.println(">>>>>> entropy info");
@@ -50,15 +55,14 @@ public class Main {
         System.out.println(calculator.calculateEntropy(mergedGraghInfo));
         System.out.println(mergedGraghInfo.getMergedVertexToEntropy().size());
         for (Map.Entry<MergedVertex, Double> entry : mergedGraghInfo.getMergedVertexToEntropy()) {
-            System.out.println(entry.getValue());
-            System.out.println(entry.getKey().getType());
+            System.out.println(entry.getValue() + " " + entry.getKey().getId() + " " + entry.getKey().getType());
         }
 
         System.out.println(">>>>>> Planner Info");
         SimlarityMigratePlanner planner = new SimlarityMigratePlanner();
         MigratePlan migratePlan = planner.getVertexMigratePlan(mergedGraghInfo);
         for (Plan plan : migratePlan.getPlanArrayList()) {
-            System.out.println(plan.getVertex().getId());
+            System.out.println(plan.getVertex().getValue());
             System.out.println(plan.getSource().getType());
             System.out.println(plan.getTarget().getType());
         }
@@ -90,6 +94,45 @@ public class Main {
                     mergedGraph.addVertex(mergedVertex);
                     vertexToMergedVertex.put(vertex, mergedVertex);
                 }
+            }
+            for (Edge edge : graph.edgeSet()) {
+                Vertex source = edge.getSource();
+                Vertex target = edge.getTarget();
+                MergedVertex mergedSource = vertexToMergedVertex.get(source);
+                MergedVertex mergedTarget = vertexToMergedVertex.get(target);
+
+                if (mergedGraph.containsEdge(mergedSource, mergedTarget)) {
+                    mergedGraph.getEdge(mergedSource, mergedTarget).addEdge(edge);
+                } else {
+                    MergedEdge mergedEdge = new MergedEdge(mergedSource, mergedTarget, edge.getRoleName());
+                    mergedEdge.addEdge(edge);
+                    mergedGraph.addEdge(mergedSource, mergedTarget, mergedEdge);
+                }
+            }
+        }
+        System.out.println(">>>>>> Initialize Merged Graph");
+        System.out.println("Vertex size " + mergedGraph.vertexSet().size());
+        System.out.println("Edge size " + mergedGraph.edgeSet().size());
+
+    }
+
+    public static void initMergedGraph2(MergedGraph mergedGraph, ArrayList<Graph> graphArrayList) {
+        HashMap<Integer, MergedVertex> idToMergedVertex = new HashMap<>();
+        HashMap<Vertex, MergedVertex> vertexToMergedVertex = new HashMap<>();
+        for (Graph graph : graphArrayList) {
+            for (Vertex vertex : graph.vertexSet()) {
+                if (idToMergedVertex.containsKey(vertex.getId())) {
+                    idToMergedVertex.get(vertex.getId()).addVertex(vertex);
+                    vertexToMergedVertex.put(vertex, idToMergedVertex.get(vertex.getId()));
+                } else {
+                    HashSet<Vertex> vertices = new HashSet<>();
+                    vertices.add(vertex);
+                    MergedVertex mergedVertex = new MergedVertex(vertices, vertex.getType(), vertex.getValue());
+                    mergedGraph.addVertex(mergedVertex);
+                    idToMergedVertex.put(vertex.getId(), mergedVertex);
+                    vertexToMergedVertex.put(vertex, mergedVertex);
+                }
+
             }
             for (Edge edge : graph.edgeSet()) {
                 Vertex source = edge.getSource();

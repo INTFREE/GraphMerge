@@ -1,5 +1,5 @@
-tha_carter_ii|attr10|"3000000.0"^^<http://dbpedia.org/datatype/canadianDollar>
-tha_carter_ii|attr10|"2465000.0"^^<http://dbpedia.org/datatype/usDollar>
+Tha_Carter_II|attr10|"3000000.0"^^<http://dbpedia.org/datatype/canadianDollar>
+Tha_Carter_II|attr10|"2465000.0"^^<http://dbpedia.org/datatype/usDollar>
 The_Witman_Boys|attr10|"3.0E7"^^<http://dbpedia.org/datatype/usDollar>
 The_Witman_Boys|attr16|"352000.0"^^<http://www.w3.org/2001/XMLSchema#double>
 Prince_Aymeric_of_Belgium|attr20|"Somalian"@en

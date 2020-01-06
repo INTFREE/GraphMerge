@@ -60,45 +60,6 @@ public class Main2 {
             break;
         }
         return;
-//        int data_size = 100000; // 数据集大小
-//        boolean mergeAttr = true; // 是否对Entity的Name进行了
-//        boolean withOutRelation = false; // 图中是否包含relation节点
-//        boolean opt = true; // 简化运算
-//        boolean calcValue = true; // 是否计算Value节点的入熵
-//        boolean detailed = true; // 是否对细分信息进行统计
-//
-//        long startTime, endTime;
-//
-//        for (Integer i = 1; i <= 3; i++) {
-//            FileImporter2 importer = new FileImporter2(data_size, mergeAttr, withOutRelation);
-//            Graph graph1 = importer.readGraph(1, i);
-//            Graph graph2 = importer.readGraph(2, i);
-//
-//            System.out.println("read finished");
-//
-//            ArrayList<Graph> graphArrayList = new ArrayList<>();
-//            graphArrayList.add(graph1);
-//            graphArrayList.add(graph2);
-//
-//            HashSet<Graph> graphHashSet = new HashSet<>();
-//            graphHashSet.add(graph1);
-//            graphHashSet.add(graph2);
-//            startTime = System.currentTimeMillis();
-//            GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
-//            MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo);
-//            mergedGraghInfo.generateMergeGraphByMatch2();
-//            endTime = System.currentTimeMillis();
-//            System.out.println("merge time:" + (endTime - startTime));
-//
-//            startTime = System.currentTimeMillis();
-//            BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
-//            double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-//            endTime = System.currentTimeMillis();
-//            System.out.println("entropy calculating time:" + (endTime - startTime));
-//
-//            System.out.println("==================" + i + "==================");
-//            System.out.println(etr);
-//        }
     }
 
 
