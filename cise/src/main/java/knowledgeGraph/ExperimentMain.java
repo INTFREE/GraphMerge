@@ -16,7 +16,7 @@ import java.util.HashSet;
 
 public class ExperimentMain {
     public static void main(String argv[]) throws IOException {
-        int data_size = 5; // 数据集大小
+        int data_size = 1000; // 数据集大小
         boolean mergeAttr = true; // 是否对Entity的Name进行了
         boolean withOutRelation = false; // 图中是否包含relation节点
         boolean opt = true; // 简化运算
@@ -31,7 +31,8 @@ public class ExperimentMain {
         Graph graph2 = importer.readGraph(2, 1);
 
         System.out.println("read finished");
-
+        graph1.print();
+        graph2.print();
         ArrayList<Graph> graphArrayList = new ArrayList<>();
         graphArrayList.add(graph1);
         graphArrayList.add(graph2);
@@ -39,8 +40,6 @@ public class ExperimentMain {
         HashSet<Graph> graphHashSet = new HashSet<>();
         graphHashSet.add(graph1);
         graphHashSet.add(graph2);
-        PrintGraph(graph1);
-        PrintGraph(graph2);
 
         startTime = System.currentTimeMillis();
         GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
@@ -65,22 +64,5 @@ public class ExperimentMain {
         planExecutor.ExecutePlan(migratePlan);
         etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
         System.out.println("entropy : " + etr);
-    }
-
-    public static void PrintGraph(Graph graph) {
-        System.out.println(">>>>>> Graph Info");
-        System.out.println(graph.getUserName());
-        System.out.println("Vertex size " + graph.vertexSet().size());
-        System.out.println("Edge size " + graph.edgeSet().size());
-        HashMap<String, HashSet<Vertex>> typeToVertex = new HashMap<>();
-        for (Vertex vertex : graph.vertexSet()) {
-            if (!typeToVertex.containsKey(vertex.getType())) {
-                typeToVertex.put(vertex.getType(), new HashSet<>());
-            }
-            typeToVertex.get(vertex.getType()).add(vertex);
-        }
-        for (String type : typeToVertex.keySet()) {
-            System.out.println(type + " size : " + typeToVertex.get(type).size());
-        }
     }
 }

@@ -27,4 +27,21 @@ public class Graph extends DefaultDirectedGraph<Vertex, Edge> {
         this.relationToVertex = relationToVertex;
     }
 
+    public void print() {
+        System.out.println(">>>>>> Graph Info");
+        System.out.println(this.getUserName());
+        System.out.println("Vertex size " + this.vertexSet().size());
+        System.out.println("Edge size " + this.edgeSet().size());
+        HashMap<String, HashSet<Vertex>> typeToVertex = new HashMap<>();
+        for (Vertex vertex : this.vertexSet()) {
+            if (!typeToVertex.containsKey(vertex.getType())) {
+                typeToVertex.put(vertex.getType(), new HashSet<>());
+            }
+            typeToVertex.get(vertex.getType()).add(vertex);
+        }
+        for (String type : typeToVertex.keySet()) {
+            System.out.println(type + " size : " + typeToVertex.get(type).size());
+        }
+    }
+
 }

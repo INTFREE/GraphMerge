@@ -130,10 +130,13 @@ public class FileImporter2 {
                 graph.addVertex(entity);
                 graph.addVertex(value); //这样是可以的吧，因为如果已包含会返回false
                 graph.addVertex(relation);
+                relation.addRelatedVertex(entity);
+                relation.addRelatedVertex(value);
 
                 entity.setGraph(graph);
                 value.setGraph(graph);
                 relation.setGraph(graph);
+
 
                 graph.getRelationToVertex().put(relation, new HashSet<>());
                 graph.getRelationToVertex().get(relation).add(entity);
@@ -207,6 +210,8 @@ public class FileImporter2 {
 
                 graph.addVertex(valueVertex);
                 graph.addVertex(relationVertex);
+                relationVertex.addRelatedVertex(entity);
+                relationVertex.addRelatedVertex(valueVertex);
 
                 valueVertex.setGraph(graph);
                 relationVertex.setGraph(graph);
@@ -269,6 +274,8 @@ public class FileImporter2 {
                 Vertex relationVertex = new Vertex(p, "Relation", attr);
                 graph.addVertex(relationVertex);
 
+                relationVertex.addRelatedVertex(entity1);
+                relationVertex.addRelatedVertex(entity2);
                 relationVertex.setGraph(graph);
 
                 graph.getRelationToVertex().put(relationVertex, new HashSet<>());

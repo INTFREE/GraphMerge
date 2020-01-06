@@ -2,6 +2,9 @@ package knowledgeGraph.baseModel;
 
 import knowledgeGraph.mergeModel.MergedVertex;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Vertex {
     private Integer id;
     private String type;   // type分为entity, value, relation
@@ -9,6 +12,7 @@ public class Vertex {
     private Integer modelId;
     private Graph graph;
     private MergedVertex mergedVertex;
+    private HashSet<Vertex> relatedVertex;
 
     public Vertex(Integer id, String type, String value) {
         this.id = id;
@@ -17,6 +21,7 @@ public class Vertex {
         this.modelId = -1;
         this.graph = null;
         this.mergedVertex = null;
+        this.relatedVertex = new HashSet<>();
     }
 
     public Vertex(Integer id, String type) {
@@ -25,11 +30,12 @@ public class Vertex {
         this.value = "";
         this.modelId = -1;
         this.graph = null;
+        this.relatedVertex = new HashSet<>();
     }
 
     @Override
     public String toString() {
-        return "graph" + this.graph.getUserName() + " " +  this.id.toString() + " " + this.type + " " + this.value + " " + this.modelId.toString();
+        return "graph" + this.graph.getUserName() + " " + this.id.toString() + " " + this.type + " " + this.value + " " + this.modelId.toString();
     }
 
     public void setGraph(Graph graph) {
@@ -79,6 +85,14 @@ public class Vertex {
 
     public MergedVertex getMergedVertex() {
         return mergedVertex;
+    }
+
+    public void addRelatedVertex(Vertex vertex) {
+        this.relatedVertex.add(vertex);
+    }
+
+    public HashSet<Vertex> getRelatedVertex() {
+        return this.relatedVertex;
     }
 }
 

@@ -375,7 +375,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             mergedEdgeSetToReferenceGraphSetMap.get(mergedEdges).add(graph);
 
         }
-        // int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
+        //int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
         int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
         // For test
         // int graphNum = 2;

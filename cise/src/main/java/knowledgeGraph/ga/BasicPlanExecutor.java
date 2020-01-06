@@ -21,12 +21,14 @@ public class BasicPlanExecutor implements PlanExecutor {
             Vertex vertex = plan.getVertex();
             MergedVertex source = plan.getSource();
             MergedVertex target = plan.getTarget();
-            System.out.println("migrate vertex " + vertex.getValue());
+
             if (checkSameGraph(vertex, target)) {
                 continue;
             }
+
             MigratePlan relationMigratePlan = doExecutePlan(vertex, source, target);
             for (Plan relationPlan : relationMigratePlan.getPlanArrayList()) {
+
                 Vertex relationVertex = relationPlan.getVertex();
                 MergedVertex relationSource = relationPlan.getSource();
                 MergedVertex relationTarget = relationPlan.getTarget();
@@ -36,9 +38,9 @@ public class BasicPlanExecutor implements PlanExecutor {
                 doExecutePlan(relationVertex, relationSource, relationTarget);
             }
 
-            this.cleanGraph();
-            break;
         }
+        this.cleanGraph();
+        mergedGraghInfo.getMergedGraph().toString();
 
     }
 
@@ -63,7 +65,7 @@ public class BasicPlanExecutor implements PlanExecutor {
         Set<MergedEdge> relatedMergedEdges = new HashSet<>();
         relatedMergedEdges.addAll(mergedGraph.incomingEdgesOf(source));
         relatedMergedEdges.addAll(mergedGraph.outgoingEdgesOf(source));
-        System.out.println(relatedMergedEdges.size());
+
         // 记录所有和迁移节点有关系的边
         Set<Pair<Vertex, Edge>> relatedVertexAndEdge = new HashSet<>();
         String type = "";
@@ -83,9 +85,7 @@ public class BasicPlanExecutor implements PlanExecutor {
                 }
             }
         }
-        source.removeVertex(vertex);
-        // 迁移到新的节点
-        target.addVertex(vertex);
+
         // 产生融合边
 
         // 如果是实体节点，需要迁移对应的relation节点
@@ -99,10 +99,10 @@ public class BasicPlanExecutor implements PlanExecutor {
         for (Pair<Vertex, Edge> entry : relatedVertexAndEdge) {
             MergedVertex relateMergedVertex = entry.getKey().getMergedVertex();
             Edge relatedEdge = entry.getValue();
-            // 对于entity节点，如果在初始融合图中，就存在和相同roleName的边，那需要将relation节点也迁移过来
+            // 对于entity节点，如果在初始融合图中，就存在和相同roleName的边，且relation 迁移前后相连节点不变，那需要将relation节点也迁移过来
             if (isEntity) {
                 for (MergedEdge mergedEdge : targetRelatedMergedEdges) {
-                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName())) {
+                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName()) && checkContext(relatedEdge.getSource(), mergedEdge.getSource(), source, target)) {
                         relationMigratePlan.addPlan(new Plan(relatedEdge.getSource(), relatedEdge.getSource().getMergedVertex(), mergedEdge.getSource()));
                     }
                 }
@@ -112,23 +112,25 @@ public class BasicPlanExecutor implements PlanExecutor {
                 if (mergedEdge == null) {
                     mergedEdge = new MergedEdge(relateMergedVertex, target, entry.getValue().getRoleName());
                     mergedGraph.addEdge(relateMergedVertex, target, mergedEdge);
-                } else {
-                    mergedEdge.addEdge(entry.getValue());
                 }
+                mergedEdge.addEdge(entry.getValue());
             } else if (type.equalsIgnoreCase("OUT")) {
                 MergedEdge mergedEdge = mergedGraph.getEdge(target, relateMergedVertex);
                 if (mergedEdge == null) {
                     mergedEdge = new MergedEdge(target, relateMergedVertex, entry.getValue().getRoleName());
                     mergedGraph.addEdge(target, relateMergedVertex, mergedEdge);
-                } else {
-                    mergedEdge.addEdge(entry.getValue());
                 }
+                mergedEdge.addEdge(entry.getValue());
             } else {
                 System.out.println("DoExecutionPlan Error: type has no value.");
             }
 
 
         }
+        source.removeVertex(vertex);
+        // 迁移到新的节点
+        target.addVertex(vertex);
+        vertex.setMergedVertex(target);
         return relationMigratePlan;
 
     }
@@ -154,5 +156,29 @@ public class BasicPlanExecutor implements PlanExecutor {
         }
 
         mergedGraph.removeAllVertices(removedVertex);
+    }
+
+    private boolean checkContext(Vertex relationVertex, MergedVertex targetRelationMergedVertex, MergedVertex migrateSourceVertex, MergedVertex migrateTargetVertex) {
+        HashSet<Vertex> relatedVertexSet = relationVertex.getRelatedVertex();
+        HashSet<Integer> relatedMergedVertexSet = new HashSet<>();
+        for (Vertex vertex : relatedVertexSet) {
+            relatedMergedVertexSet.add(vertex.getMergedVertex().getId());
+        }
+        if (!relatedMergedVertexSet.contains(migrateSourceVertex.getId())) {
+            System.out.println("Execute Plan ERROR: source not in related Set");
+            return false;
+        }
+        relatedMergedVertexSet.remove(migrateSourceVertex.getId());
+        HashSet<Integer> targetMergedVertexSet = new HashSet<>();
+        Set<MergedEdge> connectedEdges = this.mergedGraghInfo.getMergedGraph().outgoingEdgesOf(targetRelationMergedVertex);
+        for (MergedEdge mergedEdge : connectedEdges) {
+            targetMergedVertexSet.add(mergedEdge.getTarget().getId());
+        }
+        if (!targetMergedVertexSet.contains(migrateTargetVertex.getId())) {
+            System.out.println("Execute Plan ERROR: target not in related Set");
+            return false;
+        }
+        targetMergedVertexSet.remove(migrateTargetVertex.getId());
+        return targetMergedVertexSet.containsAll(relatedMergedVertexSet) && relatedMergedVertexSet.containsAll(targetMergedVertexSet);
     }
 }
