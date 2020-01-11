@@ -11,11 +11,17 @@ import knowledgeGraph.mergeModel.*;
 import java.util.*;
 
 public class SimlarityMigratePlanner implements MigratePlanner {
+    private MergedGraghInfo mergedGraghInfo;
+
+    public SimlarityMigratePlanner(MergedGraghInfo mergedGraghInfo) {
+        this.mergedGraghInfo = mergedGraghInfo;
+    }
+
     @Override
-    public MigratePlan getVertexMigratePlan(MergedGraghInfo mergedGraghInfo) {
+    public MigratePlan getVertexMigratePlan() {
         System.out.println(">>>>>>> get Migrate Plan");
         MigratePlan migratePlan = new MigratePlan();
-        MergedGraph mergedGraph = mergedGraghInfo.getMergedGraph();
+        MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
         // 计算相似度
         // 迁移10%且熵值小于某个阈值
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy();

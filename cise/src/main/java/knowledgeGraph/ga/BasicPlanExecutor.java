@@ -16,7 +16,7 @@ public class BasicPlanExecutor implements PlanExecutor {
 
     @Override
     public void ExecutePlan(MigratePlan migratePlan) {
-        System.out.println(">>>>> execute plan: ");
+//        System.out.println(">>>>> execute plan: ");
         for (Plan plan : migratePlan.getPlanArrayList()) {
             Vertex vertex = plan.getVertex();
             MergedVertex source = plan.getSource();
@@ -28,7 +28,6 @@ public class BasicPlanExecutor implements PlanExecutor {
 
             MigratePlan relationMigratePlan = doExecutePlan(vertex, source, target);
             for (Plan relationPlan : relationMigratePlan.getPlanArrayList()) {
-
                 Vertex relationVertex = relationPlan.getVertex();
                 MergedVertex relationSource = relationPlan.getSource();
                 MergedVertex relationTarget = relationPlan.getTarget();

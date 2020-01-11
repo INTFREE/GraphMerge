@@ -3,59 +3,22 @@ package knowledgeGraph.ga;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
+import knowledgeGraph.wordSim.WordEmbedding;
 import knowledgeGraph.wordSim.WordSimilarityForCh;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import com.hankcs.hanlp.dictionary.CoreSynonymDictionary;
 
 public class VertexSimilarity {
     public static double calcSimilarity(Vertex v1, Vertex v2) {
-        Graph graph1 = v1.getGraph();
-        String value1 = null;
-        for (Edge edge : graph1.edgeSet()) {
-            if (edge.getTarget().equals(v1)) {
-                Vertex relationVertex = edge.getSource();
-                boolean flag = false;
-                for (Edge edge1 : graph1.edgeSet()) {
-                    if (edge1.getSource().equals(relationVertex) && edge1.getTarget().getType().equals("Value")) {
-                        value1 = edge1.getTarget().getValue();
-                        flag = true;
-                        break;
-                    }
-                }
-                if (flag) {
-                    break;
-                }
-            }
-        }
-        Graph graph2 = v2.getGraph();
-        String value2 = null;
-        for (Edge edge : graph2.edgeSet()) {
-            if (edge.getTarget().equals(v2)) {
-                Vertex relationVertex = edge.getSource();
-                boolean flag = false;
-                for (Edge edge1 : graph2.edgeSet()) {
-                    if (edge1.getSource().equals(relationVertex) && edge1.getTarget().getType().equals("Value")) {
-                        value2 = edge1.getTarget().getValue();
-                        flag = true;
-                        break;
-                    }
-                }
-                if (flag) {
-                    break;
-                }
-            }
-        }
-        if (value1 == null || value2 == null) {
-            System.out.println("value error");
-            return 0.0;
-        }
 //        double wordSimilarity = WordSimilarityForCh.simWord(value1, value2);
 //        if (Double.doubleToLongBits(wordSimilarity) == Double.doubleToLongBits(0)) {
 //            wordSimilarity = VertexSimilarity.getEditDistance(value1, value2);
 //        }
-        double wordSimilarity = CoreSynonymDictionary.similarity(value1, value2);
-        System.out.println(value1 + " " + value2 + " " + wordSimilarity);
+        double wordSimilarity = getEditDistance(v1.getValue(), v2.getValue());
         return wordSimilarity;
+//        wordSimilarity = CoreSynonymDictionary.similarity(v1.getValue(), v2.getValue());
+//        System.out.println(v1.getValue() + " " + v2.getValue() + " " + wordSimilarity);
+//        return wordSimilarity;
     }
 
     public static double getEditDistance(String A, String B) {

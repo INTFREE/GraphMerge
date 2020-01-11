@@ -25,4 +25,12 @@ public class Plan {
     public MergedVertex getTarget() {
         return target;
     }
+
+    @Override
+    public String toString() {
+        System.out.println(">>>>>>> plan info:");
+        System.out.println("migrate vertex id: " + vertex.getId() + " value: " + vertex.getValue());
+        System.out.println("migrate source: " + source.getId() + " target: " + vertex.getValue());
+        return "";
+    }
 }

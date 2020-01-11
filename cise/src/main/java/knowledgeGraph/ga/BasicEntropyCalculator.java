@@ -120,14 +120,14 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 }
                 currentEntropy += tmpEntropy;
             }
-            // 设置二部图相关参数
-            if (mergedGraphInfo.isBiGraph()) {
-                Bigraph biGraph = mergedGraphInfo.getBiGraph();
-                List<Vertex> vertexList = new ArrayList<>(mergedVertex.getVertexSet());
-                biGraph.addVertex(vertexList.get(0));
-                biGraph.addVertex(vertexList.get(1));
-                biGraph.setEdgeWeight(biGraph.addEdge(vertexList.get(0), vertexList.get(1)), currentEntropy);
-            }
+//            // 设置二部图相关参数
+//            if (mergedGraphInfo.isBiGraph()) {
+//                Bigraph biGraph = mergedGraphInfo.getBiGraph();
+//                List<Vertex> vertexList = new ArrayList<>(mergedVertex.getVertexSet());
+//                biGraph.addVertex(vertexList.get(0));
+//                biGraph.addVertex(vertexList.get(1));
+//                biGraph.setEdgeWeight(biGraph.addEdge(vertexList.get(0), vertexList.get(1)), currentEntropy);
+//            }
 
             if (currentEntropy > threshold) {
 //                unusuals++;

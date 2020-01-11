@@ -55,7 +55,6 @@ public class MergedGraghInfo {
         this.graphsInfo = graphsInfo;
         this.mergedGraph = new MergedGraph();
         typeToVertexSetMap = new HashMap<>();
-
         vertexToMergedVertexMap = new HashMap<>();
         edgeToMergedEdgeMap = new HashMap<>();
         mergedVertexToEntropy = new ArrayList<>();

@@ -1,38 +1,43 @@
 package knowledgeGraph.ga;
 
 import com.sun.scenario.effect.Merge;
-import knowledgeGraph.baseModel.MigratePlan;
-import knowledgeGraph.baseModel.Plan;
-import knowledgeGraph.baseModel.Vertex;
+import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.MergedGraghInfo;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
 import knowledgeGraph.mergeModel.MigratePlanner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class MergeMigratePlanner implements MigratePlanner {
+    private MergedGraghInfo mergedGraghInfo;
+
+    public MergeMigratePlanner(MergedGraghInfo mergedGraghInfo) {
+        this.mergedGraghInfo = mergedGraghInfo;
+    }
+
     @Override
-    public MigratePlan getVertexMigratePlan(MergedGraghInfo mergedGraghInfo) {
-        MergedGraph mergedGraph = mergedGraghInfo.getMergedGraph();
+    public MigratePlan getVertexMigratePlan() {
+        MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
         // 寻找只有一个节点的融合节点
-        HashMap<String, HashSet<MergedVertex>> oneVertexMergedVertexMap = new HashMap<>();
+        HashMap<String, HashSet<MergedVertex>> oneVerteValuexMergedVertexMap = new HashMap<>();
+
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (mergedVertex.getVertexSet().size() == 1 && mergedVertex.getType().equalsIgnoreCase("entity")) {
                 Vertex vertex = mergedVertex.getVertexSet().iterator().next();
-                if (!oneVertexMergedVertexMap.containsKey(vertex.getValue())) {
-                    oneVertexMergedVertexMap.put(vertex.getValue(), new HashSet<>());
+                if (!oneVerteValuexMergedVertexMap.containsKey(vertex.getValue())) {
+                    oneVerteValuexMergedVertexMap.put(vertex.getValue(), new HashSet<>());
                 }
-                oneVertexMergedVertexMap.get(vertex.getValue()).add(mergedVertex);
+                oneVerteValuexMergedVertexMap.get(vertex.getValue()).add(mergedVertex);
             }
         }
+        if (this.mergedGraghInfo.isBiGraph()){
+
+        }
         MigratePlan migratePlan = new MigratePlan();
-        for (String value : oneVertexMergedVertexMap.keySet()) {
-            if (oneVertexMergedVertexMap.get(value).size() > 1) {
-                migratePlan.addPlans(generatePlans(oneVertexMergedVertexMap.get(value)));
+        for (String value : oneVerteValuexMergedVertexMap.keySet()) {
+            if (oneVerteValuexMergedVertexMap.get(value).size() > 1) {
+                migratePlan.addPlans(generatePlans(oneVerteValuexMergedVertexMap.get(value)));
             }
         }
 

@@ -59,8 +59,8 @@ public class Main {
         }
 
         System.out.println(">>>>>> Planner Info");
-        SimlarityMigratePlanner planner = new SimlarityMigratePlanner();
-        MigratePlan migratePlan = planner.getVertexMigratePlan(mergedGraghInfo);
+        SimlarityMigratePlanner planner = new SimlarityMigratePlanner(mergedGraghInfo);
+        MigratePlan migratePlan = planner.getVertexMigratePlan();
         for (Plan plan : migratePlan.getPlanArrayList()) {
             System.out.println(plan.getVertex().getValue());
             System.out.println(plan.getSource().getType());

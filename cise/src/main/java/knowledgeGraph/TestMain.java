@@ -31,8 +31,8 @@ public class TestMain {
         }
 
         mergedGraghInfo.setMergedVertexToEntropy(mergedVertexHashMap);
-        SimlarityMigratePlanner planner = new SimlarityMigratePlanner();
-        MigratePlan migratePlan = planner.getVertexMigratePlan(mergedGraghInfo);
+        SimlarityMigratePlanner planner = new SimlarityMigratePlanner(mergedGraghInfo);
+        MigratePlan migratePlan = planner.getVertexMigratePlan();
         System.out.println(">>>>>plan list");
         for (Plan plan : migratePlan.getPlanArrayList()) {
             System.out.println(plan.getVertex());
