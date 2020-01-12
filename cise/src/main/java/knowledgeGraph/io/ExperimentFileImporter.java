@@ -70,6 +70,9 @@ public class ExperimentFileImporter {
                 if (strings.size() == 2) {
                     vertexName = strings.get(1);
                 }
+                if (vertexName.length() > ExperimentMain.max_lenth) {
+                    ExperimentMain.max_lenth = vertexName.length();
+                }
                 //处理Entity, 经确认数据集中没有同名节点
                 if (this.Entity2Id.containsKey(vertexKey)) {
                     System.out.println("Vertex exists");
@@ -158,6 +161,9 @@ public class ExperimentFileImporter {
                 String vertexKey = strings.get(0);
                 String attr = strings.get(1);
                 String value = strings.get(2);
+                if (value.length() > ExperimentMain.max_lenth) {
+                    ExperimentMain.max_lenth = value.length();
+                }
                 //处理实体
                 Vertex entity = this.vertexHashMap.get(vertexKey);
                 if (entity == null) {

@@ -16,6 +16,7 @@ import java.util.HashSet;
 
 public class ExperimentMain {
     public static HashMap<Integer, Integer> ans;
+    public static int max_lenth = 0;
 
     public static void main(String argv[]) throws IOException {
         ans = new HashMap<>();
@@ -29,12 +30,10 @@ public class ExperimentMain {
 
         ExperimentFileImporter fileImporter = new ExperimentFileImporter();
 
-        //FileImporter2 fileImporter = new FileImporter2(data_size, mergeAttr, withOutRelation);
+//        FileImporter2 fileImporter = new FileImporter2(data_size, mergeAttr, withOutRelation);
         Graph graph1 = fileImporter.readGraph(1);
         Graph graph2 = fileImporter.readGraph(2);
         fileImporter.readAns();
-//
-        System.out.println("read finished");
         graph1.print();
         graph2.print();
         ArrayList<Graph> graphArrayList = new ArrayList<>();

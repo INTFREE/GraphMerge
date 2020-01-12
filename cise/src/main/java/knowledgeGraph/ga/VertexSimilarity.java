@@ -9,6 +9,8 @@ import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import com.hankcs.hanlp.dictionary.CoreSynonymDictionary;
 
 public class VertexSimilarity {
+    public static int[][] dp = new int[1500][1500];
+
     public static double calcSimilarity(Vertex v1, Vertex v2) {
 //        double wordSimilarity = WordSimilarityForCh.simWord(value1, value2);
 //        if (Double.doubleToLongBits(wordSimilarity) == Double.doubleToLongBits(0)) {
@@ -26,7 +28,7 @@ public class VertexSimilarity {
             return 0.0;
         }
         //dp[i][j]表示源串A位置i到目标串B位置j处最低需要操作的次数
-        int[][] dp = new int[A.length() + 1][B.length() + 1];
+        dp[0][0] = 0;
         for (int i = 1; i <= A.length(); i++)
             dp[i][0] = i;
         for (int j = 1; j <= B.length(); j++)
