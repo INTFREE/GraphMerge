@@ -1,5 +1,6 @@
 package knowledgeGraph.io;
 
+import knowledgeGraph.ExperimentMain;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
@@ -510,5 +511,37 @@ public class FileImporter2 {
         return Entity2Id;
     }
 
+    public void readAns(int dataSize) {
+        try {
+            // read vertex file
+            String vertexFileName = System.getProperty("user.dir") + "/src/entropy_calc/data_" + dataSize + "/" + "entity_";
+            File vertexFile1 = new File(vertexFileName + "1");
+            File vertexFile2 = new File(vertexFileName + "2");
+
+            InputStream inputStream1 = new FileInputStream(vertexFile1);
+            Reader reader1 = new InputStreamReader(inputStream1);
+            BufferedReader bufferedReader1 = new BufferedReader(reader1);
+            String line1;
+
+            InputStream inputStream2 = new FileInputStream(vertexFile2);
+            Reader reader2 = new InputStreamReader(inputStream2);
+            BufferedReader bufferedReader2 = new BufferedReader(reader2);
+            String line2;
+            while ((line1 = bufferedReader1.readLine()) != null) {
+                line2 = bufferedReader2.readLine();
+                String vertexName1 = line1.split("\\|")[0];
+                String vertexName2 = line2.split("\\|")[0];
+
+                if (vertexName1.equalsIgnoreCase("__null__")) {
+                    vertexName1 = "";
+                }
+                ExperimentMain.ans.put(Entity2Id.get(vertexName1), Entity2Id.get(vertexName2));
+            }
+            bufferedReader1.close();
+            bufferedReader2.close();
+        } catch (Exception e) {
+            System.out.println("read file error" + e.toString());
+        }
+    }
 
 }

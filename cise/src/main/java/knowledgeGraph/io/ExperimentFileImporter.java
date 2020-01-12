@@ -1,5 +1,6 @@
 package knowledgeGraph.io;
 
+import knowledgeGraph.ExperimentMain;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
@@ -281,5 +282,30 @@ public class ExperimentFileImporter {
         }
     }
 
+    public void readAns() {
+        try {
+            // read vertex file
+            String vertexFileName = data_path + "ent_links";
+            File vertexFile1 = new File(vertexFileName);
+
+            InputStream inputStream1 = new FileInputStream(vertexFile1);
+            Reader reader1 = new InputStreamReader(inputStream1);
+            BufferedReader bufferedReader1 = new BufferedReader(reader1);
+            String line1;
+
+            while ((line1 = bufferedReader1.readLine()) != null) {
+                String vertexName1 = line1.split("\t")[0];
+                String vertexName2 = line1.split("\t")[1];
+                if (!Entity2Id.containsKey(vertexName1) || !Entity2Id.containsKey(vertexName2)) {
+                    System.out.println("read ans error");
+                }
+                ExperimentMain.ans.put(Entity2Id.get(vertexName1), Entity2Id.get(vertexName2));
+            }
+            System.out.println("finish ans read. size is : " + ExperimentMain.ans.size());
+            bufferedReader1.close();
+        } catch (Exception e) {
+            System.out.println("read file error" + e.toString());
+        }
+    }
 
 }
