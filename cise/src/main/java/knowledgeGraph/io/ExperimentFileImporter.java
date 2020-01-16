@@ -22,6 +22,10 @@ public class ExperimentFileImporter {
     HashMap<String, Integer> Rel2Id;
     HashMap<String, Integer> Edge2Id;
     HashMap<String, Vertex> Vaule2Vertex;
+    List<String> allWords;
+    String regex = "^[(,!:]+";
+    String regexEnd = "[),!:]+$";
+
 
     public ExperimentFileImporter() {
         this.vertexHashMap = new HashMap<>();
@@ -35,6 +39,7 @@ public class ExperimentFileImporter {
         this.order = order;
         this.graph = new Graph(order.toString());
         this.Vaule2Vertex = new HashMap<>();
+        this.allWords = new ArrayList<>();
         System.out.println("vertexId start: " + vertexId);
         System.out.println("edgeId start: " + edgeId);
         readVertex();
@@ -44,6 +49,7 @@ public class ExperimentFileImporter {
         readRelation();
         System.out.println("vertexSet:" + this.graph.vertexSet().size());
         System.out.println("edgeSet:" + this.graph.edgeSet().size());
+        System.out.println("keyWordMap size : " + this.graph.getKeyWordToVertex().size());
         return this.graph;
     }
 
@@ -70,6 +76,7 @@ public class ExperimentFileImporter {
                 if (strings.size() == 2) {
                     vertexName = strings.get(1);
                 }
+
                 if (vertexName.length() > ExperimentMain.max_lenth) {
                     ExperimentMain.max_lenth = vertexName.length();
                 }
@@ -82,6 +89,7 @@ public class ExperimentFileImporter {
                 s = this.Entity2Id.get(vertexKey);
 
                 Vertex entity = new Vertex(s, "Entity", vertexName);
+                dealVertexName(vertexName, entity);
                 vertexHashMap.put(vertexKey, entity);
                 //处理Value
                 //value在同一个图谱中是有重名的，重名的只创建一个节点
@@ -138,6 +146,14 @@ public class ExperimentFileImporter {
             System.out.println("read file error" + e.toString());
         }
 
+    }
+
+    private void dealVertexName(String vertexName, Vertex entity) {
+        allWords = Arrays.asList(vertexName.split(" "));
+        for (String word : allWords) {
+            String keyword = word.replaceAll(regex, "").replaceAll(regexEnd, "");
+            this.graph.addKeyWord(keyword, entity);
+        }
     }
 
     private void readAttr() {
@@ -313,5 +329,4 @@ public class ExperimentFileImporter {
             System.out.println("read file error" + e.toString());
         }
     }
-
 }

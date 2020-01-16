@@ -19,6 +19,7 @@ public class ExperimentMain {
     public static int max_lenth = 0;
 
     public static void main(String argv[]) throws IOException {
+
         ans = new HashMap<>();
         int data_size = 5; // 数据集大小
         boolean mergeAttr = true; // 是否对Entity的Name进行了
@@ -29,13 +30,20 @@ public class ExperimentMain {
         long startTime, endTime;
 
         ExperimentFileImporter fileImporter = new ExperimentFileImporter();
-
-//        FileImporter2 fileImporter = new FileImporter2(data_size, mergeAttr, withOutRelation);
         Graph graph1 = fileImporter.readGraph(1);
         Graph graph2 = fileImporter.readGraph(2);
+
+
         fileImporter.readAns();
+
+//        FileImporter2 fileImporter = new FileImporter2(data_size, mergeAttr, withOutRelation);
+//        Graph graph1 = fileImporter.readGraph(1, 1);
+//        Graph graph2 = fileImporter.readGraph(2, 1);
+//        fileImporter.readAns(data_size);
+
         graph1.print();
         graph2.print();
+
         ArrayList<Graph> graphArrayList = new ArrayList<>();
         graphArrayList.add(graph1);
         graphArrayList.add(graph2);

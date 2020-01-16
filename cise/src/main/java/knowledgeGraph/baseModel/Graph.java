@@ -8,11 +8,13 @@ import java.util.HashSet;
 public class Graph extends DefaultDirectedGraph<Vertex, Edge> {
     private String userName;
     private HashMap<Vertex, HashSet<Vertex>> relationToVertex;
+    private HashMap<String, HashSet<Vertex>> keyWordToVertex;
 
     public Graph(String userName) {
         super(Edge.class);
         this.userName = userName;
         this.relationToVertex = new HashMap<>();
+        this.keyWordToVertex = new HashMap<>();
     }
 
     public String getUserName() {
@@ -44,4 +46,14 @@ public class Graph extends DefaultDirectedGraph<Vertex, Edge> {
         }
     }
 
+    public void addKeyWord(String keyWord, Vertex vertex) {
+        if (!keyWordToVertex.containsKey(keyWord)) {
+            keyWordToVertex.put(keyWord, new HashSet<>());
+        }
+        keyWordToVertex.get(keyWord).add(vertex);
+    }
+
+    public HashMap<String, HashSet<Vertex>> getKeyWordToVertex() {
+        return keyWordToVertex;
+    }
 }

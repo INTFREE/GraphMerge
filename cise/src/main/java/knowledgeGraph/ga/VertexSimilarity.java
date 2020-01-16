@@ -25,7 +25,7 @@ public class VertexSimilarity {
 
     public static double getEditDistance(String A, String B) {
         if (A.equals(B)) {
-            return 0.0;
+            return 1.0;
         }
         //dp[i][j]表示源串A位置i到目标串B位置j处最低需要操作的次数
         dp[0][0] = 0;
@@ -43,6 +43,6 @@ public class VertexSimilarity {
                 }
             }
         }
-        return dp[A.length()][B.length()];
+        return 1 - ((double) dp[A.length()][B.length()] / Math.max(A.length(), B.length()));
     }
 }
