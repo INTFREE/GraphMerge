@@ -19,6 +19,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
     boolean opt = false;
     boolean calcValue = true;
     boolean detailed = false;
+    HashSet<MergedVertex> unusualMergedVertexSet = new HashSet<>();
 
 
     public BasicEntropyCalculator() {
@@ -49,9 +50,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
         HashMap<MergedVertex, Double> mergedVertexEntropy = new HashMap<>();
         for (MergedVertex mergedVertex : mergedVertexSet) {
-//            System.out.println(">>>>>> calculate entropy");
-//            System.out.println(">>>>>> vertex type " + mergedVertex.getType());
-//            System.out.println(">>>>>> vertex Id " + mergedVertex.getId());
             if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
             //if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
             if (opt && !calcValue && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
@@ -69,7 +67,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
                 String roleName = mergedEdge.getRoleName();
-                if (inEdgeTypeHash.get(roleName) == null) inEdgeTypeHash.put(roleName, new ArrayList<>());
+                if (!inEdgeTypeHash.containsKey(roleName)) {
+                    inEdgeTypeHash.put(roleName, new ArrayList<>());
+                }
                 inEdgeTypeHash.get(roleName).add(mergedEdge);
             }
 
@@ -140,6 +140,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     }
                     if (intersection <= 1) {
                         unusuals++;
+                        unusualMergedVertexSet.add(mergedVertex);
                         System.out.println("Unusual Vertex " + mergedVertex.getVertexSet().iterator().next().getValue() + ": " + currentEntropy);
                     }
                 }
@@ -335,6 +336,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
     private double getSimilarity(String src, String tar) {
         int ld = ld(src, tar);
         return 1 - (double) ld / Math.max(src.length(), tar.length());
+    }
+
+    public HashSet<MergedVertex> getUnusualMergedVertexSet() {
+        return this.unusualMergedVertexSet;
     }
 
     private double calculateEdgeEntropyForVertex(List<Graph> graphInThisMV,

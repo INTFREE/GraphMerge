@@ -5,6 +5,7 @@ import knowledgeGraph.baseModel.Vertex;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,6 +62,46 @@ public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> 
         }
         source.removeVertex(sourceVertex);
         targetMergedVertex.addVertex(sourceVertex);
+    }
+
+    public void saveToFile() throws IOException {
+        File file = new File("MergedGraph");
+        FileOutputStream os = new FileOutputStream(file);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+        writer.write(this.vertexSet().size() + "\n");
+        writer.write(this.edgeSet().size() + "\n");
+        for (MergedVertex mergedVertex : this.vertexSet()) {
+            writer.write(serializeMergedVertex(mergedVertex) + "\n");
+        }
+        for (MergedEdge mergedEdge : this.edgeSet()) {
+            writer.write(serializeMergedEdge(mergedEdge) + "\n");
+        }
+        writer.close();
+        os.close();
+    }
+
+    public String serializeMergedVertex(MergedVertex mergedVertex) {
+        String res = "";
+        res += mergedVertex.getId().toString() + "\t" + mergedVertex.getType() + "\n";
+        StringBuilder builder = new StringBuilder();
+        for (Vertex vertex : mergedVertex.getVertexSet()) {
+            builder.append(vertex.getGraph().getUserName() + "\t");
+            builder.append(vertex.getId().toString() + "|");
+        }
+        res += builder.toString();
+        return res;
+    }
+
+    public String serializeMergedEdge(MergedEdge mergedEdge) {
+        String res = "";
+        res += mergedEdge.getSource().getId() + "\t" + mergedEdge.getTarget().getId() + "\t" + mergedEdge.getRoleName() + "\n";
+        StringBuilder builder = new StringBuilder();
+        for (Edge edge : mergedEdge.getEdgeSet()) {
+            builder.append(edge.getGraph().getUserName() + "\t");
+            builder.append(edge.getId() + "|");
+        }
+        res += builder.toString();
+        return res;
     }
 
 }

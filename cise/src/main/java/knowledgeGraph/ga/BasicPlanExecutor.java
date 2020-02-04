@@ -99,13 +99,13 @@ public class BasicPlanExecutor implements PlanExecutor {
             MergedVertex relateMergedVertex = entry.getKey().getMergedVertex();
             Edge relatedEdge = entry.getValue();
             // 对于entity节点，如果在初始融合图中，就存在和相同roleName的边，且relation 迁移前后相连节点不变，那需要将relation节点也迁移过来
-            if (isEntity) {
-                for (MergedEdge mergedEdge : targetRelatedMergedEdges) {
-                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName()) && checkContext(relatedEdge.getSource(), mergedEdge.getSource(), source, target)) {
-                        relationMigratePlan.addPlan(new Plan(relatedEdge.getSource(), relatedEdge.getSource().getMergedVertex(), mergedEdge.getSource()));
-                    }
-                }
-            }
+//            if (isEntity) {
+//                for (MergedEdge mergedEdge : targetRelatedMergedEdges) {
+//                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName()) && checkContext(relatedEdge.getSource(), mergedEdge.getSource(), source, target)) {
+//                        relationMigratePlan.addPlan(new Plan(relatedEdge.getSource(), relatedEdge.getSource().getMergedVertex(), mergedEdge.getSource()));
+//                    }
+//                }
+//            }
             if (type.equalsIgnoreCase("IN")) {
                 MergedEdge mergedEdge = mergedGraph.getEdge(relateMergedVertex, target);
                 if (mergedEdge == null) {

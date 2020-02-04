@@ -40,6 +40,14 @@ public class MergedVertex {
         this.name = name;
     }
 
+    public MergedVertex(Integer id, String type) {
+        this.id = id;
+        this.vertexSet = new HashSet<>();
+        this.type = type;
+        this.mergedGraph = null;
+        this.modelId = -1;
+    }
+
     @Override
     public String toString() {
         String tmp = this.id.toString() + " vertex set " + this.vertexSet.size() + " type " + this.type + '\n';

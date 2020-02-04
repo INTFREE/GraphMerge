@@ -26,7 +26,7 @@ public class FileImporter2 {
     HashMap<String, Integer> Val2Id;
     HashMap<String, Integer> Rel2Id;
     HashMap<String, Integer> Edge2Id;
-    HashMap<String, Vertex> Vaule2Vertex;
+    HashMap<String, Vertex> Value2Vertex;
 
 
     private void init() {
@@ -52,30 +52,19 @@ public class FileImporter2 {
     public Graph readGraph(Integer order, Integer mOrder) {
         this.order = order;
         this.graph = new Graph(order.toString());
-        this.Vaule2Vertex = new HashMap<>();
+        this.Value2Vertex = new HashMap<>();
         //好丑
         this.Entity2Id = readMatch(mOrder);
-        if (!withOutRelation) {
-            System.out.println("vertexId start: " + vertexId);
-            System.out.println("edgeId start: " + edgeId);
-            readVertex();
-            System.out.println("vertex finish");
-            readAttr();
-            System.out.println("attr finish");
-            readRelation();
-            System.out.println("vertexSet:" + this.graph.vertexSet().size());
-            System.out.println("edgeSet:" + this.graph.edgeSet().size());
-        } else {
-            System.out.println("vertexId start: " + vertexId);
-            System.out.println("edgeId start: " + edgeId);
-            readVertex2();
-            System.out.println("vertex finish");
-            readAttr2();
-            System.out.println("attr finish");
-            readRelation2();
-            System.out.println("vertexSet:" + this.graph.vertexSet().size());
-            System.out.println("edgeSet:" + this.graph.edgeSet().size());
-        }
+        System.out.println("vertexId start: " + vertexId);
+        System.out.println("edgeId start: " + edgeId);
+        readVertex();
+        System.out.println("vertex finish");
+        readAttr();
+        System.out.println("attr finish");
+        readRelation();
+        System.out.println("vertexSet:" + this.graph.vertexSet().size());
+        System.out.println("edgeSet:" + this.graph.edgeSet().size());
+
 
         return this.graph;
     }
@@ -113,11 +102,11 @@ public class FileImporter2 {
                 if (Val2Id.get(vertexName) == null) Val2Id.put(vertexName, vertexId++);
                 o = Val2Id.get(vertexName);
                 Vertex value;
-                if (Vaule2Vertex.get(vertexName) == null) {//必然之前是Val2Id.get(vertexName) == null
+                if (Value2Vertex.get(vertexName) == null) {//必然之前是Val2Id.get(vertexName) == null
                     value = new Vertex(o, "Value", vertexName);
-                    Vaule2Vertex.put(vertexName, value);
+                    Value2Vertex.put(vertexName, value);
                 }
-                value = Vaule2Vertex.get(vertexName);
+                value = Value2Vertex.get(vertexName);
                 entity.setValue(value.getValue());
                 //处理Relation
                 String tmp = s + "|" + "name" + "|" + o;
@@ -153,12 +142,12 @@ public class FileImporter2 {
                 tmp = p + "|name-target|" + o;
                 if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge valueEdge = new Edge(Edge2Id.get(tmp), relation, value, "name-target");
-
+                entityEdge.setGraph(graph);
+                valueEdge.setGraph(graph);
                 graph.addEdge(relation, entity, entityEdge);
                 graph.addEdge(relation, value, valueEdge);
 
-                entityEdge.setGraph(graph);
-                valueEdge.setGraph(graph);
+
             }
             bufferedReader.close();
         } catch (Exception e) {
@@ -196,11 +185,11 @@ public class FileImporter2 {
                 if (Val2Id.get(value) == null) Val2Id.put(value, vertexId++);
                 o = Val2Id.get(value);
                 Vertex valueVertex;
-                if (Vaule2Vertex.get(value) == null) {
+                if (Value2Vertex.get(value) == null) {
                     valueVertex = new Vertex(o, "Value", value);
-                    Vaule2Vertex.put(value, valueVertex);
+                    Value2Vertex.put(value, valueVertex);
                 }
-                valueVertex = Vaule2Vertex.get(value);
+                valueVertex = Value2Vertex.get(value);
 
                 String tmp = s + "|" + attr + "|" + o;
                 //if (mergeAttr) tmp = s+"|"+attr+"|"; 存在同名属性比较复杂
@@ -228,12 +217,11 @@ public class FileImporter2 {
                 tmp = p + "|" + attr + "-target|" + o;
                 if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge valueEdge = new Edge(Edge2Id.get(tmp), relationVertex, valueVertex, attr + "-target");
-
+                entityEdge.setGraph(graph);
+                valueEdge.setGraph(graph);
                 graph.addEdge(relationVertex, entity, entityEdge);
                 graph.addEdge(relationVertex, valueVertex, valueEdge);
 
-                entityEdge.setGraph(graph);
-                valueEdge.setGraph(graph);
 
             }
             bufferedReader.close();
@@ -290,11 +278,10 @@ public class FileImporter2 {
                 tmp = p + "|" + attr + "-target|" + o;
                 if (Edge2Id.get(tmp) == null) Edge2Id.put(tmp, edgeId++);
                 Edge entityEdge2 = new Edge(Edge2Id.get(tmp), relationVertex, entity2, attr + "-target");
-
-                graph.addEdge(relationVertex, entity1, entityEdge1);
-                graph.addEdge(relationVertex, entity2, entityEdge2);
                 entityEdge1.setGraph(graph);
                 entityEdge2.setGraph(graph);
+                graph.addEdge(relationVertex, entity1, entityEdge1);
+                graph.addEdge(relationVertex, entity2, entityEdge2);
 
 
             }
@@ -339,11 +326,11 @@ public class FileImporter2 {
                 if (Val2Id.get(vertexName) == null) Val2Id.put(vertexName, vertexId++);
                 o = Val2Id.get(vertexName);
                 Vertex value;
-                if (Vaule2Vertex.get(vertexName) == null) {//必然之前是Val2Id.get(vertexName) == null
+                if (Value2Vertex.get(vertexName) == null) {//必然之前是Val2Id.get(vertexName) == null
                     value = new Vertex(o, "Value", vertexName);
-                    Vaule2Vertex.put(vertexName, value);
+                    Value2Vertex.put(vertexName, value);
                 }
-                value = Vaule2Vertex.get(vertexName);
+                value = Value2Vertex.get(vertexName);
 
                 graph.addVertex(entity);
                 graph.addVertex(value); //这样是可以的吧，因为如果已包含会返回false
@@ -395,11 +382,11 @@ public class FileImporter2 {
                 if (Val2Id.get(value) == null) Val2Id.put(value, vertexId++);
                 o = Val2Id.get(value);
                 Vertex valueVertex;
-                if (Vaule2Vertex.get(value) == null) {
+                if (Value2Vertex.get(value) == null) {
                     valueVertex = new Vertex(o, "Value", value);
-                    Vaule2Vertex.put(value, valueVertex);
+                    Value2Vertex.put(value, valueVertex);
                 }
-                valueVertex = Vaule2Vertex.get(value);
+                valueVertex = Value2Vertex.get(value);
 
                 String tmp = s + "|" + attr + "|" + o;
                 //if (mergeAttr) tmp = s+"|"+attr+"|"; 存在同名属性比较复杂
@@ -503,7 +490,9 @@ public class FileImporter2 {
                 String vertexKey = line.split("\\|e")[0];
                 String mergeVertexId = line.split("\\|e")[1];
                 Entity2Id.put(vertexKey, Integer.valueOf(mergeVertexId) + 1);//因为原数据是从0开始的
+                vertexId = Math.max(vertexId, Integer.valueOf(mergeVertexId) + 1);
             }
+            vertexId += 1;
             bufferedReader.close();
         } catch (Exception e) {
             System.out.println("read file error" + e.toString());

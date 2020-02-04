@@ -211,6 +211,9 @@ public class ExperimentFileImporter {
                 valueVertex.setGraph(graph);
                 relationVertex.setGraph(graph);
 
+                relationVertex.addRelatedVertex(entity);
+                relationVertex.addRelatedVertex(valueVertex);
+
                 graph.getRelationToVertex().put(relationVertex, new HashSet<>());
                 graph.getRelationToVertex().get(relationVertex).add(entity);
                 graph.getRelationToVertex().get(relationVertex).add(valueVertex);
@@ -329,4 +332,5 @@ public class ExperimentFileImporter {
             System.out.println("read file error" + e.toString());
         }
     }
+
 }
