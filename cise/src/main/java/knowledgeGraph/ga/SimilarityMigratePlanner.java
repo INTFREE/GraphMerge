@@ -2,26 +2,75 @@ package knowledgeGraph.ga;
 
 
 import javafx.util.Pair;
-import knowledgeGraph.baseModel.Edge;
-import knowledgeGraph.baseModel.MigratePlan;
-import knowledgeGraph.baseModel.Plan;
-import knowledgeGraph.baseModel.Vertex;
+import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.*;
+import org.jgrapht.alg.interfaces.MatchingAlgorithm;
+import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class SimlarityMigratePlanner implements MigratePlanner {
+public class SimilarityMigratePlanner implements MigratePlanner {
     private MergedGraghInfo mergedGraghInfo;
 
-    public SimlarityMigratePlanner(MergedGraghInfo mergedGraghInfo) {
+    public SimilarityMigratePlanner(MergedGraghInfo mergedGraghInfo) {
         this.mergedGraghInfo = mergedGraghInfo;
     }
 
     @Override
     public MigratePlan getVertexMigratePlan() {
-        System.out.println(">>>>>>> get Migrate Plan");
+        System.out.println(">>>>>>>Sim get Migrate Plan");
         MigratePlan migratePlan = new MigratePlan();
         MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
+
+        // 如果还存在单一节点，首先处理单独节点
+        HashMap<String, HashSet<Pair<Vertex, VertexContext>>> oneNodeVerties = new HashMap<>();
+
+        for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
+            if (mergedVertex.getVertexSet().size() == 1) {
+                Vertex vertex = mergedVertex.getVertexSet().iterator().next();
+                if (!oneNodeVerties.containsKey(vertex.getGraph().getUserName())) {
+                    oneNodeVerties.put(vertex.getGraph().getUserName(), new HashSet<>());
+                }
+                oneNodeVerties.get(vertex.getGraph().getUserName()).add(new Pair<>(vertex, mergedGraph.getVertexContext(vertex)));
+            }
+        }
+
+        // 如果还存在二部图
+        if (oneNodeVerties.keySet().size() == 2) {
+            String key1 = oneNodeVerties.keySet().iterator().next();
+            String key2 = oneNodeVerties.keySet().iterator().next();
+            System.out.println("still exist bigraph");
+            System.out.println("graph" + key1 + " " + oneNodeVerties.get(key1).size());
+            System.out.println("graph" + key2 + " " + oneNodeVerties.get(key2).size());
+            Bigraph bigraph = new Bigraph();
+            HashSet<Vertex> entity1 = new HashSet<>();
+            HashSet<Vertex> entity2 = new HashSet<>();
+            for (Pair<Vertex, VertexContext> vertex1 : oneNodeVerties.get(key1)) {
+                bigraph.addVertex(vertex1.getKey());
+                entity1.add(vertex1.getKey());
+                for (Pair<Vertex, VertexContext> vertex2 : oneNodeVerties.get(key2)) {
+                    bigraph.addVertex(vertex2.getKey());
+                    entity2.add(vertex2.getKey());
+                    Double similarity = vertex1.getValue().getSimilarity(vertex2.getValue());
+                    bigraph.setEdgeWeight(bigraph.addEdge(vertex1.getKey(), vertex2.getKey()), similarity);
+                }
+            }
+            System.out.println("bigraph size" + bigraph.vertexSet().size() + " " + bigraph.vertexSet().size());
+            System.out.println("entity1 size " + entity1.size());
+            System.out.println("entity2 size " + entity2.size());
+            MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
+                    = new MaximumWeightBipartiteMatching<>(bigraph, entity1, entity2);
+            MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
+            System.out.println("matching size " + matching.getEdges().size());
+            for (DefaultWeightedEdge edge : matching.getEdges()) {
+                migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
+            }
+            return migratePlan;
+        }
         // 计算相似度
         // 迁移10%且熵值小于某个阈值
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy();
@@ -152,4 +201,5 @@ public class SimlarityMigratePlanner implements MigratePlanner {
         result.addAll(givenSet);
         return intersection / result.size();
     }
+
 }

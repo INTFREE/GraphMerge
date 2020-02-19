@@ -1,13 +1,16 @@
 package knowledgeGraph.ga;
 
-import com.sun.scenario.effect.Merge;
-import knowledgeGraph.baseModel.*;
+import knowledgeGraph.baseModel.MigratePlan;
+import knowledgeGraph.baseModel.Plan;
+import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.MergedGraghInfo;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
 import knowledgeGraph.mergeModel.MigratePlanner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class MergeMigratePlanner implements MigratePlanner {
     private MergedGraghInfo mergedGraghInfo;
@@ -30,9 +33,6 @@ public class MergeMigratePlanner implements MigratePlanner {
                 }
                 oneVerteValuexMergedVertexMap.get(vertex.getValue()).add(mergedVertex);
             }
-        }
-        if (this.mergedGraghInfo.isBiGraph()){
-
         }
         MigratePlan migratePlan = new MigratePlan();
         for (String value : oneVerteValuexMergedVertexMap.keySet()) {

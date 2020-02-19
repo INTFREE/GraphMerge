@@ -4,11 +4,11 @@ import knowledgeGraph.baseModel.*;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.types.Node;
 
-import static org.neo4j.driver.v1.Values.parameters;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.neo4j.driver.v1.Values.parameters;
 
 
 public class Importer {

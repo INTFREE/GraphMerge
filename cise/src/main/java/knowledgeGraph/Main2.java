@@ -1,21 +1,8 @@
 package knowledgeGraph;
 
-import knowledgeGraph.ga.BasicEntropyCalculator;
-import knowledgeGraph.ga.GAProcess;
-import knowledgeGraph.io.FileImporter;
-import knowledgeGraph.io.FileImporter2;
 import knowledgeGraph.wordSim.WordEmbedding;
 
-import knowledgeGraph.io.GraphImporter;
-import knowledgeGraph.io.Importer;
-import knowledgeGraph.baseModel.*;
-import knowledgeGraph.mergeModel.MergedGraghInfo;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Iterator;
 
 
 public class Main2 {

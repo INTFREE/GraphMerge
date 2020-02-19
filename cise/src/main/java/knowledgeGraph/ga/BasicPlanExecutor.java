@@ -16,7 +16,7 @@ public class BasicPlanExecutor implements PlanExecutor {
 
     @Override
     public void ExecutePlan(MigratePlan migratePlan) {
-//        System.out.println(">>>>> execute plan: ");
+        System.out.println(">>>>> execute plan: ");
         for (Plan plan : migratePlan.getPlanArrayList()) {
             Vertex vertex = plan.getVertex();
             MergedVertex source = plan.getSource();
@@ -60,6 +60,11 @@ public class BasicPlanExecutor implements PlanExecutor {
     private MigratePlan doExecutePlan(Vertex vertex, MergedVertex source, MergedVertex target) {
         MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
 
+        if (!source.getVertexSet().contains(vertex)) {
+            System.out.println("DoExecutionPlan ERROR: vertex not in source MergedVertex.");
+            return null;
+        }
+
         // 找到所有和迁移源点相连的融合边
         Set<MergedEdge> relatedMergedEdges = new HashSet<>();
         relatedMergedEdges.addAll(mergedGraph.incomingEdgesOf(source));
@@ -99,24 +104,24 @@ public class BasicPlanExecutor implements PlanExecutor {
             MergedVertex relateMergedVertex = entry.getKey().getMergedVertex();
             Edge relatedEdge = entry.getValue();
             // 对于entity节点，如果在初始融合图中，就存在和相同roleName的边，且relation 迁移前后相连节点不变，那需要将relation节点也迁移过来
-//            if (isEntity) {
-//                for (MergedEdge mergedEdge : targetRelatedMergedEdges) {
-//                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName()) && checkContext(relatedEdge.getSource(), mergedEdge.getSource(), source, target)) {
-//                        relationMigratePlan.addPlan(new Plan(relatedEdge.getSource(), relatedEdge.getSource().getMergedVertex(), mergedEdge.getSource()));
-//                    }
-//                }
-//            }
+            if (isEntity) {
+                for (MergedEdge mergedEdge : targetRelatedMergedEdges) {
+                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName()) && checkContext(relatedEdge.getSource(), mergedEdge.getSource(), source, target)) {
+                        relationMigratePlan.addPlan(new Plan(relatedEdge.getSource(), relatedEdge.getSource().getMergedVertex(), mergedEdge.getSource()));
+                    }
+                }
+            }
             if (type.equalsIgnoreCase("IN")) {
                 MergedEdge mergedEdge = mergedGraph.getEdge(relateMergedVertex, target);
                 if (mergedEdge == null) {
-                    mergedEdge = new MergedEdge(relateMergedVertex, target, entry.getValue().getRoleName());
+                    mergedEdge = new MergedEdge(relateMergedVertex, target, relatedEdge.getRoleName());
                     mergedGraph.addEdge(relateMergedVertex, target, mergedEdge);
                 }
                 mergedEdge.addEdge(entry.getValue());
             } else if (type.equalsIgnoreCase("OUT")) {
                 MergedEdge mergedEdge = mergedGraph.getEdge(target, relateMergedVertex);
                 if (mergedEdge == null) {
-                    mergedEdge = new MergedEdge(target, relateMergedVertex, entry.getValue().getRoleName());
+                    mergedEdge = new MergedEdge(target, relateMergedVertex, relatedEdge.getRoleName());
                     mergedGraph.addEdge(target, relateMergedVertex, mergedEdge);
                 }
                 mergedEdge.addEdge(entry.getValue());

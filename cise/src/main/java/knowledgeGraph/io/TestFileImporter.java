@@ -1,6 +1,5 @@
 package knowledgeGraph.io;
 
-import com.sun.scenario.effect.Merge;
 import javafx.util.Pair;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;

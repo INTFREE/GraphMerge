@@ -1,14 +1,7 @@
 package knowledgeGraph.ga;
 
-import javafx.util.Pair;
-import knowledgeGraph.baseModel.Edge;
-import knowledgeGraph.baseModel.Graph;
-import knowledgeGraph.baseModel.Vertex;
-import knowledgeGraph.mergeModel.*;
-import knowledgeGraph.util.UtilFunction.RandomUtil;
-import knowledgeGraph.util.UtilFunction.CollectionUtil;
-
-import java.util.*;
+import knowledgeGraph.mergeModel.MergedGraghInfo;
+import knowledgeGraph.mergeModel.Mutator;
 
 
 public class BasicMutator implements Mutator {

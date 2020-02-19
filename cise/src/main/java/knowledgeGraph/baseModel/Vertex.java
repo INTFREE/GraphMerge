@@ -3,7 +3,6 @@ package knowledgeGraph.baseModel;
 import knowledgeGraph.mergeModel.MergedVertex;
 
 import java.util.HashSet;
-import java.util.Set;
 
 public class Vertex {
     private Integer id;

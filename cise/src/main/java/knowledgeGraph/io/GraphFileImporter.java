@@ -1,17 +1,20 @@
 package knowledgeGraph.io;
 
+import javafx.util.Pair;
+import knowledgeGraph.ExperimentMain;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.MergedEdge;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
-import org.neo4j.register.Register;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GraphFileImporter {
+    String data_path = System.getProperty("user.dir");
     private HashMap<String, HashMap<Integer, Vertex>> graphToidToVertex;
     private HashMap<String, HashMap<Integer, Edge>> graphToidToEdge;
 
@@ -20,15 +23,14 @@ public class GraphFileImporter {
         graphToidToEdge = new HashMap<>();
     }
 
-    public void readGraphFile(Integer graphNum) {
+    public Pair<MergedGraph, ArrayList<Graph>> readGraphFile(Integer graphNum) {
+        ArrayList<Graph> graphs = new ArrayList<>();
         for (int i = 1; i <= graphNum; i++) {
             Graph graph = readGraphFromFile(i);
-            System.out.println("vertex size " + graph.vertexSet().size());
-            System.out.println("edge size " + graph.edgeSet().size());
+            graphs.add(graph);
         }
         MergedGraph mergedGraph = readMergedGraphFromFile();
-        System.out.println("merged vertex size : " + mergedGraph.vertexSet().size());
-        System.out.println("merged edge size : " + mergedGraph.edgeSet().size());
+        return new Pair<>(mergedGraph, graphs);
     }
 
 
@@ -37,11 +39,10 @@ public class GraphFileImporter {
         MergedGraph mergedGraph = new MergedGraph();
         HashMap<Integer, MergedVertex> idToMergedVertex = new HashMap<>();
         try {
-            File mergedGraphFile = new File("MergedGraph");
+            File mergedGraphFile = new File(data_path + "/MergedGraph");
             inputStream = new FileInputStream(mergedGraphFile);
             Reader reader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(reader);
-            String line;
             Integer vertexNum = Integer.parseInt(bufferedReader.readLine());
             Integer edgeNum = Integer.parseInt(bufferedReader.readLine());
             String[] attrs;
@@ -98,7 +99,8 @@ public class GraphFileImporter {
         HashMap<Integer, Edge> idToEdge = new HashMap<>();
         try {
             // read vertex file
-            String vertexFileName = "Graph_" + graphName;
+            String vertexFileName = data_path + "/Graph_" + graphName;
+            System.out.println(vertexFileName);
             File vertexFile = new File(vertexFileName);
             inputStream = new FileInputStream(vertexFile);
             Reader reader = new InputStreamReader(inputStream);
@@ -111,11 +113,17 @@ public class GraphFileImporter {
                 line = bufferedReader.readLine();
                 attrs = line.split("\t");
                 Integer id = Integer.parseInt(attrs[0]);
-                Vertex vertex = new Vertex(id, attrs[1], attrs[2]);
+                Vertex vertex;
+                if (attrs.length != 3) {
+                    vertex = new Vertex(id, attrs[1], "");
+                } else {
+                    vertex = new Vertex(id, attrs[1], attrs[2]);
+                }
+                vertex.setGraph(graph);
                 idToVertex.put(id, vertex);
                 graph.addVertex(vertex);
             }
-
+            System.out.println("vertex finish");
             for (int i = 0; i < edgeNum; i++) {
                 line = bufferedReader.readLine();
                 attrs = line.split("\t");
@@ -126,9 +134,13 @@ public class GraphFileImporter {
                     System.out.println(line);
                 }
                 Edge edge = new Edge(id, source, target, attrs[3]);
+                edge.setGraph(graph);
                 idToEdge.put(id, edge);
+                source.addRelatedVertex(target);
+                target.addRelatedVertex(source);
                 graph.addEdge(source, target, edge);
             }
+            System.out.println("edge finish");
             bufferedReader.close();
         } catch (Exception e) {
             System.out.println("read file error" + e.toString());

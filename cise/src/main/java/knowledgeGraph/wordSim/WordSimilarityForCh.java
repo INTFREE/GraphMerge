@@ -1,16 +1,13 @@
 package knowledgeGraph.wordSim;
 
-import org.neo4j.register.Register;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 该类为此项目的主要文件，提供计算词语相似度的一些基本公式，都为静态。

@@ -1,12 +1,7 @@
 package knowledgeGraph.mergeModel;
 
-import com.sun.scenario.effect.Merge;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.util.UtilFunction;
-import org.jgrapht.graph.SimpleWeightedGraph;
-import org.neo4j.register.Register;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-import org.omg.Messaging.SyncScopeHelper;
 
 import java.util.*;
 

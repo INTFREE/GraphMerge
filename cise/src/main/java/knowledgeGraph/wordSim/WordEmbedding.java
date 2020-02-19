@@ -2,8 +2,6 @@ package knowledgeGraph.wordSim;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 public class WordEmbedding {
     HashMap<String, Double[]> embedding; // 直接这么操作会溢出

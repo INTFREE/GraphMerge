@@ -7,7 +7,6 @@ import knowledgeGraph.baseModel.Vertex;
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 public class FileImporter {
     HashMap<String, Vertex> vertexHashMap;

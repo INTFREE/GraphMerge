@@ -1,12 +1,6 @@
 package knowledgeGraph.ga;
 
-import knowledgeGraph.baseModel.Edge;
-import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
-import knowledgeGraph.wordSim.WordEmbedding;
-import knowledgeGraph.wordSim.WordSimilarityForCh;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-import com.hankcs.hanlp.dictionary.CoreSynonymDictionary;
 
 public class VertexSimilarity {
     public static int[][] dp = new int[1500][1500];

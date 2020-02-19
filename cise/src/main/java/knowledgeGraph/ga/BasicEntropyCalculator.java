@@ -1,17 +1,11 @@
 package knowledgeGraph.ga;
 
-import knowledgeGraph.baseModel.Bigraph;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class BasicEntropyCalculator implements EntropyCalculator {

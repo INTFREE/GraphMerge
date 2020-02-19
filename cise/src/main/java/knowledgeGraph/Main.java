@@ -1,21 +1,14 @@
 package knowledgeGraph;
 
+import knowledgeGraph.baseModel.*;
 import knowledgeGraph.ga.BasicEntropyCalculator;
-import knowledgeGraph.ga.GAProcess;
-import knowledgeGraph.ga.SimlarityMigratePlanner;
-import knowledgeGraph.io.FileImporter;
+import knowledgeGraph.ga.SimilarityMigratePlanner;
 import knowledgeGraph.io.GraphImporter;
 import knowledgeGraph.io.Importer;
-import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.MergedEdge;
 import knowledgeGraph.mergeModel.MergedGraghInfo;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
-import org.jgrapht.alg.interfaces.MatchingAlgorithm;
-import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.alg.interfaces.MatchingAlgorithm.*;
-import org.neo4j.register.Register;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +52,7 @@ public class Main {
         }
 
         System.out.println(">>>>>> Planner Info");
-        SimlarityMigratePlanner planner = new SimlarityMigratePlanner(mergedGraghInfo);
+        SimilarityMigratePlanner planner = new SimilarityMigratePlanner(mergedGraghInfo);
         MigratePlan migratePlan = planner.getVertexMigratePlan();
         for (Plan plan : migratePlan.getPlanArrayList()) {
             System.out.println(plan.getVertex().getValue());

@@ -1,12 +1,11 @@
 package knowledgeGraph.mergeModel;
 
+import javafx.util.Pair;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Vertex;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -102,6 +101,31 @@ public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> 
         }
         res += builder.toString();
         return res;
+    }
+
+    // 假设计算上下文相似度的节点都是实体节点
+    public VertexContext getVertexContext(Vertex vertex) {
+        VertexContext vertexContext = new VertexContext();
+        Set<MergedEdge> relatedEdges = this.incomingEdgesOf(vertex.getMergedVertex());
+        Set<MergedEdge> tempMergedEdges = new HashSet<>();
+        for (MergedEdge mergedEdge : relatedEdges) {
+            boolean flag = false;
+            for (Edge edge : mergedEdge.getEdgeSet()) {
+                if (edge.getTarget().equals(vertex)) {
+                    flag = true;
+                }
+            }
+            if (flag) {
+                tempMergedEdges = this.outgoingEdgesOf(mergedEdge.getSource());
+                tempMergedEdges.remove(mergedEdge);
+                HashSet<Integer> relatedVertexId = new HashSet<>();
+                for (MergedEdge mergedEdge1 : tempMergedEdges) {
+                    relatedVertexId.add(mergedEdge1.getTarget().getId());
+                }
+                vertexContext.addContext(new Pair<>(mergedEdge.getRoleName(), relatedVertexId));
+            }
+        }
+        return vertexContext;
     }
 
 }

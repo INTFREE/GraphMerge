@@ -1,9 +1,11 @@
 package knowledgeGraph.io;
 
 import knowledgeGraph.baseModel.*;
-import org.neo4j.register.Register;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GraphImporter {
     static HashMap<Vertex, Integer> Neo4jVertexToId = new HashMap<>();
@@ -95,4 +97,5 @@ public class GraphImporter {
         }
         return graph;
     }
+
 }

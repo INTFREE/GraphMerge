@@ -8,7 +8,6 @@ import knowledgeGraph.baseModel.Vertex;
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 
 
 public class FileImporter2 {
