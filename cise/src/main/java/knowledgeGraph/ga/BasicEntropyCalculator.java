@@ -44,15 +44,38 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
         HashMap<MergedVertex, Double> mergedVertexEntropy = new HashMap<>();
         for (MergedVertex mergedVertex : mergedVertexSet) {
+            /*
+             FIXME: 该if存在几个问题
+              1、只用于处理2图？判断的是两图是否融合
+              2、只处理entity的熵值？按照文章的话其实entity/relation/value都要算的
+              3、当前如果2图中节点未融合，则节点的熵值为0.
+             目标: 为了保证节点能够尽可能的融合，可以有两种处理方式
+                1. 未融合的节点熵值为0，但是需要计算值节点的入熵
+                2. 未融合计算熵值（按照出入边和其他出入边均不相同进行计算），不再计算值节点的熵值
+              我看了下当前的算法是按照目标1处理的，在两图里面可能问题不大，只需要把未融合的节点做下一轮融合就行了
+             TODO:
+                1. 删除 !mergedVertex.getType().equalsIgnoreCase("entity")
+                2. mergedVertex.getVertexSet().size() != 2 改为 mergedVertex.getVertexSet().size() < 2
+            */
             if (mergedVertex.getVertexSet().size() != 2 || !mergedVertex.getType().equalsIgnoreCase("entity")) {
                 continue;
             }
             Iterator<Vertex> iterator = mergedVertex.getVertexSet().iterator();
             Vertex vertex1 = iterator.next();
             Vertex vertex2 = iterator.next();
+            /*
+             FIXME: 仅用于测试
+            */
             if (!(vertex1.getValue().equalsIgnoreCase("Le Capital") || vertex2.getValue().equalsIgnoreCase("Le Capital"))) {
                 continue;
             }
+            /*
+             FIXME:
+              1. mergedVertex.getVertexSet().size()是不是和FIXME 1的问题重复了
+              2. calcValue只是用于判断是否需要计算值节点的入熵的吧？这里是不是不需要判断
+             TODO:
+              建议删除此if
+            */
             if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
             //if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
             if (opt && !calcValue && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
@@ -387,6 +410,12 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             mergedEdgeSetToReferenceGraphSetMap.get(mergedEdges).add(graph);
 
         }
+        /*
+         TODO:
+            改为 int graphNum = graphInThisMV.size(); 这样缺省的情况存在的熵值，缺省值会判定为一个和之前都不相似的值.
+            2部图, 如果缺省的话理想情况下应该是1不是0.5
+            我看了下代码好像现在可能会算出来0.5
+        */
         //int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
         int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
         // For test
@@ -418,8 +447,39 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 else if (edgeCombinationX.getKey().isEmpty() || edgeCombinationY.getKey().isEmpty()) {
                     similarity = 0;
                 }
+               /*
+                 FIXME:
+                    因为当前节点通过relation节点连接, 算熵的时候需要按照relation异侧的节点进行计算
+                    需要更新s(x,y)的计算方法：
+                        原mv1，mv2其实图中的relation节点，所以需要找到relation节点连接的目标节点
+                    举例：
+                        对于二元关系的计算
+                            rel(name)
+                                - - E(张三)
+                                - name - val(张三)
+                            计算E(张三)的熵值，当前mv取到的是rel(name)节点，实际上mv需要取到异侧节点val(张三)。
+                            计算方法不变。
+                        对于多元关系的计算
+                            r(出演)
+                                - 电影 - E(大话西游)
+                                - 演员 - E(周星驰）
+                                - 角色 - E(至尊宝)
+                            计算E(大话西游)的熵值，当前实际上计算的是r(出演)，我们需要计算的是- 演员 - E(周星驰），- 角色 - E(至尊宝)
+                    TODO:
+                        考虑2点：
+                            a. 是否考虑多元关系
+                            b. 时候考虑连接一组val集合(最后一个else的情况，当前是如果连接一组的话就不考虑只的相似性了)
+                        方案1：不考虑a、b，需要更新第一个else if中的mv计算方式
+                        方案2：仅考虑b. 需要采用方案1，且需要更新最后一个else，同样需要计算考虑mv的值相似性，且不需要做最大匹配。
+                        方案3: 仅考虑a. 需要采用方案1，且将一个多元关系拆分为多个二元关系
+                        方案4: 仅考虑a, 需要采用方案1, 且将多元关系作为一个集合（类似else中的做法）
+                        方案5: 考虑a和b，采用方案2+方案3/4
 
-                // 如果是两个值节点，计算值的相似度（编辑距离）
+                        建议采用方案1或者方案3
+                */
+
+               // 如果是两个值节点，计算值的相似度（编辑距离）
+                // FIXME: edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 这个不太懂，是说如果只有一条出边吧？非集合状态
                 else if (edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 && edgeInOrOut.equals(EdgeType.OUT)) {//OUT指向多个值节点
                     MergedVertex mv1 = edgeCombinationX.getKey().iterator().next().getTarget();
                     MergedVertex mv2 = edgeCombinationY.getKey().iterator().next().getTarget();
