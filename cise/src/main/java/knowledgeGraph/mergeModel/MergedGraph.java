@@ -117,15 +117,43 @@ public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> 
             }
             if (flag) {
                 tempMergedEdges = this.outgoingEdgesOf(mergedEdge.getSource());
-                tempMergedEdges.remove(mergedEdge);
                 HashSet<Integer> relatedVertexId = new HashSet<>();
                 for (MergedEdge mergedEdge1 : tempMergedEdges) {
+                    if (mergedEdge1.equals(mergedEdge)) {
+                        continue;
+                    }
                     relatedVertexId.add(mergedEdge1.getTarget().getId());
                 }
                 vertexContext.addContext(new Pair<>(mergedEdge.getRoleName(), relatedVertexId));
             }
         }
         return vertexContext;
+    }
+
+    public void saveMergedVertex(MergedVertex mergedVertex) {
+        try {
+            File file = new File("MergedVertex");
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            writer.write("MergedVertex info : \n");
+            writer.write(serializeMergedVertex(mergedVertex) + "\n");
+            writer.write("MergedEdge info : \n");
+            for (MergedEdge mergedEdge : incomingEdgesOf(mergedVertex)) {
+                writer.write(serializeMergedEdge(mergedEdge) + "\n");
+                MergedVertex source = mergedEdge.getSource();
+                writer.write("other related mergedVertex \n");
+                for (MergedEdge relationEdge : outgoingEdgesOf(source)) {
+                    if (mergedEdge.equals(relationEdge)) {
+                        continue;
+                    }
+                    writer.write(serializeMergedVertex(relationEdge.getTarget()));
+                }
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("save MergedVertex error " + e);
+        }
     }
 
 }

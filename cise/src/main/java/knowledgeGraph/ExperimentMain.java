@@ -8,6 +8,7 @@ import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.ga.BasicEntropyCalculator;
 import knowledgeGraph.ga.BasicPlanExecutor;
 import knowledgeGraph.ga.BigraphMatchPlanner;
+import knowledgeGraph.ga.SimilarityMigratePlanner;
 import knowledgeGraph.io.ExperimentFileImporter;
 import knowledgeGraph.io.FileImporter2;
 import knowledgeGraph.io.GraphFileImporter;
@@ -24,13 +25,16 @@ import java.util.Iterator;
 
 public class ExperimentMain {
     public static HashMap<Integer, Integer> ans;
+    public static HashSet<MergedVertex> wrongMergedVertexSet;
     public static int max_lenth = 0;
 
     public static void main(String argv[]) throws IOException {
+//        firstStep();
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
         boolean detailed = false; // 是否对细分信息进行统计
         ans = new HashMap<>();
+        wrongMergedVertexSet = new HashSet<>();
         readAns();
 
         long startTime, endTime;
@@ -38,25 +42,29 @@ public class ExperimentMain {
         Pair<MergedGraph, ArrayList<Graph>> graphInfo = importer.readGraphFile(2);
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphInfo.getKey());
         System.out.println("finish mergeGraph read");
-////
+//
         startTime = System.currentTimeMillis();
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
         double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
         endTime = System.currentTimeMillis();
         System.out.println("entropy calculating time:" + (endTime - startTime));
         System.out.println("entropy : " + etr);
-//        BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
-//        MigratePlan migratePlan = bigraphMatchPlanner.getVertexMigratePlan();
+//        calcuteHitOne(mergedGraghInfo);
+////        mergedGraghInfo.saveEntropy();
 //
-//        System.out.println(">>> migrate info");
-//        System.out.println(migratePlan.getPlanArrayList().size());
+//        SimilarityMigratePlanner similarityMigratePlanner = new SimilarityMigratePlanner(mergedGraghInfo);
+//        MigratePlan migratePlan = similarityMigratePlanner.getVertexMigratePlan();
+////        BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
+////        MigratePlan migratePlan = bigraphMatchPlanner.getVertexMigratePlan();
+////
+////        System.out.println(">>> migrate info");
+////        System.out.println(migratePlan.getPlanArrayList().size());
 //        BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
 //        planExecutor.ExecutePlan(migratePlan);
-//        mergedGraghInfo.getMergedGraph().saveToFile();
+////        mergedGraghInfo.getMergedGraph().saveToFile();
 //        etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-        HashSet<MergedVertex> unusualSet = basicEntropyCalculator.getUnusualMergedVertexSet();
 //        System.out.println("entropy : " + etr);
-        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo, unusualSet));
+//        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
     }
 
     public static void firstStep() {
@@ -73,30 +81,30 @@ public class ExperimentMain {
 //        fileImporter.readAns(data_size);
 
         // 大规模实验数据
-//        ExperimentFileImporter fileImporter = new ExperimentFileImporter();
-//        Graph graph1 = fileImporter.readGraph(1);
-//        Graph graph2 = fileImporter.readGraph(2);
+        ExperimentFileImporter fileImporter = new ExperimentFileImporter();
+        Graph graph1 = fileImporter.readGraph(1);
+        Graph graph2 = fileImporter.readGraph(2);
 //        fileImporter.readAns();
 //      // 保存数据
 //        saveAns();
-//        graph1.print();
-//        graph2.print();
+        graph1.print();
+        graph2.print();
+
+        ArrayList<Graph> graphArrayList = new ArrayList<>();
+        graphArrayList.add(graph1);
+        graphArrayList.add(graph2);
+
+        HashSet<Graph> graphHashSet = new HashSet<>();
+        graphHashSet.add(graph1);
+        graphHashSet.add(graph2);
+        long startTime, endTime;
+        startTime = System.currentTimeMillis();
+        GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
+        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo, true);
 //
-//        ArrayList<Graph> graphArrayList = new ArrayList<>();
-//        graphArrayList.add(graph1);
-//        graphArrayList.add(graph2);
-//
-//        HashSet<Graph> graphHashSet = new HashSet<>();
-//        graphHashSet.add(graph1);
-//        graphHashSet.add(graph2);
-//
-//        startTime = System.currentTimeMillis();
-//        GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
-//        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo, true);
-//
-//        mergedGraghInfo.generateMergeGraphByMatch2();
-//        endTime = System.currentTimeMillis();
-//        System.out.println("merge time:" + (endTime - startTime));
+        mergedGraghInfo.generateMergeGraphByMatch2();
+        endTime = System.currentTimeMillis();
+        System.out.println("merge time:" + (endTime - startTime));
 ////
 //        graph1.saveToFile();
 //        graph2.saveToFile();
@@ -108,8 +116,8 @@ public class ExperimentMain {
 //        System.out.println("entropy calculating time:" + (endTime - startTime));
 //        System.out.println("entropy : " + etr);
         // 生成迁移方案
-//        BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
-//        MigratePlan migratePlan = bigraphMatchPlanner.getVertexMigratePlan();
+        BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
+        MigratePlan migratePlan = bigraphMatchPlanner.getVertexMigratePlan();
 //        System.out.println(">>> migrate info");
 //        System.out.println(migratePlan.getPlanArrayList().size());
         // 执行迁移方案
@@ -123,10 +131,11 @@ public class ExperimentMain {
 //        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo, unusualSet));
     }
 
-    public static double calcuteHitOne(MergedGraghInfo mergedGraghInfo, HashSet<MergedVertex> unusualSet) {
+    public static double calcuteHitOne(MergedGraghInfo mergedGraghInfo) {
         MergedGraph mergedGraph = mergedGraghInfo.getMergedGraph();
         int correctNum = 0;
-        HashSet<MergedVertex> wrongMergedVertexSet = new HashSet<>();
+        HashSet<MergedVertex> tempwrongMergedVertexSet = new HashSet<>();
+        HashSet<Integer> wrongIds = new HashSet<>();
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (mergedVertex.getType().equalsIgnoreCase("entity")) {
                 Integer key = -1, value = -1;
@@ -147,21 +156,16 @@ public class ExperimentMain {
                     if (flag) {
                         correctNum += 1;
                     } else {
-                        wrongMergedVertexSet.add(mergedVertex);
+                        tempwrongMergedVertexSet.add(mergedVertex);
                     }
                 } else {
-                    wrongMergedVertexSet.add(mergedVertex);
+                    wrongIds.add(mergedVertex.getVertexSet().iterator().next().getId());
+
                 }
             }
         }
-        System.out.println("wrong set size is : " + wrongMergedVertexSet.size());
-        wrongMergedVertexSet.retainAll(unusualSet);
-        System.out.println("unusual set size is : " + unusualSet.size());
-        System.out.println("interaction size is : " + wrongMergedVertexSet.size());
-        System.out.println("wrong index");
-        for (MergedVertex mergedVertex : wrongMergedVertexSet) {
-            System.out.println(mergedGraghInfo.getMergedVertexToEntropy().indexOf(mergedVertex));
-        }
+        System.out.println("wrong set size is : " + tempwrongMergedVertexSet.size());
+        wrongMergedVertexSet = tempwrongMergedVertexSet;
         return (double) correctNum / ans.size();
     }
 

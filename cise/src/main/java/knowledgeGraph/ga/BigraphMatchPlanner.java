@@ -11,6 +11,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class BigraphMatchPlanner implements MigratePlanner {
     private Graph graph1;
@@ -42,13 +43,14 @@ public class BigraphMatchPlanner implements MigratePlanner {
             return null;
         }
         Bigraph bigraph = this.generateBigraph(graph1, graph2);
-        MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
-                = new MaximumWeightBipartiteMatching<>(bigraph, entityVertexSet1, entityVertexSet2);
-        MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
-        System.out.println("Bigraph match size :" + matching.getEdges().size());
-        for (DefaultWeightedEdge edge : matching.getEdges()) {
-            migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
-        }
+
+//        MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
+//                = new MaximumWeightBipartiteMatching<>(bigraph, entityVertexSet1, entityVertexSet2);
+//        MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
+//        System.out.println("Bigraph match size :" + matching.getEdges().size());
+//        for (DefaultWeightedEdge edge : matching.getEdges()) {
+//            migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
+//        }
         return migratePlan;
     }
 
@@ -123,17 +125,18 @@ public class BigraphMatchPlanner implements MigratePlanner {
             }
 
         }
-//        for (Vertex vertex : entityVertexSet1) {
-//            for (Vertex vertex1 : entityVertexSet2) {
-//                double similarity = VertexSimilarity.calcSimilarity(vertex, vertex1);
-//                if (similarity > 0.5) {
-//                    bigraph.setEdgeWeight(bigraph.addEdge(vertex, vertex1), VertexSimilarity.calcSimilarity(vertex, vertex1));
-//                }
-//            }
-//        }
 
         System.out.println("bigraph vertex size : " + bigraph.vertexSet().size());
         System.out.println("bigraph edge size : " + bigraph.edgeSet().size());
+        for (Vertex vertex : bigraph.vertexSet()) {
+            if (vertex.getValue().equalsIgnoreCase("Capital (film)") || vertex.getValue().equalsIgnoreCase("Human Capital (film)")) {
+                System.out.println(vertex.getValue());
+                Set<DefaultWeightedEdge> edges = bigraph.edgesOf(vertex);
+                for (DefaultWeightedEdge edge : edges) {
+                    System.out.println(bigraph.getEdgeTarget(edge).getValue() + " " + bigraph.getEdgeSource(edge).getValue() + bigraph.getEdgeWeight(edge));
+                }
+            }
+        }
         return bigraph;
     }
 

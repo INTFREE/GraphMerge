@@ -30,7 +30,7 @@ public class Plan {
     public String toString() {
         System.out.println(">>>>>>> plan info:");
         System.out.println("migrate vertex id: " + vertex.getId() + " value: " + vertex.getValue());
-        System.out.println("migrate source: " + source.getId() + " target: " + vertex.getValue());
+        System.out.println("migrate source: " + source.getId() + " target: " + target.getId());
         return "";
     }
 }

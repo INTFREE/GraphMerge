@@ -44,6 +44,15 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
         HashMap<MergedVertex, Double> mergedVertexEntropy = new HashMap<>();
         for (MergedVertex mergedVertex : mergedVertexSet) {
+            if (mergedVertex.getVertexSet().size() != 2 || !mergedVertex.getType().equalsIgnoreCase("entity")) {
+                continue;
+            }
+            Iterator<Vertex> iterator = mergedVertex.getVertexSet().iterator();
+            Vertex vertex1 = iterator.next();
+            Vertex vertex2 = iterator.next();
+            if (!(vertex1.getValue().equalsIgnoreCase("Le Capital") || vertex2.getValue().equalsIgnoreCase("Le Capital"))) {
+                continue;
+            }
             if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
             //if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
             if (opt && !calcValue && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
@@ -86,6 +95,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     partEntropy[pos] += tmpEntropy;
                 }
                 currentEntropy += tmpEntropy;
+                System.out.println("intype " + inType + " " + tmpEntropy);
             }
 
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
@@ -113,6 +123,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     partEntropy[pos] += tmpEntropy;
                 }
                 currentEntropy += tmpEntropy;
+                System.out.println("intype " + outType + " " + tmpEntropy);
             }
 //            // 设置二部图相关参数
 //            if (mergedGraphInfo.isBiGraph()) {
@@ -143,6 +154,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             mergedVertexEntropy.put(mergedVertex, currentEntropy);
             edgeEntropy += currentEntropy;
             finalEntropy += currentEntropy * edgeNum;
+            System.out.println("entropy " + currentEntropy);
+            System.out.println("edgeNum " + edgeNum);
 
         }
         mergedGraphInfo.setMergedVertexToEntropy(mergedVertexEntropy);

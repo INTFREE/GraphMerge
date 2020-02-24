@@ -3,6 +3,7 @@ package knowledgeGraph.mergeModel;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.util.UtilFunction;
 
+import java.io.*;
 import java.util.*;
 
 public class MergedGraghInfo {
@@ -41,6 +42,8 @@ public class MergedGraghInfo {
      */
     List<Map.Entry<MergedVertex, Double>> mergedVertexToEntropy;
 
+    List<MergedVertex> mergedVertexListSortedByEntropy;
+
     /**
      * 构造函数，接收一组待融合图信息作为参数
      *
@@ -53,6 +56,7 @@ public class MergedGraghInfo {
         vertexToMergedVertexMap = new HashMap<>();
         edgeToMergedEdgeMap = new HashMap<>();
         mergedVertexToEntropy = new ArrayList<>();
+        mergedVertexListSortedByEntropy = new ArrayList<>();
     }
 
     public MergedGraghInfo(GraphsInfo graphsInfo, boolean isBiGraph) {
@@ -65,6 +69,7 @@ public class MergedGraghInfo {
         if (this.isBiGraph) {
             biGraph = new Bigraph();
         }
+        mergedVertexListSortedByEntropy = new ArrayList<>();
     }
 
     public MergedGraghInfo(MergedGraph mergedGraph) {
@@ -87,6 +92,7 @@ public class MergedGraghInfo {
                 edgeToMergedEdgeMap.put(edge, mergedEdge);
             }
         }
+        mergedVertexListSortedByEntropy = new ArrayList<>();
     }
 
     public double getEntropy() {
@@ -444,6 +450,10 @@ public class MergedGraghInfo {
         return mergedVertexToEntropy;
     }
 
+    public Integer getMergedVertexIndexInEntropy(MergedVertex mergedVertex) {
+        return mergedVertexListSortedByEntropy.indexOf(mergedVertex);
+    }
+
     public void setMergedVertexToEntropy(HashMap<MergedVertex, Double> mergedVertexToEntropy) {
         List<Map.Entry<MergedVertex, Double>> sortedEntropy =
                 new ArrayList<>(mergedVertexToEntropy.entrySet());
@@ -453,8 +463,30 @@ public class MergedGraghInfo {
                 return (o2.getValue()).compareTo(o1.getValue());
             }
         });
-
+        mergedVertexListSortedByEntropy.clear();
+        for (Map.Entry<MergedVertex, Double> entry : sortedEntropy) {
+            if (entry.getKey().getType().equalsIgnoreCase("entity")) {
+                mergedVertexListSortedByEntropy.add(entry.getKey());
+            }
+        }
         this.mergedVertexToEntropy = sortedEntropy;
+    }
+
+    public void saveEntropy() throws IOException {
+        File file = new File("EntropyFile");
+        FileOutputStream os = new FileOutputStream(file);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+
+        for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy) {
+            writer.write(entry.getKey().getId() + "\t" + entry.getValue() + "\n");
+            if (entry.getValue() == 2.0) {
+                mergedGraph.saveMergedVertex(entry.getKey());
+                break;
+            }
+        }
+
+        writer.close();
+        os.close();
     }
 
 }

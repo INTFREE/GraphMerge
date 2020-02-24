@@ -5,6 +5,11 @@ import knowledgeGraph.baseModel.Vertex;
 public class VertexSimilarity {
     public static int[][] dp = new int[1500][1500];
 
+    public static void main(String argv[]) {
+        System.out.println(getEditDistance("Le Capital", "Capital (film)"));
+
+    }
+
     public static double calcSimilarity(Vertex v1, Vertex v2) {
 //        double wordSimilarity = WordSimilarityForCh.simWord(value1, value2);
 //        if (Double.doubleToLongBits(wordSimilarity) == Double.doubleToLongBits(0)) {

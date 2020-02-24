@@ -59,6 +59,7 @@ public class GraphFileImporter {
                         System.out.println("read Vertex error");
                     }
                     mergedVertex.addVertex(vertex);
+                    vertex.setMergedVertex(mergedVertex);
                 }
                 idToMergedVertex.put(id, mergedVertex);
                 mergedGraph.addVertex(mergedVertex);

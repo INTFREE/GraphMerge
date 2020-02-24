@@ -8,10 +8,8 @@ import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 public class SimilarityMigratePlanner implements MigratePlanner {
     private MergedGraghInfo mergedGraghInfo;
@@ -30,7 +28,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         HashMap<String, HashSet<Pair<Vertex, VertexContext>>> oneNodeVerties = new HashMap<>();
 
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
-            if (mergedVertex.getVertexSet().size() == 1) {
+            if (mergedVertex.getVertexSet().size() == 1 && mergedVertex.getType().equalsIgnoreCase("entity")) {
                 Vertex vertex = mergedVertex.getVertexSet().iterator().next();
                 if (!oneNodeVerties.containsKey(vertex.getGraph().getUserName())) {
                     oneNodeVerties.put(vertex.getGraph().getUserName(), new HashSet<>());
@@ -41,35 +39,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
 
         // 如果还存在二部图
         if (oneNodeVerties.keySet().size() == 2) {
-            String key1 = oneNodeVerties.keySet().iterator().next();
-            String key2 = oneNodeVerties.keySet().iterator().next();
-            System.out.println("still exist bigraph");
-            System.out.println("graph" + key1 + " " + oneNodeVerties.get(key1).size());
-            System.out.println("graph" + key2 + " " + oneNodeVerties.get(key2).size());
-            Bigraph bigraph = new Bigraph();
-            HashSet<Vertex> entity1 = new HashSet<>();
-            HashSet<Vertex> entity2 = new HashSet<>();
-            for (Pair<Vertex, VertexContext> vertex1 : oneNodeVerties.get(key1)) {
-                bigraph.addVertex(vertex1.getKey());
-                entity1.add(vertex1.getKey());
-                for (Pair<Vertex, VertexContext> vertex2 : oneNodeVerties.get(key2)) {
-                    bigraph.addVertex(vertex2.getKey());
-                    entity2.add(vertex2.getKey());
-                    Double similarity = vertex1.getValue().getSimilarity(vertex2.getValue());
-                    bigraph.setEdgeWeight(bigraph.addEdge(vertex1.getKey(), vertex2.getKey()), similarity);
-                }
-            }
-            System.out.println("bigraph size" + bigraph.vertexSet().size() + " " + bigraph.vertexSet().size());
-            System.out.println("entity1 size " + entity1.size());
-            System.out.println("entity2 size " + entity2.size());
-            MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
-                    = new MaximumWeightBipartiteMatching<>(bigraph, entity1, entity2);
-            MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
-            System.out.println("matching size " + matching.getEdges().size());
-            for (DefaultWeightedEdge edge : matching.getEdges()) {
-                migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
-            }
-            return migratePlan;
+            return getBigraphPlan(oneNodeVerties);
         }
         // 计算相似度
         // 迁移10%且熵值小于某个阈值
@@ -91,6 +61,42 @@ public class SimilarityMigratePlanner implements MigratePlanner {
             migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
             break;
         }
+        return migratePlan;
+    }
+
+    public MigratePlan getBigraphPlan(HashMap<String, HashSet<Pair<Vertex, VertexContext>>> oneNodeVerties) {
+        MigratePlan migratePlan = new MigratePlan();
+        Iterator<String> iterator = oneNodeVerties.keySet().iterator();
+        String key1 = iterator.next();
+        String key2 = iterator.next();
+        System.out.println("still exist bigraph");
+        System.out.println("graph" + key1 + " " + oneNodeVerties.get(key1).size());
+        System.out.println("graph" + key2 + " " + oneNodeVerties.get(key2).size());
+        Bigraph bigraph = new Bigraph();
+        HashSet<Vertex> entity1 = new HashSet<>();
+        HashSet<Vertex> entity2 = new HashSet<>();
+        for (Pair<Vertex, VertexContext> vertex1 : oneNodeVerties.get(key1)) {
+            bigraph.addVertex(vertex1.getKey());
+            entity1.add(vertex1.getKey());
+            for (Pair<Vertex, VertexContext> vertex2 : oneNodeVerties.get(key2)) {
+                bigraph.addVertex(vertex2.getKey());
+                entity2.add(vertex2.getKey());
+                Double similarity = VertexSimilarity.calcSimilarity(vertex1.getKey(), vertex2.getKey());
+                bigraph.setEdgeWeight(bigraph.addEdge(vertex1.getKey(), vertex2.getKey()), similarity);
+            }
+        }
+        System.out.println("bigraph size" + bigraph.vertexSet().size() + " " + bigraph.vertexSet().size());
+        System.out.println("entity1 size " + entity1.size());
+        System.out.println("entity2 size " + entity2.size());
+        saveBigraph(bigraph, entity1, entity2);
+        MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
+                = new MaximumWeightBipartiteMatching<>(bigraph, entity1, entity2);
+        MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
+        System.out.println("matching size " + matching.getEdges().size());
+        for (DefaultWeightedEdge edge : matching.getEdges()) {
+            migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
+        }
+        System.out.println("plan size " + migratePlan.getPlanArrayList().size());
         return migratePlan;
     }
 
@@ -200,6 +206,47 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         result.addAll(baseSet);
         result.addAll(givenSet);
         return intersection / result.size();
+    }
+
+    private void saveBigraph(Bigraph bigraph, HashSet<Vertex> vertices1, HashSet<Vertex> vertices2) {
+        try {
+            File file = new File("BigraphFile");
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            writer.write("bigraph vertex size " + bigraph.vertexSet().size() + "\n");
+            writer.write("bigraph edge size " + bigraph.edgeSet().size() + "\n");
+            writer.write("entity information" + "\n");
+            for (Vertex vertex : vertices1) {
+                writer.write(vertex.getGraph().getUserName() + " " + vertex.getId() + " " + vertex.getValue() + "\n");
+            }
+            for (Vertex vertex : vertices2) {
+                writer.write(vertex.getGraph().getUserName() + " " + vertex.getId() + " " + vertex.getValue() + "\n");
+            }
+
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("save Bigraph error " + e);
+        }
+    }
+
+    private void saveMigratePlan(MigratePlan migratePlan) {
+        try {
+            File file = new File("MigratePlan");
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            writer.write("migrate size " + migratePlan.getPlanArrayList().size() + "\n");
+            for (Plan plan : migratePlan.getPlanArrayList()) {
+                writer.write(plan.getVertex().getId() + "\t" + plan.getVertex().getValue() + "\n");
+                writer.write(plan.getSource().getId() + "\t" + plan.getTarget().getId() + "\n");
+                writer.write("target vertex value " + plan.getTarget().getVertexSet().iterator().next().getValue());
+            }
+
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("save MigratePlan error " + e);
+        }
     }
 
 }
