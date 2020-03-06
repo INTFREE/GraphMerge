@@ -33,6 +33,22 @@ public class GraphFileImporter {
         return new Pair<>(mergedGraph, graphs);
     }
 
+    private void saveRelation(Graph graph) {
+        try {
+            File file = new File("Graph_relation_" + graph.getUserName());
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            for (Vertex vertex : graph.vertexSet()) {
+                if (vertex.getType().equalsIgnoreCase("relation") && !vertex.getValue().equalsIgnoreCase("name")) {
+                    writer.write(vertex.getValue() + "\n");
+                }
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("save MergedVertex error " + e);
+        }
+    }
 
     public MergedGraph readMergedGraphFromFile() {
         InputStream inputStream;
@@ -82,7 +98,6 @@ public class GraphFileImporter {
                     mergedEdge.addEdge(edge);
                 }
                 mergedGraph.addEdge(source, target, mergedEdge);
-
             }
 
         } catch (Exception e) {

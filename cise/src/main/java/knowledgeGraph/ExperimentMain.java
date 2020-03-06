@@ -40,15 +40,19 @@ public class ExperimentMain {
         long startTime, endTime;
         GraphFileImporter importer = new GraphFileImporter();
         Pair<MergedGraph, ArrayList<Graph>> graphInfo = importer.readGraphFile(2);
+        for (Graph graph : graphInfo.getValue()) {
+            graph.print();
+        }
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphInfo.getKey());
+
         System.out.println("finish mergeGraph read");
-//
-        startTime = System.currentTimeMillis();
+////
+//        startTime = System.currentTimeMillis();
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
         double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-        endTime = System.currentTimeMillis();
-        System.out.println("entropy calculating time:" + (endTime - startTime));
-        System.out.println("entropy : " + etr);
+//        endTime = System.currentTimeMillis();
+//        System.out.println("entropy calculating time:" + (endTime - startTime));
+//        System.out.println("entropy : " + etr);
 //        calcuteHitOne(mergedGraghInfo);
 ////        mergedGraghInfo.saveEntropy();
 //

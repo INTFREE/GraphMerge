@@ -33,7 +33,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
                 if (!oneNodeVerties.containsKey(vertex.getGraph().getUserName())) {
                     oneNodeVerties.put(vertex.getGraph().getUserName(), new HashSet<>());
                 }
-                oneNodeVerties.get(vertex.getGraph().getUserName()).add(new Pair<>(vertex, mergedGraph.getVertexContext(vertex)));
+//                oneNodeVerties.get(vertex.getGraph().getUserName()).add(new Pair<>(vertex, mergedGraph.getVertexContext(vertex)));
             }
         }
 

@@ -14,6 +14,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
     boolean calcValue = true;
     boolean detailed = false;
     HashSet<MergedVertex> unusualMergedVertexSet = new HashSet<>();
+    MergedGraghInfo mergedGraghInfo;
 
 
     public BasicEntropyCalculator() {
@@ -27,7 +28,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
     @Override
     public double calculateEntropy(MergedGraghInfo mergedGraphInfo) {
-
+        mergedGraghInfo = mergedGraphInfo;
         int[] count = {0, 0, 0, 0, 0, 0};
         double[] partEntropy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         int unusuals = 0;
@@ -48,6 +49,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
              FIXME: 该if存在几个问题
               1、只用于处理2图？判断的是两图是否融合
               2、只处理entity的熵值？按照文章的话其实entity/relation/value都要算的
+              Q: 感觉现在的计算方式relation应该不会有出边熵，value节点可能有边熵，但是上下文好像没意义？感觉只需要计算entity
               3、当前如果2图中节点未融合，则节点的熵值为0.
              目标: 为了保证节点能够尽可能的融合，可以有两种处理方式
                 1. 未融合的节点熵值为0，但是需要计算值节点的入熵
@@ -55,18 +57,15 @@ public class BasicEntropyCalculator implements EntropyCalculator {
               我看了下当前的算法是按照目标1处理的，在两图里面可能问题不大，只需要把未融合的节点做下一轮融合就行了
              TODO:
                 1. 删除 !mergedVertex.getType().equalsIgnoreCase("entity")
+                Done
                 2. mergedVertex.getVertexSet().size() != 2 改为 mergedVertex.getVertexSet().size() < 2
+                Done
             */
-            if (mergedVertex.getVertexSet().size() != 2 || !mergedVertex.getType().equalsIgnoreCase("entity")) {
+            if (mergedVertex.getVertexSet().size() < 2) {
                 continue;
             }
-            Iterator<Vertex> iterator = mergedVertex.getVertexSet().iterator();
-            Vertex vertex1 = iterator.next();
-            Vertex vertex2 = iterator.next();
-            /*
-             FIXME: 仅用于测试
-            */
-            if (!(vertex1.getValue().equalsIgnoreCase("Le Capital") || vertex2.getValue().equalsIgnoreCase("Le Capital"))) {
+            // For test
+            if (mergedVertex.getId() != 1) {
                 continue;
             }
             /*
@@ -75,22 +74,17 @@ public class BasicEntropyCalculator implements EntropyCalculator {
               2. calcValue只是用于判断是否需要计算值节点的入熵的吧？这里是不是不需要判断
              TODO:
               建议删除此if
+              Done
             */
-            if (opt && calcValue && mergedVertex.getVertexSet().size() <= 1) continue; // 只有一个值节点时，熵值为0;
-            //if (opt && mergedVertex.getType() == "Relation") continue; // Relaiton节点没有熵值
-            if (opt && !calcValue && mergedVertex.getType() == "Value") continue; // 不计算Value的入熵
 
-            //Set<Graph> graphSetInMV = new HashSet<>();
             List<Graph> graphListInMV = new ArrayList<>();
             for (Vertex vertex : mergedVertex.getVertexSet()) {
                 graphListInMV.add(vertex.getGraph());
             }
-
             double currentEntropy = 0.0;
             double tmpEntropy = 0.0;
             HashMap<String, List<MergedEdge>> inEdgeTypeHash = new HashMap<>();
             HashMap<String, List<MergedEdge>> outEdgeTypeHash = new HashMap<>();
-
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
                 String roleName = mergedEdge.getRoleName();
                 if (!inEdgeTypeHash.containsKey(roleName)) {
@@ -98,10 +92,11 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 }
                 inEdgeTypeHash.get(roleName).add(mergedEdge);
             }
-
             for (String inType : inEdgeTypeHash.keySet()) {
                 if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
-                else
+                if (!inType.equalsIgnoreCase("电影")) {
+                    continue;
+                } else
                     tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType), inType, EdgeType.IN);
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
@@ -123,7 +118,9 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
                 String roleName = mergedEdge.getRoleName();
-                if (outEdgeTypeHash.get(roleName) == null) outEdgeTypeHash.put(roleName, new ArrayList<>());
+                if (!outEdgeTypeHash.containsKey(roleName)) {
+                    outEdgeTypeHash.put(roleName, new ArrayList<>());
+                }
                 outEdgeTypeHash.get(roleName).add(mergedEdge);
             }
 
@@ -148,31 +145,23 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 currentEntropy += tmpEntropy;
                 System.out.println("intype " + outType + " " + tmpEntropy);
             }
-//            // 设置二部图相关参数
-//            if (mergedGraphInfo.isBiGraph()) {
-//                Bigraph biGraph = mergedGraphInfo.getBiGraph();
-//                List<Vertex> vertexList = new ArrayList<>(mergedVertex.getVertexSet());
-//                biGraph.addVertex(vertexList.get(0));
-//                biGraph.addVertex(vertexList.get(1));
-//                biGraph.setEdgeWeight(biGraph.addEdge(vertexList.get(0), vertexList.get(1)), currentEntropy);
-//            }
 
-            if (currentEntropy > threshold) {
-//                unusuals++;
-                if (mergedVertex.getType() == "Entity") {
-                    int intersection = 0;
-                    for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
-                        if (mergedEdge.getEdgeSet().size() == 2) {
-                            intersection++;
-                        }
-                    }
-                    if (intersection <= 1) {
-                        unusuals++;
-                        unusualMergedVertexSet.add(mergedVertex);
-                        System.out.println("Unusual Vertex " + mergedVertex.getVertexSet().iterator().next().getValue() + ": " + currentEntropy);
-                    }
-                }
-            }
+//            if (currentEntropy > threshold) {
+////                unusuals++;
+//                if (mergedVertex.getType() == "Entity") {
+//                    int intersection = 0;
+//                    for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
+//                        if (mergedEdge.getEdgeSet().size() == 2) {
+//                            intersection++;
+//                        }
+//                    }
+//                    if (intersection <= 1) {
+//                        unusuals++;
+//                        unusualMergedVertexSet.add(mergedVertex);
+//                        System.out.println("Unusual Vertex " + mergedVertex.getVertexSet().iterator().next().getValue() + ": " + currentEntropy);
+//                    }
+//                }
+//            }
             // Question
             mergedVertexEntropy.put(mergedVertex, currentEntropy);
             edgeEntropy += currentEntropy;
@@ -213,115 +202,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
             entropy += pX * Math.log(rstSumPySxy) / Math.log(2);
         }
-
-        return Math.abs(entropy);
-    }
-
-    private double calculateEdgeEntropyForVertex(MergedGraghInfo mergedGraphInfo,
-                                                 MergedVertex mergedVertex,
-                                                 List<Graph> graphInThisMV,
-                                                 String type,
-                                                 EdgeType edgeInOrOut) {
-
-        /**
-         * 每个被融合图引用的融合边集合
-         */
-        Map<Graph, List<MergedEdge>> graphToReferencedMergedEdgeSetMap = new HashMap<>();
-
-        Set<MergedEdge> targetMergedEdgeSet = new HashSet<>();
-
-        if (edgeInOrOut.equals(EdgeType.IN)) {
-            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().incomingEdgesOf(mergedVertex);
-
-        } else if (edgeInOrOut.equals(EdgeType.OUT)) {
-            targetMergedEdgeSet = mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex);
-        }
-
-        // 对于目标集合中的每个融合边，
-        for (MergedEdge me : targetMergedEdgeSet) {
-            // 找到me的类型与type是否一致
-            if (me.getRoleName() != type) continue;
-            // 找到其包含的被融合边集合
-            Set<Edge> edgeSet = me.getEdgeSet();
-            // 找到这些被融合边来自的被融合图的集合
-            List<Graph> referencedGraphSet = new ArrayList<>();
-            for (Edge edge : edgeSet) {
-                referencedGraphSet.add(edge.getGraph());
-            }
-            // 对于找到的每个被融合图
-            for (Graph graph : referencedGraphSet) {
-                // 将当前的融合边添加到它引用的融合边集合中
-                if (!graphToReferencedMergedEdgeSetMap.containsKey(graph)) {
-                    graphToReferencedMergedEdgeSetMap.put(graph, new ArrayList<>());
-                }
-                graphToReferencedMergedEdgeSetMap.get(graph).add(me);
-            }
-        }
-
-        // 逆置这个映射，对于每个“融合边的组合”，计算引用了这个组合的被融合图的集合
-        Map<List<MergedEdge>, List<Graph>> mergedEdgeSetToReferenceGraphSetMap = new HashMap<>();
-
-        List<MergedEdge> emptyEdgeSet = new ArrayList<>();
-
-        for (Graph graph : graphInThisMV) {
-            List<MergedEdge> mergedEdges;
-            mergedEdges = graphToReferencedMergedEdgeSetMap.getOrDefault(graph, emptyEdgeSet);
-            if (!mergedEdgeSetToReferenceGraphSetMap.containsKey(mergedEdges)) {
-                mergedEdgeSetToReferenceGraphSetMap.put(mergedEdges, new ArrayList<>());
-            }
-            mergedEdgeSetToReferenceGraphSetMap.get(mergedEdges).add(graph);
-
-        }
-
-//        int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
-        int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
-
-        /*
-         * 下面是计算熵的数学部分
-         * 公式是SUM(x in allEdgeSet, p(x) * log(SUM(y_in_allEdgeSet, p(y) * s(x,y))))
-         */
-
-        double entropy = 0;
-
-        Set<Map.Entry<List<MergedEdge>, List<Graph>>> allEdgeComb = mergedEdgeSetToReferenceGraphSetMap.entrySet();
-        for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationX : allEdgeComb) {
-            List<Graph> usersX = edgeCombinationX.getValue();
-            double pX = ((double) usersX.size()) / graphNum;
-
-            double rstSumPySxy = 0.0;
-
-            for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationY : allEdgeComb) {
-                List<Graph> usersY = edgeCombinationY.getValue();
-                double pY = ((double) usersY.size()) / graphNum;
-                double similarity;
-
-                // 如果两个融合边组合是一样的，则相似度为1
-                if (edgeCombinationX.equals(edgeCombinationY)) {
-                    similarity = 1.0;
-                }
-                // 如果其中一方为空，则相似度为0
-                else if (edgeCombinationX.getKey().isEmpty() || edgeCombinationY.getKey().isEmpty()) {
-                    similarity = 0;
-                }
-
-                // 否则，二者相似度等于 交集大小/并集大小
-                else {
-                    // 计算X和Y相似度时需要的交集和并集
-                    Set<MergedEdge> intersection = new HashSet<>(edgeCombinationX.getKey());
-                    intersection.retainAll(edgeCombinationY.getKey());
-                    Set<MergedEdge> union = new HashSet<>(edgeCombinationX.getKey());
-                    union.addAll(edgeCombinationY.getKey());
-                    similarity = ((double) intersection.size()) / union.size();
-                }
-                rstSumPySxy += pY * similarity;
-            }
-            if (rstSumPySxy == 0) {
-                System.out.println("here");
-            }
-            // 将log换位2为底
-            entropy += pX * Math.log(rstSumPySxy) / Math.log(2);
-        }
-
 
         return Math.abs(entropy);
     }
@@ -415,9 +295,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             改为 int graphNum = graphInThisMV.size(); 这样缺省的情况存在的熵值，缺省值会判定为一个和之前都不相似的值.
             2部图, 如果缺省的话理想情况下应该是1不是0.5
             我看了下代码好像现在可能会算出来0.5
+         Done.
         */
-        //int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
-        int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
+        int graphNum = graphInThisMV.size(); //此时缺省值相当于非相似的值
+//        int graphNum = graphToReferencedMergedEdgeSetMap.size(); //此时若缺省则不计入运算
         // For test
         // int graphNum = 2;
         /*
@@ -428,12 +309,12 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         double entropy = 0;
 
         Set<Map.Entry<List<MergedEdge>, List<Graph>>> allEdgeComb = mergedEdgeSetToReferenceGraphSetMap.entrySet();
+
         for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationX : allEdgeComb) {
             List<Graph> usersX = edgeCombinationX.getValue();
             double pX = ((double) usersX.size()) / graphNum;
-
             double rstSumPySxy = 0.0;
-
+            VertexContext vertexContextX = genertateContext(edgeCombinationX.getKey());
             for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationY : allEdgeComb) {
                 List<Graph> usersY = edgeCombinationY.getValue();
                 double pY = ((double) usersY.size()) / graphNum;
@@ -478,43 +359,43 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                         建议采用方案1或者方案3
                 */
 
-               // 如果是两个值节点，计算值的相似度（编辑距离）
+                // 如果是两个值节点，计算值的相似度（编辑距离）
                 // FIXME: edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 这个不太懂，是说如果只有一条出边吧？非集合状态
-                else if (edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 && edgeInOrOut.equals(EdgeType.OUT)) {//OUT指向多个值节点
-                    MergedVertex mv1 = edgeCombinationX.getKey().iterator().next().getTarget();
-                    MergedVertex mv2 = edgeCombinationY.getKey().iterator().next().getTarget();
-
-                    if (mv1.getType() == "Value" && mv2.getType() == "Value") {
-                        String s1 = mv1.getVertexSet().iterator().next().getValue();
-                        String s2 = mv2.getVertexSet().iterator().next().getValue();
-                        similarity = getSimilarity(s1, s2);
-
-                        //System.out.println("Similarity: " + s1 + "-" + s2 + "-" + similarity);
-                    } else {
-                        // 两个无值的节点，所以相似度只能是0
-                        similarity = 0;
-                    }
-
-                }
-
-                // 否则，二者相似度等于 交集大小/并集大小
                 else {
-                    // 计算X和Y相似度时需要的交集和并集
-                    Set<MergedEdge> intersection = new HashSet<>(edgeCombinationX.getKey());
-                    intersection.retainAll(edgeCombinationY.getKey());
-                    Set<MergedEdge> union = new HashSet<>(edgeCombinationX.getKey());
-                    union.addAll(edgeCombinationY.getKey());
-                    similarity = ((double) intersection.size()) / union.size();
+                    VertexContext vertexContextY = genertateContext(edgeCombinationY.getKey());
+                    similarity = vertexContextX.getSimilarity(vertexContextY);
                 }
                 rstSumPySxy += pY * similarity;
-            }
-            if (rstSumPySxy == 0) {
-                System.out.println("here");
             }
             // 将log换位2为底
             entropy += pX * Math.log(rstSumPySxy) / Math.log(2);
         }
 
         return Math.abs(entropy);
+    }
+
+    public VertexContext genertateContext(List<MergedEdge> mergedEdgeList) {
+        VertexContext vertexContext = new VertexContext();
+        for (MergedEdge mergedEdge : mergedEdgeList) {
+            HashMap<String, MergedVertex> mergedVertexHashMap = new HashMap<>();
+            MergedVertex relationVertex = mergedEdge.getSource();
+            Set<MergedEdge> outgoingMergedEdges = mergedGraghInfo.getMergedGraph().outgoingEdgesOf(relationVertex);
+            for (MergedEdge relationMergedEdge : outgoingMergedEdges) {
+                if (relationMergedEdge.equals(mergedEdge)) {
+                    continue;
+                }
+                mergedVertexHashMap.put(relationMergedEdge.getRoleName(), relationMergedEdge.getTarget());
+            }
+            vertexContext.addContext(mergedVertexHashMap);
+        }
+        return vertexContext;
+    }
+
+    public void printEdgeSet(List<MergedEdge> mergedEdgeList) {
+        String info = "";
+        for (MergedEdge mergedEdge : mergedEdgeList) {
+            info += mergedEdge.getRoleName() + mergedEdge.getEdgeSet().iterator().next().getId() + "\t";
+        }
+        System.out.println(info);
     }
 }

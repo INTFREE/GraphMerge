@@ -104,31 +104,31 @@ public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> 
     }
 
     // 假设计算上下文相似度的节点都是实体节点
-    public VertexContext getVertexContext(Vertex vertex) {
-        VertexContext vertexContext = new VertexContext();
-        Set<MergedEdge> relatedEdges = this.incomingEdgesOf(vertex.getMergedVertex());
-        Set<MergedEdge> tempMergedEdges = new HashSet<>();
-        for (MergedEdge mergedEdge : relatedEdges) {
-            boolean flag = false;
-            for (Edge edge : mergedEdge.getEdgeSet()) {
-                if (edge.getTarget().equals(vertex)) {
-                    flag = true;
-                }
-            }
-            if (flag) {
-                tempMergedEdges = this.outgoingEdgesOf(mergedEdge.getSource());
-                HashSet<Integer> relatedVertexId = new HashSet<>();
-                for (MergedEdge mergedEdge1 : tempMergedEdges) {
-                    if (mergedEdge1.equals(mergedEdge)) {
-                        continue;
-                    }
-                    relatedVertexId.add(mergedEdge1.getTarget().getId());
-                }
-                vertexContext.addContext(new Pair<>(mergedEdge.getRoleName(), relatedVertexId));
-            }
-        }
-        return vertexContext;
-    }
+//    public VertexContext getVertexContext(Vertex vertex) {
+//        VertexContext vertexContext = new VertexContext();
+//        Set<MergedEdge> relatedEdges = this.incomingEdgesOf(vertex.getMergedVertex());
+//        Set<MergedEdge> tempMergedEdges = new HashSet<>();
+//        for (MergedEdge mergedEdge : relatedEdges) {
+//            boolean flag = false;
+//            for (Edge edge : mergedEdge.getEdgeSet()) {
+//                if (edge.getTarget().equals(vertex)) {
+//                    flag = true;
+//                }
+//            }
+//            if (flag) {
+//                tempMergedEdges = this.outgoingEdgesOf(mergedEdge.getSource());
+//                HashSet<MergedVertex> relatedVertex = new HashSet<>();
+//                for (MergedEdge mergedEdge1 : tempMergedEdges) {
+//                    if (mergedEdge1.equals(mergedEdge)) {
+//                        continue;
+//                    }
+//                    relatedVertex.add(mergedEdge1.getTarget());
+//                }
+//                vertexContext.addContext(new Pair<>(mergedEdge.getRoleName(), relatedVertex));
+//            }
+//        }
+//        return vertexContext;
+//    }
 
     public void saveMergedVertex(MergedVertex mergedVertex) {
         try {
