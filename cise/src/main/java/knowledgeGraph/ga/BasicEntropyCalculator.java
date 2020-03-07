@@ -309,12 +309,14 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         double entropy = 0;
 
         Set<Map.Entry<List<MergedEdge>, List<Graph>>> allEdgeComb = mergedEdgeSetToReferenceGraphSetMap.entrySet();
-
+        HashMap<Map.Entry<List<MergedEdge>, List<Graph>>, VertexContext> entryVertexContextHashMap = new HashMap<>();
+        for (Map.Entry<List<MergedEdge>, List<Graph>> entry : allEdgeComb) {
+            entryVertexContextHashMap.put(entry, genertateContext(entry.getKey()));
+        }
         for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationX : allEdgeComb) {
             List<Graph> usersX = edgeCombinationX.getValue();
             double pX = ((double) usersX.size()) / graphNum;
             double rstSumPySxy = 0.0;
-            VertexContext vertexContextX = genertateContext(edgeCombinationX.getKey());
             for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationY : allEdgeComb) {
                 List<Graph> usersY = edgeCombinationY.getValue();
                 double pY = ((double) usersY.size()) / graphNum;
@@ -362,8 +364,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 // 如果是两个值节点，计算值的相似度（编辑距离）
                 // FIXME: edgeCombinationX.getKey().size() == 1 && edgeCombinationY.getKey().size() == 1 这个不太懂，是说如果只有一条出边吧？非集合状态
                 else {
-                    VertexContext vertexContextY = genertateContext(edgeCombinationY.getKey());
-                    similarity = vertexContextX.getSimilarity(vertexContextY);
+                    similarity = entryVertexContextHashMap.get(edgeCombinationX).getSimilarity(entryVertexContextHashMap.get(edgeCombinationY));
                 }
                 rstSumPySxy += pY * similarity;
             }
