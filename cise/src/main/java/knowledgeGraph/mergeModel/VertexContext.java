@@ -15,11 +15,13 @@ public class VertexContext {
     HashSet<String> contextId;
     Integer id = 1;
     Integer roleNum = 1;
+    Integer totalId;
 
-    public VertexContext() {
+    public VertexContext(Integer id) {
         contexts = new HashSet<>();
         contextHashMapToId = new HashMap<>();
         contextId = new HashSet<>();
+        totalId = id;
     }
 
     public void print() {
@@ -36,39 +38,41 @@ public class VertexContext {
         return contexts;
     }
 
+    public HashMap<HashMap<String, MergedVertex>, String> getContextHashMapToId() {
+        return contextHashMapToId;
+    }
+
+    public HashSet<String> getContextId() {
+        return contextId;
+    }
+
     public void addContext(HashMap<String, MergedVertex> context) {
+        String key = "context" + totalId + "_" + id;
         roleNum = context.size();
-        contextHashMapToId.put(context, "context_" + id);
-        contextId.add("context_" + id);
+        contextHashMapToId.put(context, key);
+        contextId.add(key);
         id += 1;
         this.contexts.add(context);
     }
 
-    public double getSimilarity(VertexContext vertexContext) {
-        HashSet<HashMap<String, MergedVertex>> anotherContext = vertexContext.getContexts();
+    public double getSimilarity(VertexContext anotherContext) {
         DefaultUndirectedWeightedGraph<String, DefaultWeightedEdge> bigraph = new DefaultUndirectedWeightedGraph<>(DefaultWeightedEdge.class);
         for (String context_id : contextId) {
             bigraph.addVertex(context_id);
         }
-        HashSet<String> context_2 = new HashSet<>();
-        Integer temp_id = 1;
-        HashMap<HashMap<String, MergedVertex>, String> contextHashMap2 = new HashMap<>();
-        for (HashMap<String, MergedVertex> key : anotherContext) {
-            contextHashMap2.put(key, "another_context_" + temp_id);
-            context_2.add("another_context_" + temp_id);
-            bigraph.addVertex("another_context_" + temp_id);
-            temp_id += 1;
+        for (String context_id : anotherContext.getContextId()) {
+            bigraph.addVertex(context_id);
         }
         for (HashMap<String, MergedVertex> context : this.contexts) {
             String key1 = contextHashMapToId.get(context);
-            for (HashMap<String, MergedVertex> context1 : anotherContext) {
-                String key2 = contextHashMap2.get(context1);
+            for (HashMap<String, MergedVertex> context1 : anotherContext.getContexts()) {
+                String key2 = anotherContext.getContextHashMapToId().get(context1);
                 double similarity = calculateHashMapSimilarity(context, context1);
                 bigraph.setEdgeWeight(bigraph.addEdge(key1, key2), similarity);
             }
         }
-        MaximumWeightBipartiteMatching<String, DefaultWeightedEdge> matching = new MaximumWeightBipartiteMatching<>(bigraph, contextId, context_2);
-        return matching.getMatching().getWeight() / (roleNum * Math.max(contexts.size(), anotherContext.size()));
+        MaximumWeightBipartiteMatching<String, DefaultWeightedEdge> matching = new MaximumWeightBipartiteMatching<>(bigraph, contextId, anotherContext.getContextId());
+        return matching.getMatching().getWeight() / (roleNum * Math.max(contexts.size(), anotherContext.getContextId().size()));
     }
 
     public double calculateHashMapSimilarity(HashMap<String, MergedVertex> context1, HashMap<String, MergedVertex> context2) {

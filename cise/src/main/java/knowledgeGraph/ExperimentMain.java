@@ -1,10 +1,7 @@
 package knowledgeGraph;
 
 import javafx.util.Pair;
-import knowledgeGraph.baseModel.Graph;
-import knowledgeGraph.baseModel.GraphsInfo;
-import knowledgeGraph.baseModel.MigratePlan;
-import knowledgeGraph.baseModel.Vertex;
+import knowledgeGraph.baseModel.*;
 import knowledgeGraph.ga.BasicEntropyCalculator;
 import knowledgeGraph.ga.BasicPlanExecutor;
 import knowledgeGraph.ga.BigraphMatchPlanner;
@@ -18,10 +15,7 @@ import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 public class ExperimentMain {
     public static HashMap<Integer, Integer> ans;
@@ -43,15 +37,16 @@ public class ExperimentMain {
         for (Graph graph : graphInfo.getValue()) {
             graph.print();
         }
+        migrateRelation(graphInfo.getKey());
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphInfo.getKey());
 
         System.out.println("finish mergeGraph read");
 ////
-//        startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
         double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-//        endTime = System.currentTimeMillis();
-//        System.out.println("entropy calculating time:" + (endTime - startTime));
+        endTime = System.currentTimeMillis();
+        System.out.println("entropy calculating time:" + (endTime - startTime));
 //        System.out.println("entropy : " + etr);
 //        calcuteHitOne(mergedGraghInfo);
 ////        mergedGraghInfo.saveEntropy();
@@ -205,5 +200,58 @@ public class ExperimentMain {
         } catch (Exception e) {
             System.out.println("read file error" + e.toString());
         }
+    }
+
+    public static void migrateRelation(MergedGraph mergedGraph) {
+        HashMap<String, String> relationMap = new HashMap<>();
+        try {
+            for (int i = 1; i <= 2; i++) {
+                String fileName = "relation_" + i + "_map";
+                File vertexFile1 = new File(fileName);
+
+                InputStream inputStream1 = new FileInputStream(vertexFile1);
+                Reader reader1 = new InputStreamReader(inputStream1);
+                BufferedReader bufferedReader1 = new BufferedReader(reader1);
+                String line1;
+
+                while ((line1 = bufferedReader1.readLine()) != null) {
+                    String originName = line1.split("\t")[0];
+                    String newName = line1.split("\t")[1];
+                    relationMap.put(originName, newName);
+                }
+                bufferedReader1.close();
+            }
+
+        } catch (Exception e) {
+            System.out.println("read file error" + e.toString());
+        }
+        System.out.println();
+        for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
+            if (mergedVertex.getType().equalsIgnoreCase("relation")) {
+                if (mergedVertex.getVertexSet().size() == 1) {
+                    Vertex vertex = mergedVertex.getVertexSet().iterator().next();
+                    if (relationMap.containsKey(vertex.getValue())) {
+                        String newValue = relationMap.get(vertex.getValue());
+                        System.out.println(vertex.getValue() + "\t" + newValue);
+                        vertex.setValue(newValue);
+                        Set<MergedEdge> relatedEdges = mergedGraph.outgoingEdgesOf(mergedVertex);
+                        for (MergedEdge mergedEdge : relatedEdges) {
+                            if (mergedEdge.getRoleName().endsWith("source")) {
+                                mergedEdge.setRoleName(newValue + "-source");
+                                for (Edge edge : mergedEdge.getEdgeSet()) {
+                                    edge.setRoleName(newValue + "-source");
+                                }
+                            } else if (mergedEdge.getRoleName().endsWith("target")) {
+                                mergedEdge.setRoleName(newValue + "-target");
+                                for (Edge edge : mergedEdge.getEdgeSet()) {
+                                    edge.setRoleName(newValue + "-target");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

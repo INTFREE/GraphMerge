@@ -65,7 +65,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 continue;
             }
             // For test
-            if (mergedVertex.getId() != 1) {
+//            if (mergedVertex.getId() != 1) {
+//                continue;
+//            }
+            if (!mergedVertex.getType().equalsIgnoreCase("entity")) {
                 continue;
             }
             /*
@@ -94,10 +97,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
             for (String inType : inEdgeTypeHash.keySet()) {
                 if (opt && !calcValue && mergedVertex.getVertexSet().size() <= 1) tmpEntropy = 1;
-                if (!inType.equalsIgnoreCase("电影")) {
-                    continue;
-                } else
-                    tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType), inType, EdgeType.IN);
+                tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType), inType, EdgeType.IN);
                 if (detailed && tmpEntropy != 0) {
                     int pos = 0;
                     if (inType.substring(0, 4).equals("name")) pos += 0;
@@ -113,7 +113,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     partEntropy[pos] += tmpEntropy;
                 }
                 currentEntropy += tmpEntropy;
-                System.out.println("intype " + inType + " " + tmpEntropy);
             }
 
             for (MergedEdge mergedEdge : mergedGraphInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
@@ -167,7 +166,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             edgeEntropy += currentEntropy;
             finalEntropy += currentEntropy * edgeNum;
             System.out.println("entropy " + currentEntropy);
-            System.out.println("edgeNum " + edgeNum);
 
         }
         mergedGraphInfo.setMergedVertexToEntropy(mergedVertexEntropy);
@@ -310,8 +308,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 
         Set<Map.Entry<List<MergedEdge>, List<Graph>>> allEdgeComb = mergedEdgeSetToReferenceGraphSetMap.entrySet();
         HashMap<Map.Entry<List<MergedEdge>, List<Graph>>, VertexContext> entryVertexContextHashMap = new HashMap<>();
+        Integer id = 1;
         for (Map.Entry<List<MergedEdge>, List<Graph>> entry : allEdgeComb) {
-            entryVertexContextHashMap.put(entry, genertateContext(entry.getKey()));
+            entryVertexContextHashMap.put(entry, genertateContext(entry.getKey(), id));
+            id += 1;
         }
         for (Map.Entry<List<MergedEdge>, List<Graph>> edgeCombinationX : allEdgeComb) {
             List<Graph> usersX = edgeCombinationX.getValue();
@@ -375,8 +375,8 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         return Math.abs(entropy);
     }
 
-    public VertexContext genertateContext(List<MergedEdge> mergedEdgeList) {
-        VertexContext vertexContext = new VertexContext();
+    public VertexContext genertateContext(List<MergedEdge> mergedEdgeList, Integer id) {
+        VertexContext vertexContext = new VertexContext(id);
         for (MergedEdge mergedEdge : mergedEdgeList) {
             HashMap<String, MergedVertex> mergedVertexHashMap = new HashMap<>();
             MergedVertex relationVertex = mergedEdge.getSource();

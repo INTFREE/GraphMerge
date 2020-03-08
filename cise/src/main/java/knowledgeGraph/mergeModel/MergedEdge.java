@@ -62,6 +62,10 @@ public class MergedEdge {
         this.edgeSet = edgeSet;
     }
 
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
     public void addEdge(Edge e) {
         this.edgeSet.add(e);
     }
