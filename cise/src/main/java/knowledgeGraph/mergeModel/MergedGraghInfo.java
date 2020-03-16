@@ -93,6 +93,9 @@ public class MergedGraghInfo {
             }
         }
         mergedVertexListSortedByEntropy = new ArrayList<>();
+        for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
+            mergedVertexListSortedByEntropy.add(mergedVertex);
+        }
     }
 
     public double getEntropy() {
@@ -469,6 +472,7 @@ public class MergedGraghInfo {
                 mergedVertexListSortedByEntropy.add(entry.getKey());
             }
         }
+        System.out.println("entropy array size : " + mergedVertexListSortedByEntropy.size());
         this.mergedVertexToEntropy = sortedEntropy;
     }
 

@@ -10,55 +10,56 @@ import knowledgeGraph.mergeModel.MergedGraghInfo;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 
 public class Main {
     public static void main(String argv[]) {
-        Importer importer = new Importer();
-        ArrayList<String> userNameList = new ArrayList<>();
-        userNameList.add("jiangy@pku.edu.cn");
-        userNameList.add("weiyh@pku.edu.cn");
-        GraphImporter graphImporter = new GraphImporter();
-        ArrayList<Graph> graphArrayList = new ArrayList<>();
-        for (String userName : userNameList) {
-            Graph graph = graphImporter.readGraph(importer, "大话西游-电影人物关系图谱", userName);
-            System.out.println(">>>>>> Graph Info");
-            System.out.println(graph.getUserName());
-            System.out.println("Vertex size " + graph.vertexSet().size());
-            System.out.println("Edge size " + graph.edgeSet().size());
-            graphArrayList.add(graph);
-            for (Vertex vertex : graph.vertexSet()) {
-                if (vertex.getType().equalsIgnoreCase("entity")) {
-                    System.out.println(vertex.getValue());
-                }
-            }
-        }
-        importer.finishImport();
-
-        MergedGraph mergedGraph = new MergedGraph();
-        initMergedGraph2(mergedGraph, graphArrayList);
-        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(mergedGraph);
-
-        System.out.println(">>>>>> entropy info");
-        BasicEntropyCalculator calculator = new BasicEntropyCalculator();
-        System.out.println(calculator.calculateEntropy(mergedGraghInfo));
-        System.out.println(mergedGraghInfo.getMergedVertexToEntropy().size());
-        for (Map.Entry<MergedVertex, Double> entry : mergedGraghInfo.getMergedVertexToEntropy()) {
-            System.out.println(entry.getValue() + " " + entry.getKey().getId() + " " + entry.getKey().getType());
-        }
-
-        System.out.println(">>>>>> Planner Info");
-        SimilarityMigratePlanner planner = new SimilarityMigratePlanner(mergedGraghInfo);
-        MigratePlan migratePlan = planner.getVertexMigratePlan();
-        for (Plan plan : migratePlan.getPlanArrayList()) {
-            System.out.println(plan.getVertex().getValue());
-            System.out.println(plan.getSource().getType());
-            System.out.println(plan.getTarget().getType());
-        }
+        List<String> a = new ArrayList<>();
+        a.add("test");
+        a.add("test1");
+        System.out.println(a.indexOf("test1"));
+//        Importer importer = new Importer();
+//        ArrayList<String> userNameList = new ArrayList<>();
+//        userNameList.add("jiangy@pku.edu.cn");
+//        userNameList.add("weiyh@pku.edu.cn");
+//        GraphImporter graphImporter = new GraphImporter();
+//        ArrayList<Graph> graphArrayList = new ArrayList<>();
+//        for (String userName : userNameList) {
+//            Graph graph = graphImporter.readGraph(importer, "大话西游-电影人物关系图谱", userName);
+//            System.out.println(">>>>>> Graph Info");
+//            System.out.println(graph.getUserName());
+//            System.out.println("Vertex size " + graph.vertexSet().size());
+//            System.out.println("Edge size " + graph.edgeSet().size());
+//            graphArrayList.add(graph);
+//            for (Vertex vertex : graph.vertexSet()) {
+//                if (vertex.getType().equalsIgnoreCase("entity")) {
+//                    System.out.println(vertex.getValue());
+//                }
+//            }
+//        }
+//        importer.finishImport();
+//
+//        MergedGraph mergedGraph = new MergedGraph();
+//        initMergedGraph2(mergedGraph, graphArrayList);
+//        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(mergedGraph);
+//
+//        System.out.println(">>>>>> entropy info");
+//        BasicEntropyCalculator calculator = new BasicEntropyCalculator();
+//        System.out.println(calculator.calculateEntropy(mergedGraghInfo));
+//        System.out.println(mergedGraghInfo.getMergedVertexToEntropy().size());
+//        for (Map.Entry<MergedVertex, Double> entry : mergedGraghInfo.getMergedVertexToEntropy()) {
+//            System.out.println(entry.getValue() + " " + entry.getKey().getId() + " " + entry.getKey().getType());
+//        }
+//
+//        System.out.println(">>>>>> Planner Info");
+//        SimilarityMigratePlanner planner = new SimilarityMigratePlanner(mergedGraghInfo);
+//        MigratePlan migratePlan = planner.getVertexMigratePlan();
+//        for (Plan plan : migratePlan.getPlanArrayList()) {
+//            System.out.println(plan.getVertex().getValue());
+//            System.out.println(plan.getSource().getType());
+//            System.out.println(plan.getTarget().getType());
+//        }
 
     }
 

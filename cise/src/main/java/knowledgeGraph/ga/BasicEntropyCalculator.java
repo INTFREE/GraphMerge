@@ -1,5 +1,6 @@
 package knowledgeGraph.ga;
 
+import com.sun.scenario.effect.Merge;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
@@ -16,8 +17,11 @@ public class BasicEntropyCalculator implements EntropyCalculator {
     HashSet<MergedVertex> unusualMergedVertexSet = new HashSet<>();
     MergedGraghInfo mergedGraghInfo;
 
-
     public BasicEntropyCalculator() {
+    }
+
+    public BasicEntropyCalculator(MergedGraghInfo mergedGraghInfo) {
+        this.mergedGraghInfo = mergedGraghInfo;
     }
 
     public BasicEntropyCalculator(boolean opt, boolean calcValue, boolean detailed) {
@@ -61,9 +65,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 2. mergedVertex.getVertexSet().size() != 2 改为 mergedVertex.getVertexSet().size() < 2
                 Done
             */
-            if (mergedVertex.getVertexSet().size() < 2) {
-                continue;
-            }
+
             // For test
 //            if (mergedVertex.getId() != 1) {
 //                continue;
@@ -84,6 +86,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             for (Vertex vertex : mergedVertex.getVertexSet()) {
                 graphListInMV.add(vertex.getGraph());
             }
+            System.out.println(calculateVertexEntropy(mergedVertex));
             double currentEntropy = 0.0;
             double tmpEntropy = 0.0;
             HashMap<String, List<MergedEdge>> inEdgeTypeHash = new HashMap<>();
@@ -142,7 +145,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                     partEntropy[pos] += tmpEntropy;
                 }
                 currentEntropy += tmpEntropy;
-                System.out.println("intype " + outType + " " + tmpEntropy);
             }
 
 //            if (currentEntropy > threshold) {
@@ -162,10 +164,10 @@ public class BasicEntropyCalculator implements EntropyCalculator {
 //                }
 //            }
             // Question
+            System.out.println(mergedVertex.getId() + "\t" + currentEntropy);
             mergedVertexEntropy.put(mergedVertex, currentEntropy);
             edgeEntropy += currentEntropy;
             finalEntropy += currentEntropy * edgeNum;
-            System.out.println("entropy " + currentEntropy);
 
         }
         mergedGraphInfo.setMergedVertexToEntropy(mergedVertexEntropy);
@@ -173,10 +175,50 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             for (int i = 0; i < 6; i++)
                 System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);
         }
-        System.out.println("Unusual Count " + unusuals);
+//        System.out.println("Unusual Count " + unusuals);
         System.out.println("edge entropy " + edgeEntropy);
         System.out.println("final entropy " + finalEntropy);
         return finalEntropy;
+    }
+
+    public double calculateVertexEntropy(MergedVertex mergedVertex) {
+        if (this.mergedGraghInfo == null) {
+            System.out.println("no mergedGraphInfo");
+            return 0.0;
+        }
+        List<Graph> graphListInMV = new ArrayList<>();
+        for (Vertex vertex : mergedVertex.getVertexSet()) {
+            graphListInMV.add(vertex.getGraph());
+        }
+        double currentEntropy = 0.0;
+        double tmpEntropy = 0.0;
+        HashMap<String, List<MergedEdge>> inEdgeTypeHash = new HashMap<>();
+        HashMap<String, List<MergedEdge>> outEdgeTypeHash = new HashMap<>();
+        for (MergedEdge mergedEdge : this.mergedGraghInfo.getMergedGraph().incomingEdgesOf(mergedVertex)) {
+            String roleName = mergedEdge.getRoleName();
+            if (!inEdgeTypeHash.containsKey(roleName)) {
+                inEdgeTypeHash.put(roleName, new ArrayList<>());
+            }
+            inEdgeTypeHash.get(roleName).add(mergedEdge);
+        }
+        for (String inType : inEdgeTypeHash.keySet()) {
+            tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, inEdgeTypeHash.get(inType), inType, EdgeType.IN);
+            currentEntropy += tmpEntropy;
+        }
+
+        for (MergedEdge mergedEdge : this.mergedGraghInfo.getMergedGraph().outgoingEdgesOf(mergedVertex)) {
+            String roleName = mergedEdge.getRoleName();
+            if (!outEdgeTypeHash.containsKey(roleName)) {
+                outEdgeTypeHash.put(roleName, new ArrayList<>());
+            }
+            outEdgeTypeHash.get(roleName).add(mergedEdge);
+        }
+
+        for (String outType : outEdgeTypeHash.keySet()) {
+            tmpEntropy = calculateEdgeEntropyForVertex(graphListInMV, outEdgeTypeHash.get(outType), outType, EdgeType.OUT);
+            currentEntropy += tmpEntropy;
+        }
+        return currentEntropy;
     }
 
     /**

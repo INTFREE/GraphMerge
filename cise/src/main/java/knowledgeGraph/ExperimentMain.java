@@ -23,6 +23,7 @@ public class ExperimentMain {
     public static int max_lenth = 0;
 
     public static void main(String argv[]) throws IOException {
+
 //        firstStep();
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
@@ -47,9 +48,9 @@ public class ExperimentMain {
         double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
         endTime = System.currentTimeMillis();
         System.out.println("entropy calculating time:" + (endTime - startTime));
-//        System.out.println("entropy : " + etr);
-//        calcuteHitOne(mergedGraghInfo);
-////        mergedGraghInfo.saveEntropy();
+        System.out.println("entropy : " + etr);
+        calcuteHitOne(mergedGraghInfo);
+//        mergedGraghInfo.saveEntropy();
 //
 //        SimilarityMigratePlanner similarityMigratePlanner = new SimilarityMigratePlanner(mergedGraghInfo);
 //        MigratePlan migratePlan = similarityMigratePlanner.getVertexMigratePlan();
@@ -63,7 +64,7 @@ public class ExperimentMain {
 ////        mergedGraghInfo.getMergedGraph().saveToFile();
 //        etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
 //        System.out.println("entropy : " + etr);
-//        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
+        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
     }
 
     public static void firstStep() {
@@ -135,6 +136,7 @@ public class ExperimentMain {
         int correctNum = 0;
         HashSet<MergedVertex> tempwrongMergedVertexSet = new HashSet<>();
         HashSet<Integer> wrongIds = new HashSet<>();
+        System.out.println("total mergedVertex size : " + mergedGraghInfo.getMergedGraph().vertexSet().size());
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (mergedVertex.getType().equalsIgnoreCase("entity")) {
                 Integer key = -1, value = -1;
@@ -164,6 +166,9 @@ public class ExperimentMain {
             }
         }
         System.out.println("wrong set size is : " + tempwrongMergedVertexSet.size());
+        for (MergedVertex mergedVertex : tempwrongMergedVertexSet) {
+            System.out.println(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex));
+        }
         wrongMergedVertexSet = tempwrongMergedVertexSet;
         return (double) correctNum / ans.size();
     }
@@ -225,14 +230,12 @@ public class ExperimentMain {
         } catch (Exception e) {
             System.out.println("read file error" + e.toString());
         }
-        System.out.println();
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (mergedVertex.getType().equalsIgnoreCase("relation")) {
                 if (mergedVertex.getVertexSet().size() == 1) {
                     Vertex vertex = mergedVertex.getVertexSet().iterator().next();
                     if (relationMap.containsKey(vertex.getValue())) {
                         String newValue = relationMap.get(vertex.getValue());
-                        System.out.println(vertex.getValue() + "\t" + newValue);
                         vertex.setValue(newValue);
                         Set<MergedEdge> relatedEdges = mergedGraph.outgoingEdgesOf(mergedVertex);
                         for (MergedEdge mergedEdge : relatedEdges) {

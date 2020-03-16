@@ -23,48 +23,56 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         System.out.println(">>>>>>>Sim get Migrate Plan");
         MigratePlan migratePlan = new MigratePlan();
         MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
-
+        BasicEntropyCalculator entropyCalculator = new BasicEntropyCalculator();
+        BasicPlanExecutor executor = new BasicPlanExecutor(this.mergedGraghInfo);
         // 如果还存在单一节点，首先处理单独节点
-        HashMap<String, HashSet<Pair<Vertex, VertexContext>>> oneNodeVerties = new HashMap<>();
-
+        HashMap<String, HashSet<Vertex>> bigraphVerties = new HashMap<>();
+        bigraphVerties.put("1", new HashSet<>());
+        bigraphVerties.put("2", new HashSet<>());
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (mergedVertex.getVertexSet().size() == 1 && mergedVertex.getType().equalsIgnoreCase("entity")) {
                 Vertex vertex = mergedVertex.getVertexSet().iterator().next();
-                if (!oneNodeVerties.containsKey(vertex.getGraph().getUserName())) {
-                    oneNodeVerties.put(vertex.getGraph().getUserName(), new HashSet<>());
-                }
-//                oneNodeVerties.get(vertex.getGraph().getUserName()).add(new Pair<>(vertex, mergedGraph.getVertexContext(vertex)));
+                bigraphVerties.get(vertex.getGraph().getUserName()).add(vertex);
             }
         }
 
-        // 如果还存在二部图
-        if (oneNodeVerties.keySet().size() == 2) {
-            return getBigraphPlan(oneNodeVerties);
-        }
         // 计算相似度
         // 迁移10%且熵值小于某个阈值
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy();
         for (HashMap.Entry<MergedVertex, Double> entry : mergedVertexArrayList) {
-            if (!entry.getKey().getType().equalsIgnoreCase("entity")) {
+            MergedVertex mergedVertex = entry.getKey();
+            if (!mergedVertex.getType().equalsIgnoreCase("entity") || mergedVertex.getVertexSet().size() == 1) {
                 continue;
             }
-            System.out.println("Source " + entry.getKey().getVertexSet().size());
-            EdgeType type = EdgeType.IN;
-            System.out.println("type " + entry.getKey().getType());
-            if (entry.getKey().getType().equalsIgnoreCase("relation")) {
-                type = EdgeType.OUT;
-            }
-            Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, entry.getKey(), type);
-            Set<MergedVertex> sameTypeMergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
-            MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, entry.getKey(), sameTypeMergedVertexSet, vertexSetPair.getValue(), type);
-            System.out.println("Target " + mutateTarget.getVertexSet().size());
-            migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
-            break;
+            Iterator<Vertex> vertexIterator = mergedVertex.getVertexSet().iterator();
+            Vertex migrateVertex = vertexIterator.next();
+            Vertex remainVertex = vertexIterator.next();
+            MergedVertex mergedVertex1 = new MergedVertex("entity");
+            mergedVertex1.setMergedGraph(mergedGraph);
+            mergedGraph.addVertex(mergedVertex1);
+            migratePlan.addPlan(new Plan(migrateVertex, mergedVertex, mergedVertex1));
+            bigraphVerties.get(migrateVertex.getGraph().getUserName()).add(migrateVertex);
+            bigraphVerties.get(remainVertex.getGraph().getUserName()).add(remainVertex);
+//            System.out.println("Source " + entry.getKey().getVertexSet().size());
+//            EdgeType type = EdgeType.IN;
+//            System.out.println("type " + entry.getKey().getType());
+//            if (entry.getKey().getType().equalsIgnoreCase("relation")) {
+//                type = EdgeType.OUT;
+//            }
+//            Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, entry.getKey(), type);
+//            Set<MergedVertex> sameTypeMergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
+//            MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, entry.getKey(), sameTypeMergedVertexSet, vertexSetPair.getValue(), type);
+//            System.out.println("Target " + mutateTarget.getVertexSet().size());
+//            migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
+//            break;
         }
+        executor.ExecutePlan(migratePlan, false);
+        migratePlan.clear();
+        migratePlan = getBigraphPlan(bigraphVerties, entropyCalculator, executor);
         return migratePlan;
     }
 
-    public MigratePlan getBigraphPlan(HashMap<String, HashSet<Pair<Vertex, VertexContext>>> oneNodeVerties) {
+    public MigratePlan getBigraphPlan(HashMap<String, HashSet<Vertex>> oneNodeVerties, BasicEntropyCalculator entropyCalculator, BasicPlanExecutor executor) {
         MigratePlan migratePlan = new MigratePlan();
         Iterator<String> iterator = oneNodeVerties.keySet().iterator();
         String key1 = iterator.next();
@@ -75,14 +83,22 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         Bigraph bigraph = new Bigraph();
         HashSet<Vertex> entity1 = new HashSet<>();
         HashSet<Vertex> entity2 = new HashSet<>();
-        for (Pair<Vertex, VertexContext> vertex1 : oneNodeVerties.get(key1)) {
-            bigraph.addVertex(vertex1.getKey());
-            entity1.add(vertex1.getKey());
-            for (Pair<Vertex, VertexContext> vertex2 : oneNodeVerties.get(key2)) {
-                bigraph.addVertex(vertex2.getKey());
-                entity2.add(vertex2.getKey());
-                Double similarity = VertexSimilarity.calcSimilarity(vertex1.getKey(), vertex2.getKey());
-                bigraph.setEdgeWeight(bigraph.addEdge(vertex1.getKey(), vertex2.getKey()), similarity);
+        for (Vertex vertex1 : oneNodeVerties.get(key1)) {
+            bigraph.addVertex(vertex1);
+            entity1.add(vertex1);
+            for (Vertex vertex2 : oneNodeVerties.get(key2)) {
+                bigraph.addVertex(vertex2);
+                entity2.add(vertex2);
+                migratePlan.clear();
+                MergedVertex source = vertex2.getMergedVertex();
+                migratePlan.clear();
+                migratePlan.addPlan(new Plan(vertex2, source, vertex1.getMergedVertex()));
+                executor.ExecutePlan(migratePlan, false);
+                double similarity = entropyCalculator.calculateVertexEntropy(vertex1.getMergedVertex());
+                bigraph.setEdgeWeight(bigraph.addEdge(vertex1, vertex2), similarity);
+                migratePlan.clear();
+                migratePlan.addPlan(new Plan(vertex2, vertex1.getMergedVertex(), source));
+                executor.ExecutePlan(migratePlan, false);
             }
         }
         System.out.println("bigraph size" + bigraph.vertexSet().size() + " " + bigraph.vertexSet().size());

@@ -4,6 +4,8 @@ import javafx.util.Pair;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +17,7 @@ public class BasicPlanExecutor implements PlanExecutor {
     }
 
     @Override
-    public void ExecutePlan(MigratePlan migratePlan) {
+    public void ExecutePlan(MigratePlan migratePlan, boolean relationMigrate) {
         System.out.println(">>>>> execute plan: ");
         for (Plan plan : migratePlan.getPlanArrayList()) {
             Vertex vertex = plan.getVertex();
@@ -26,7 +28,7 @@ public class BasicPlanExecutor implements PlanExecutor {
                 continue;
             }
 
-            MigratePlan relationMigratePlan = doExecutePlan(vertex, source, target);
+            MigratePlan relationMigratePlan = doExecutePlan(vertex, source, target, relationMigrate);
             for (Plan relationPlan : relationMigratePlan.getPlanArrayList()) {
                 Vertex relationVertex = relationPlan.getVertex();
                 MergedVertex relationSource = relationPlan.getSource();
@@ -34,7 +36,7 @@ public class BasicPlanExecutor implements PlanExecutor {
                 if (checkSameGraph(relationVertex, relationTarget)) {
                     continue;
                 }
-                doExecutePlan(relationVertex, relationSource, relationTarget);
+                doExecutePlan(relationVertex, relationSource, relationTarget, false);
             }
 
         }
@@ -57,7 +59,7 @@ public class BasicPlanExecutor implements PlanExecutor {
         return targetGraphSet.contains(vertexGraph);
     }
 
-    private MigratePlan doExecutePlan(Vertex vertex, MergedVertex source, MergedVertex target) {
+    private MigratePlan doExecutePlan(Vertex vertex, MergedVertex source, MergedVertex target, boolean relationMigrate) {
         MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
 
         if (!source.getVertexSet().contains(vertex)) {
@@ -104,7 +106,7 @@ public class BasicPlanExecutor implements PlanExecutor {
             MergedVertex relateMergedVertex = entry.getKey().getMergedVertex();
             Edge relatedEdge = entry.getValue();
             // 对于entity节点，如果在初始融合图中，就存在和相同roleName的边，且relation 迁移前后相连节点不变，那需要将relation节点也迁移过来
-            if (isEntity) {
+            if (isEntity && relationMigrate) {
                 for (MergedEdge mergedEdge : targetRelatedMergedEdges) {
                     if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName()) && checkContext(relatedEdge.getSource(), mergedEdge.getSource(), source, target)) {
                         relationMigratePlan.addPlan(new Plan(relatedEdge.getSource(), relatedEdge.getSource().getMergedVertex(), mergedEdge.getSource()));
@@ -161,6 +163,7 @@ public class BasicPlanExecutor implements PlanExecutor {
 
         mergedGraph.removeAllVertices(removedVertex);
     }
+
 
     private boolean checkContext(Vertex relationVertex, MergedVertex targetRelationMergedVertex, MergedVertex migrateSourceVertex, MergedVertex migrateTargetVertex) {
         HashSet<Vertex> relatedVertexSet = relationVertex.getRelatedVertex();

@@ -25,4 +25,8 @@ public class MigratePlan {
     public void addPlans(Collection<? extends Plan> plans) {
         planArrayList.addAll(plans);
     }
+
+    public void clear() {
+        this.planArrayList.clear();
+    }
 }
