@@ -295,8 +295,6 @@ public class ExperimentFileImporter {
                 graph.addEdge(relationVertex, entity2, entityEdge2);
                 entityEdge1.setGraph(graph);
                 entityEdge2.setGraph(graph);
-
-
             }
             bufferedReader.close();
 

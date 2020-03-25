@@ -4,21 +4,34 @@ import java.io.*;
 import java.util.HashMap;
 
 public class WordEmbedding {
-    HashMap<String, Double[]> embedding; // 直接这么操作会溢出
-
+    HashMap<String, double[]> embedding; // 直接这么操作会溢出
+    Double[] defaultData;
     String file_path = System.getProperty("user.dir") + "/src/offline_data/" + "glove.6B.200d.txt";
 
     public WordEmbedding() {
         System.out.println("Test Embedding");
-        embedding = new HashMap<String, Double[]>();
+        embedding = new HashMap<String, double[]>();
     }
 
     public WordEmbedding(String file_name) {
         this.file_path = System.getProperty("user.dir") + "/src/offline_data/" + file_name;
-        embedding = new HashMap<String, Double[]>();
+        embedding = new HashMap<String, double[]>();
     }
 
-    public HashMap<String, Double[]> setEmbedding() {
+    public double[] getWordEmbedding(String word) {
+        if (this.embedding.size() == 0) {
+            System.out.println("not initialize");
+            return new double[200];
+        }
+        if (embedding.containsKey(word)) {
+            return embedding.get(word);
+        } else {
+            System.out.println("word " + word + " not exists");
+            return new double[200];
+        }
+    }
+
+    public HashMap<String, double[]> setEmbedding() {
         InputStream inputStream;
         try {
             // read embedding file
@@ -28,8 +41,8 @@ public class WordEmbedding {
             BufferedReader bufferedReader = new BufferedReader(reader);
 
             String line;
+            double[] vector = new double[200];
             while ((line = bufferedReader.readLine()) != null) {
-                Double[] vector = new Double[200];
                 String[] arr = line.split("\\s+");
                 String w = arr[0];
 
@@ -51,10 +64,12 @@ public class WordEmbedding {
         return this.embedding;
     }
 
-    public HashMap<String, Double[]> getEmbedding() {
+    public HashMap<String, double[]> getEmbedding() {
         if (this.embedding.size() == 0) this.setEmbedding();
         return this.embedding;
     }
+
+
 }
 
 

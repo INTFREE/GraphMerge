@@ -4,12 +4,13 @@ import javafx.util.Pair;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Vertex;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DirectedPseudograph;
 
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MergedGraph extends DefaultDirectedGraph<MergedVertex, MergedEdge> {
+public class MergedGraph extends DirectedPseudograph<MergedVertex, MergedEdge> {
     private MergedVertex mostEntropyMergedVertex;
 
     public MergedGraph() {

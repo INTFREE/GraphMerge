@@ -1,12 +1,13 @@
 package knowledgeGraph.baseModel;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DirectedPseudograph;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class Graph extends DefaultDirectedGraph<Vertex, Edge> {
+public class Graph extends DirectedPseudograph<Vertex, Edge> {
     private String userName;
     private HashMap<Vertex, HashSet<Vertex>> relationToVertex;
     private HashMap<String, HashSet<Vertex>> keyWordToVertex;

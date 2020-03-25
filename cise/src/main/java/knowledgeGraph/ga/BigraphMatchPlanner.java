@@ -44,13 +44,13 @@ public class BigraphMatchPlanner implements MigratePlanner {
         }
         Bigraph bigraph = this.generateBigraph(graph1, graph2);
 
-//        MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
-//                = new MaximumWeightBipartiteMatching<>(bigraph, entityVertexSet1, entityVertexSet2);
-//        MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
-//        System.out.println("Bigraph match size :" + matching.getEdges().size());
-//        for (DefaultWeightedEdge edge : matching.getEdges()) {
-//            migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
-//        }
+        MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
+                = new MaximumWeightBipartiteMatching<>(bigraph, entityVertexSet1, entityVertexSet2);
+        MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
+        System.out.println("Bigraph match size :" + matching.getEdges().size());
+        for (DefaultWeightedEdge edge : matching.getEdges()) {
+            migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
+        }
         return migratePlan;
     }
 
@@ -128,15 +128,6 @@ public class BigraphMatchPlanner implements MigratePlanner {
 
         System.out.println("bigraph vertex size : " + bigraph.vertexSet().size());
         System.out.println("bigraph edge size : " + bigraph.edgeSet().size());
-        for (Vertex vertex : bigraph.vertexSet()) {
-            if (vertex.getValue().equalsIgnoreCase("Capital (film)") || vertex.getValue().equalsIgnoreCase("Human Capital (film)")) {
-                System.out.println(vertex.getValue());
-                Set<DefaultWeightedEdge> edges = bigraph.edgesOf(vertex);
-                for (DefaultWeightedEdge edge : edges) {
-                    System.out.println(bigraph.getEdgeTarget(edge).getValue() + " " + bigraph.getEdgeSource(edge).getValue() + bigraph.getEdgeWeight(edge));
-                }
-            }
-        }
         return bigraph;
     }
 

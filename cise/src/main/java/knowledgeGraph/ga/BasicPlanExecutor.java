@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,14 +12,16 @@ import java.util.Set;
 
 public class BasicPlanExecutor implements PlanExecutor {
     MergedGraghInfo mergedGraghInfo;
+    Set<String> targetGraphSet;
 
     public BasicPlanExecutor(MergedGraghInfo mergedGraghInfo) {
         this.mergedGraghInfo = mergedGraghInfo;
+        targetGraphSet = new HashSet<>();
     }
 
     @Override
     public void ExecutePlan(MigratePlan migratePlan, boolean relationMigrate) {
-        System.out.println(">>>>> execute plan: ");
+        System.out.println(">>>>> execute plan: " + migratePlan.getPlanArrayList().size());
         for (Plan plan : migratePlan.getPlanArrayList()) {
             Vertex vertex = plan.getVertex();
             MergedVertex source = plan.getSource();
@@ -38,11 +41,8 @@ public class BasicPlanExecutor implements PlanExecutor {
                 }
                 doExecutePlan(relationVertex, relationSource, relationTarget, false);
             }
-
         }
         this.cleanGraph();
-        mergedGraghInfo.getMergedGraph().toString();
-
     }
 
     // TODO:直接调用计算熵值函数效率太低.
@@ -51,10 +51,10 @@ public class BasicPlanExecutor implements PlanExecutor {
     }
 
     private boolean checkSameGraph(Vertex vertex, MergedVertex target) {
-        Graph vertexGraph = vertex.getGraph();
-        Set<Graph> targetGraphSet = new HashSet<>();
+        String vertexGraph = vertex.getGraph().getUserName();
+        targetGraphSet.clear();
         for (Vertex vertex1 : target.getVertexSet()) {
-            targetGraphSet.add(vertex1.getGraph());
+            targetGraphSet.add(vertex1.getGraph().getUserName());
         }
         return targetGraphSet.contains(vertexGraph);
     }
@@ -91,7 +91,6 @@ public class BasicPlanExecutor implements PlanExecutor {
                 }
             }
         }
-
         // 产生融合边
 
         // 如果是实体节点，需要迁移对应的relation节点
@@ -114,19 +113,33 @@ public class BasicPlanExecutor implements PlanExecutor {
                 }
             }
             if (type.equalsIgnoreCase("IN")) {
-                MergedEdge mergedEdge = mergedGraph.getEdge(relateMergedVertex, target);
-                if (mergedEdge == null) {
-                    mergedEdge = new MergedEdge(relateMergedVertex, target, relatedEdge.getRoleName());
-                    mergedGraph.addEdge(relateMergedVertex, target, mergedEdge);
+                Set<MergedEdge> mergedEdges = mergedGraph.getAllEdges(relateMergedVertex, target);
+                MergedEdge targetMergedEdge = null;
+                for (MergedEdge mergedEdge : mergedEdges) {
+                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName())) {
+                        targetMergedEdge = mergedEdge;
+                        break;
+                    }
                 }
-                mergedEdge.addEdge(entry.getValue());
+                if (targetMergedEdge == null) {
+                    targetMergedEdge = new MergedEdge(relateMergedVertex, target, relatedEdge.getRoleName());
+                    mergedGraph.addEdge(relateMergedVertex, target, targetMergedEdge);
+                }
+                targetMergedEdge.addEdge(entry.getValue());
             } else if (type.equalsIgnoreCase("OUT")) {
-                MergedEdge mergedEdge = mergedGraph.getEdge(target, relateMergedVertex);
-                if (mergedEdge == null) {
-                    mergedEdge = new MergedEdge(target, relateMergedVertex, relatedEdge.getRoleName());
-                    mergedGraph.addEdge(target, relateMergedVertex, mergedEdge);
+                Set<MergedEdge> mergedEdges = mergedGraph.getAllEdges(target, relateMergedVertex);
+                MergedEdge targetMergedEdge = null;
+                for (MergedEdge mergedEdge : mergedEdges) {
+                    if (mergedEdge.getRoleName().equalsIgnoreCase(relatedEdge.getRoleName())) {
+                        targetMergedEdge = mergedEdge;
+                        break;
+                    }
                 }
-                mergedEdge.addEdge(entry.getValue());
+                if (targetMergedEdge == null) {
+                    targetMergedEdge = new MergedEdge(target, relateMergedVertex, relatedEdge.getRoleName());
+                    mergedGraph.addEdge(target, relateMergedVertex, targetMergedEdge);
+                }
+                targetMergedEdge.addEdge(entry.getValue());
             } else {
                 System.out.println("DoExecutionPlan Error: type has no value.");
             }

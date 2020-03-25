@@ -1,5 +1,6 @@
 package knowledgeGraph;
 
+import com.sun.scenario.effect.Merge;
 import javafx.util.Pair;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.ga.BasicEntropyCalculator;
@@ -31,27 +32,26 @@ public class ExperimentMain {
         ans = new HashMap<>();
         wrongMergedVertexSet = new HashSet<>();
         readAns();
-
+//
         long startTime, endTime;
         GraphFileImporter importer = new GraphFileImporter();
         Pair<MergedGraph, ArrayList<Graph>> graphInfo = importer.readGraphFile(2);
         for (Graph graph : graphInfo.getValue()) {
             graph.print();
         }
-        migrateRelation(graphInfo.getKey());
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphInfo.getKey());
 
         System.out.println("finish mergeGraph read");
-////
         startTime = System.currentTimeMillis();
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
         double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
         endTime = System.currentTimeMillis();
         System.out.println("entropy calculating time:" + (endTime - startTime));
-        System.out.println("entropy : " + etr);
-        calcuteHitOne(mergedGraghInfo);
-//        mergedGraghInfo.saveEntropy();
-//
+        System.out.println("before entropy : " + etr);
+        mergedGraghInfo.saveEntropy("BeforeMigrateRelationEntropy");
+        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
+
+        migrateRelation(mergedGraghInfo.getMergedGraph());
 //        SimilarityMigratePlanner similarityMigratePlanner = new SimilarityMigratePlanner(mergedGraghInfo);
 //        MigratePlan migratePlan = similarityMigratePlanner.getVertexMigratePlan();
 ////        BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
@@ -61,20 +61,20 @@ public class ExperimentMain {
 ////        System.out.println(migratePlan.getPlanArrayList().size());
 //        BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
 //        planExecutor.ExecutePlan(migratePlan);
-////        mergedGraghInfo.getMergedGraph().saveToFile();
-//        etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-//        System.out.println("entropy : " + etr);
-        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
+        etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+        System.out.println("after entropy : " + etr);
+        mergedGraghInfo.saveEntropy("AfterEntropy");
+//        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
     }
 
-    public static void firstStep() {
+    public static void firstStep() throws IOException {
         // 小规模实验数据
 //        int data_size = 5; // 数据集大小
 //        boolean mergeAttr = true; // 是否对Entity的Name进行了
 //        boolean withOutRelation = false; // 图中是否包含relation节点
-//        boolean opt = true; // 简化运算
-//        boolean calcValue = true; // 是否计算Value节点的入熵
-//        boolean detailed = false; // 是否对细分信息进行统计
+        boolean opt = true; // 简化运算
+        boolean calcValue = true; // 是否计算Value节点的入熵
+        boolean detailed = false; // 是否对细分信息进行统计
 //        FileImporter2 fileImporter = new FileImporter2(data_size, mergeAttr, withOutRelation);
 //        Graph graph1 = fileImporter.readGraph(1, 1);
 //        Graph graph2 = fileImporter.readGraph(2, 1);
@@ -83,10 +83,16 @@ public class ExperimentMain {
         // 大规模实验数据
         ExperimentFileImporter fileImporter = new ExperimentFileImporter();
         Graph graph1 = fileImporter.readGraph(1);
+        checkGraph(graph1);
         Graph graph2 = fileImporter.readGraph(2);
-//        fileImporter.readAns();
-//      // 保存数据
-//        saveAns();
+        checkGraph(graph2);
+        ans = new HashMap<>();
+        wrongMergedVertexSet = new HashSet<>();
+
+        fileImporter.readAns();
+        // 保存数据
+        saveAns();
+//        readAns();
         graph1.print();
         graph2.print();
 
@@ -101,34 +107,43 @@ public class ExperimentMain {
         startTime = System.currentTimeMillis();
         GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo, true);
-//
+
         mergedGraghInfo.generateMergeGraphByMatch2();
         endTime = System.currentTimeMillis();
         System.out.println("merge time:" + (endTime - startTime));
-////
-//        graph1.saveToFile();
-//        graph2.saveToFile();
-//        startTime = System.currentTimeMillis();
-        // 计算熵值
-//        BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
-//        double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-//        endTime = System.currentTimeMillis();
-//        System.out.println("entropy calculating time:" + (endTime - startTime));
-//        System.out.println("entropy : " + etr);
+        checkMergedGraph(mergedGraghInfo.getMergedGraph());
+
+        System.out.println("save Graph file");
+        graph1.saveToFile();
+        graph2.saveToFile();
+
+
+        startTime = System.currentTimeMillis();
+        BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
+        double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+        endTime = System.currentTimeMillis();
+        System.out.println("entropy calculating time:" + (endTime - startTime));
+        System.out.println("primitive entropy : " + etr);
+
         // 生成迁移方案
         BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
         MigratePlan migratePlan = bigraphMatchPlanner.getVertexMigratePlan();
-//        System.out.println(">>> migrate info");
-//        System.out.println(migratePlan.getPlanArrayList().size());
-        // 执行迁移方案
-//        BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
-//        planExecutor.ExecutePlan(migratePlan);
-//        mergedGraghInfo.getMergedGraph().saveToFile();
-        // 计算熵值
-//        etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-//        HashSet<MergedVertex> unusualSet = basicEntropyCalculator.getUnusualMergedVertexSet();
-//        System.out.println("entropy : " + etr);
-//        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo, unusualSet));
+        System.out.println(">>> migrate info");
+        System.out.println(migratePlan.getPlanArrayList().size());
+
+        System.out.println("execute plan ");
+        startTime = System.currentTimeMillis();
+//        执行迁移方案
+        BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
+        planExecutor.ExecutePlan(migratePlan, true);
+        endTime = System.currentTimeMillis();
+        System.out.println("execute time:" + (endTime - startTime));
+        mergedGraghInfo.getMergedGraph().saveToFile();
+
+//        计算迁移后熵值
+        etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+        System.out.println("new entropy : " + etr);
+        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
     }
 
     public static double calcuteHitOne(MergedGraghInfo mergedGraghInfo) {
@@ -204,6 +219,36 @@ public class ExperimentMain {
             bufferedReader1.close();
         } catch (Exception e) {
             System.out.println("read file error" + e.toString());
+        }
+    }
+
+    public static void checkGraph(Graph graph) {
+        System.out.println("wrong data " + graph.getUserName());
+        for (Vertex vertex : graph.vertexSet()) {
+            if (vertex.getType().equalsIgnoreCase("relation")) {
+                Set<Edge> edgeSet = graph.outgoingEdgesOf(vertex);
+                if (edgeSet.size() != 2) {
+                    System.out.println(vertex.getId() + "\t" + edgeSet.size());
+                }
+            }
+        }
+    }
+
+    public static void checkMergedGraph(MergedGraph graph) {
+        System.out.println("wrong merged data");
+        for (MergedVertex vertex : graph.vertexSet()) {
+            if (vertex.getType().equalsIgnoreCase("relation")) {
+                Set<MergedEdge> edgeSet = graph.outgoingEdgesOf(vertex);
+                if (edgeSet.size() != 2) {
+                    System.out.println(vertex.getId() + "\t" + edgeSet.size());
+                }
+            }
+        }
+        System.out.println("edge data");
+        for (MergedEdge edge : graph.edgeSet()) {
+            if (edge.getEdgeSet().size() != 1) {
+                System.out.println(edge.getRoleName() + "\t" + edge.getEdgeSet().size() + "\t" + edge.getEdgeSet());
+            }
         }
     }
 

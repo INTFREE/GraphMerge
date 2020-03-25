@@ -476,17 +476,13 @@ public class MergedGraghInfo {
         this.mergedVertexToEntropy = sortedEntropy;
     }
 
-    public void saveEntropy() throws IOException {
-        File file = new File("EntropyFile");
+    public void saveEntropy(String file_name) throws IOException {
+        File file = new File(file_name);
         FileOutputStream os = new FileOutputStream(file);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
 
         for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy) {
             writer.write(entry.getKey().getId() + "\t" + entry.getValue() + "\n");
-            if (entry.getValue() == 2.0) {
-                mergedGraph.saveMergedVertex(entry.getKey());
-                break;
-            }
         }
 
         writer.close();

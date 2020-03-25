@@ -91,7 +91,6 @@ public class SimilarityMigratePlanner implements MigratePlanner {
                 entity2.add(vertex2);
                 migratePlan.clear();
                 MergedVertex source = vertex2.getMergedVertex();
-                migratePlan.clear();
                 migratePlan.addPlan(new Plan(vertex2, source, vertex1.getMergedVertex()));
                 executor.ExecutePlan(migratePlan, false);
                 double similarity = entropyCalculator.calculateVertexEntropy(vertex1.getMergedVertex());

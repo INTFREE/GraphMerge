@@ -12,13 +12,21 @@ import knowledgeGraph.mergeModel.MergedVertex;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class GraphFileImporter {
-    String data_path = System.getProperty("user.dir");
+    String data_path;
     private HashMap<String, HashMap<Integer, Vertex>> graphToidToVertex;
     private HashMap<String, HashMap<Integer, Edge>> graphToidToEdge;
 
     public GraphFileImporter() {
+        data_path = System.getProperty("user.dir");
+        graphToidToVertex = new HashMap<>();
+        graphToidToEdge = new HashMap<>();
+    }
+
+    public GraphFileImporter(String path) {
+        data_path = System.getProperty("user.dir") + "/" + path ;
         graphToidToVertex = new HashMap<>();
         graphToidToEdge = new HashMap<>();
     }
@@ -116,7 +124,6 @@ public class GraphFileImporter {
         try {
             // read vertex file
             String vertexFileName = data_path + "/Graph_" + graphName;
-            System.out.println(vertexFileName);
             File vertexFile = new File(vertexFileName);
             inputStream = new FileInputStream(vertexFile);
             Reader reader = new InputStreamReader(inputStream);

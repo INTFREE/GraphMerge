@@ -36,7 +36,7 @@ public class Main2 {
 //        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo);
 //        mergedGraghInfo.generateMergeGraphByMatch(mergeVertexToVertexSet);
         WordEmbedding embedding = new WordEmbedding();
-        HashMap<String, Double[]> result = embedding.getEmbedding();
+        HashMap<String, double[]> result = embedding.getEmbedding();
 //        测试用
         System.out.println(result.size());
         for (String key : result.keySet()) {

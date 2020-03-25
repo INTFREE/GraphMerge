@@ -56,6 +56,9 @@ public class VertexContext {
     }
 
     public double getSimilarity(VertexContext anotherContext) {
+        if (this.contextId.isEmpty() || anotherContext.contextId.isEmpty()) {
+            return 0.0;
+        }
         DefaultUndirectedWeightedGraph<String, DefaultWeightedEdge> bigraph = new DefaultUndirectedWeightedGraph<>(DefaultWeightedEdge.class);
         for (String context_id : contextId) {
             bigraph.addVertex(context_id);
@@ -79,15 +82,15 @@ public class VertexContext {
         double res = 0;
         for (String key1 : context1.keySet()) {
             if (context2.containsKey(key1)) {
-                res += calculateMergedVertexSimilarity(context1.get(key1), context2.get(key1));
+                res += calculateMergedVertexSimilarity(key1, context1.get(key1), context2.get(key1));
             }
         }
         return res;
     }
 
-    public double calculateMergedVertexSimilarity(MergedVertex mergedVertex1, MergedVertex mergedVertex2) {
+    public double calculateMergedVertexSimilarity(String type, MergedVertex mergedVertex1, MergedVertex mergedVertex2) {
         if (!mergedVertex1.getType().equalsIgnoreCase(mergedVertex2.getType())) {
-            System.out.println("calculate similarity error " + mergedVertex1.getId() + mergedVertex2.getId());
+            System.out.println("calculate similarity error " + type + "\t" + mergedVertex1.getId() + "\t" +  mergedVertex2.getId());
         }
         if (mergedVertex1.getType().equalsIgnoreCase("entity")) {
             if (mergedVertex1.getId() == mergedVertex2.getId()) {
