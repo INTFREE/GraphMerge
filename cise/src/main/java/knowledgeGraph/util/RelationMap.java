@@ -1,6 +1,8 @@
 package knowledgeGraph.util;
 
 import knowledgeGraph.ga.VertexSimilarity;
+import knowledgeGraph.mergeModel.MergedVertex;
+import knowledgeGraph.wordSim.RelatedWord;
 import knowledgeGraph.wordSim.WordEmbedding;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
@@ -9,8 +11,10 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.neo4j.register.Register;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 public class RelationMap {
     HashMap<String, String> relationMap; // 直接这么操作会溢出
@@ -23,8 +27,8 @@ public class RelationMap {
     }
 
     public static void main(String argv[]) {
-        wordEmbedding = new WordEmbedding();
-        wordEmbedding.setEmbedding();
+//        wordEmbedding = new WordEmbedding();
+//        wordEmbedding.setEmbedding();
         RelationMap relationMap = new RelationMap();
         HashSet<String> relation_1 = relationMap.readRelationData("1");
         HashSet<String> relation_2 = relationMap.readRelationData("2");
@@ -32,12 +36,34 @@ public class RelationMap {
         System.out.println(relation_2.size());
         HashSet<String> same_value = new HashSet<>(relation_1);
         same_value.retainAll(relation_2);
-        System.out.println(same_value);
-        relation_1.removeAll(same_value);
-        relation_2.removeAll(same_value);
-        System.out.println(relation_1.size());
-        System.out.println(relation_2.size());
-        relationMap.produceRelationMap(relation_1, relation_2);
+        System.out.println("same size :" + same_value.size());
+//        relation_1.removeAll(same_value);
+//        relation_2.removeAll(same_value);
+//        HashMap<String, String> relations = relationMap.produceRelationMapByEditDistance(relation_1, relation_2);
+//        relationMap.writeRelationData("1", relations);
+//        relationMap.writeRelationData("2", relations);
+
+    }
+
+    public void writeRelationData(String file_name, HashMap<String, String> relations) {
+        try {
+            File file = new File(file_name);
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            HashMap<String, String> valueToKey = fileToValueMap.get(file_name);
+            for (String value : valueToKey.keySet()) {
+                if (file_name.equalsIgnoreCase("1") && relations.containsKey(value)) {
+                    writer.write(valueToKey.get(value) + "\t" + relations.get(value) + "\n");
+                } else {
+                    writer.write(valueToKey.get(value) + "\t" + value + "\n");
+                }
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("write file error" + e.toString());
+        }
+
     }
 
     public HashSet<String> readRelationData(String file_name) {
@@ -67,7 +93,7 @@ public class RelationMap {
         return relation;
     }
 
-    public void produceRelationMap(HashSet<String> relation_set_1, HashSet<String> relation_set_2) {
+    public void produceRelationMapByEmbedding(HashSet<String> relation_set_1, HashSet<String> relation_set_2) {
         DefaultUndirectedWeightedGraph<String, DefaultWeightedEdge> bigraph = new DefaultUndirectedWeightedGraph<>(DefaultWeightedEdge.class);
         for (String relation_1 : relation_set_1) {
             bigraph.addVertex(relation_1);
@@ -98,6 +124,69 @@ public class RelationMap {
         for (DefaultWeightedEdge edge : matching.getMatching().getEdges()) {
             System.out.println(bigraph.getEdgeSource(edge) + "\t" + bigraph.getEdgeTarget(edge));
         }
+    }
+
+    public HashMap<String, String> produceRelationMapByEditDistance(HashSet<String> relation_set_1, HashSet<String> relation_set_2) {
+        String regex = "^[(,!:]+";
+        String regexEnd = "[),!:]+$";
+        HashSet<String> stopWords = new HashSet<>(Arrays.asList("a", "the", "an", "of", "A", "The", "on", "with"));
+        HashMap<String, HashSet<String>> keyWordToRelation = new HashMap<>();
+        RelatedWord relatedWord = new RelatedWord();
+        DefaultUndirectedWeightedGraph<String, DefaultWeightedEdge> bigraph = new DefaultUndirectedWeightedGraph<>(DefaultWeightedEdge.class);
+        for (String relation_1 : relation_set_1) {
+            bigraph.addVertex(relation_1);
+        }
+        for (String relation_2 : relation_set_2) {
+            bigraph.addVertex(relation_2);
+            String[] words = relation_2.split(" ");
+            for (String word : words) {
+                String temp_word = word.replaceAll(regex, "").replaceAll(regexEnd, "");
+                if (!keyWordToRelation.containsKey(temp_word)) {
+                    keyWordToRelation.put(temp_word, new HashSet<>());
+                }
+                keyWordToRelation.get(temp_word).add(relation_2);
+            }
+        }
+        HashSet<String> relatedRelation = new HashSet<>();
+        String[] relatedWords;
+        for (String relation_1 : relation_set_1) {
+            relatedRelation.clear();
+            String[] relations = relation_1.split(" ");
+            for (String relation : relations) {
+                String temp_word = relation.replaceAll(regex, "").replaceAll(regexEnd, "");
+                if (stopWords.contains(temp_word)) {
+                    continue;
+                }
+                if (keyWordToRelation.containsKey(temp_word)) {
+                    System.out.println("exists related word " + temp_word);
+                    relatedRelation.addAll(keyWordToRelation.get(temp_word));
+                }
+                if (relatedWord.getRelatedWord().containsKey(temp_word)) {
+                    System.out.println("relatedWord exists " + temp_word);
+                    relatedWords = relatedWord.getRelatedWord().get(temp_word);
+                    for (String temp_related_word : relatedWords) {
+                        if (keyWordToRelation.containsKey(temp_related_word)) {
+                            relatedRelation.addAll(keyWordToRelation.get(temp_related_word));
+                        }
+                    }
+                }
+            }
+            for (String relation_2 : relatedRelation) {
+                if (relation_set_2.contains(relation_2)) {
+                    bigraph.setEdgeWeight(bigraph.addEdge(relation_1, relation_2), VertexSimilarity.getEditDistance(relation_1, relation_2));
+                }
+            }
+        }
+        System.out.println("bigraph info");
+        System.out.println(bigraph.vertexSet().size());
+        System.out.println(bigraph.edgeSet().size());
+        MaximumWeightBipartiteMatching<String, DefaultWeightedEdge> matching = new MaximumWeightBipartiteMatching<>(bigraph, relation_set_1, relation_set_2);
+        HashMap<String, String> res = new HashMap<>();
+        for (DefaultWeightedEdge edge : matching.getMatching().getEdges()) {
+            System.out.println(bigraph.getEdgeSource(edge) + "\t" + bigraph.getEdgeTarget(edge) + "\t" + bigraph.getEdgeWeight(edge));
+            res.put(bigraph.getEdgeSource(edge), bigraph.getEdgeTarget(edge));
+        }
+        return res;
     }
 
     public double[] getRelationEmbedding(String relation) {

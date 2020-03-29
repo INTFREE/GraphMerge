@@ -2,8 +2,10 @@ package knowledgeGraph.ga;
 
 
 import javafx.util.Pair;
+import knowledgeGraph.ExperimentMain;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.*;
+import knowledgeGraph.wordSim.RelatedWord;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -13,8 +15,13 @@ import java.util.*;
 
 public class SimilarityMigratePlanner implements MigratePlanner {
     private MergedGraghInfo mergedGraghInfo;
+    private String[] allwords;
+    String regex = "^[(,!:]+";
+    String regexEnd = "[),!:]+$";
+    private HashMap<String, HashSet<Vertex>> keywordToVertex;
 
     public SimilarityMigratePlanner(MergedGraghInfo mergedGraghInfo) {
+        keywordToVertex = new HashMap<>();
         this.mergedGraghInfo = mergedGraghInfo;
     }
 
@@ -22,8 +29,9 @@ public class SimilarityMigratePlanner implements MigratePlanner {
     public MigratePlan getVertexMigratePlan() {
         System.out.println(">>>>>>>Sim get Migrate Plan");
         MigratePlan migratePlan = new MigratePlan();
+        keywordToVertex.clear();
         MergedGraph mergedGraph = this.mergedGraghInfo.getMergedGraph();
-        BasicEntropyCalculator entropyCalculator = new BasicEntropyCalculator();
+        BasicEntropyCalculator entropyCalculator = new BasicEntropyCalculator(this.mergedGraghInfo);
         BasicPlanExecutor executor = new BasicPlanExecutor(this.mergedGraghInfo);
         // 如果还存在单一节点，首先处理单独节点
         HashMap<String, HashSet<Vertex>> bigraphVerties = new HashMap<>();
@@ -35,10 +43,12 @@ public class SimilarityMigratePlanner implements MigratePlanner {
                 bigraphVerties.get(vertex.getGraph().getUserName()).add(vertex);
             }
         }
-
         // 计算相似度
-        // 迁移10%且熵值小于某个阈值
-        List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy();
+        // 迁移5%且熵值小于某个阈值
+        double size = mergedGraghInfo.getMergedVertexToEntropy().size() * 0.05;
+        int new_size = (int) size;
+        List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy().subList(0, new_size);
+        System.out.println("entropy list size " + mergedVertexArrayList.size());
         for (HashMap.Entry<MergedVertex, Double> entry : mergedVertexArrayList) {
             MergedVertex mergedVertex = entry.getKey();
             if (!mergedVertex.getType().equalsIgnoreCase("entity") || mergedVertex.getVertexSet().size() == 1) {
@@ -66,9 +76,18 @@ public class SimilarityMigratePlanner implements MigratePlanner {
 //            migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
 //            break;
         }
-        executor.ExecutePlan(migratePlan, false);
+        System.out.println("migrate two2one plan size : " + migratePlan.getPlanArrayList().size());
+        executor.ExecutePlan(migratePlan, true, true);
         migratePlan.clear();
+        System.out.println("graph_1 size " + bigraphVerties.get("1").size());
+        System.out.println("graph_2 size " + bigraphVerties.get("2").size());
+        long start_time = System.currentTimeMillis();
+        calRelatedVertex(bigraphVerties.get("2"));
+        long end_time = System.currentTimeMillis();
+        System.out.println("calculate time " + (end_time - start_time));
         migratePlan = getBigraphPlan(bigraphVerties, entropyCalculator, executor);
+        long new_end_time = System.currentTimeMillis();
+        System.out.println("generate time :" + (new_end_time - end_time));
         return migratePlan;
     }
 
@@ -81,26 +100,37 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         System.out.println("graph" + key1 + " " + oneNodeVerties.get(key1).size());
         System.out.println("graph" + key2 + " " + oneNodeVerties.get(key2).size());
         Bigraph bigraph = new Bigraph();
-        HashSet<Vertex> entity1 = new HashSet<>();
-        HashSet<Vertex> entity2 = new HashSet<>();
+        HashSet<Vertex> entity1 = oneNodeVerties.get(key1);
+        HashSet<Vertex> entity2 = oneNodeVerties.get(key2);
+        for (Vertex vertex : entity1) {
+            bigraph.addVertex(vertex);
+        }
+        for (Vertex vertex : entity2) {
+            bigraph.addVertex(vertex);
+        }
+        HashSet<Vertex> relatedVertex;
+        int count = 0;
         for (Vertex vertex1 : oneNodeVerties.get(key1)) {
-            bigraph.addVertex(vertex1);
-            entity1.add(vertex1);
-            for (Vertex vertex2 : oneNodeVerties.get(key2)) {
-                bigraph.addVertex(vertex2);
-                entity2.add(vertex2);
+            count += 1;
+            relatedVertex = getRelatedVertex(vertex1);
+
+            for (Vertex vertex2 : relatedVertex) {
                 migratePlan.clear();
                 MergedVertex source = vertex2.getMergedVertex();
                 migratePlan.addPlan(new Plan(vertex2, source, vertex1.getMergedVertex()));
-                executor.ExecutePlan(migratePlan, false);
+                executor.ExecutePlan(migratePlan, false, false);
                 double similarity = entropyCalculator.calculateVertexEntropy(vertex1.getMergedVertex());
+                similarity = 1 / (1 + similarity);
                 bigraph.setEdgeWeight(bigraph.addEdge(vertex1, vertex2), similarity);
                 migratePlan.clear();
                 migratePlan.addPlan(new Plan(vertex2, vertex1.getMergedVertex(), source));
-                executor.ExecutePlan(migratePlan, false);
+                executor.ExecutePlan(migratePlan, false, false);
+            }
+            if (count % 200 == 0) {
+                System.out.println("calculate : " + count);
             }
         }
-        System.out.println("bigraph size" + bigraph.vertexSet().size() + " " + bigraph.vertexSet().size());
+        System.out.println("bigraph size" + bigraph.vertexSet().size() + "\t" + bigraph.edgeSet().size());
         System.out.println("entity1 size " + entity1.size());
         System.out.println("entity2 size " + entity2.size());
         saveBigraph(bigraph, entity1, entity2);
@@ -113,6 +143,47 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         }
         System.out.println("plan size " + migratePlan.getPlanArrayList().size());
         return migratePlan;
+    }
+
+    private HashSet<Vertex> getRelatedVertex(Vertex vertex) {
+        String[] relatedWords;
+        HashSet<Vertex> relatedVertex = new HashSet<>();
+        allwords = vertex.getValue().split(" ");
+        for (String word : allwords) {
+            String temp_word = word.replaceAll(regex, "").replaceAll(regexEnd, "");
+            if (keywordToVertex.containsKey(temp_word)) {
+                relatedVertex.addAll(keywordToVertex.get(temp_word));
+            }
+            if (ExperimentMain.relatedWord.getRelatedWord().containsKey(temp_word)) {
+                relatedWords = ExperimentMain.relatedWord.getRelatedWord().get(temp_word);
+                for (String temp : relatedWords) {
+                    if (keywordToVertex.containsKey(temp)) {
+                        relatedVertex.addAll(keywordToVertex.get(temp));
+                    }
+                }
+            }
+        }
+//        if (relatedVertex.size() == 0) {
+//            System.out.println("zero vertex : " + vertex.getId());
+//        }
+        return relatedVertex;
+    }
+
+    private void calRelatedVertex(HashSet<Vertex> vertices) {
+        for (Vertex vertex : vertices) {
+            if (!vertex.getType().equalsIgnoreCase("entity")) {
+                continue;
+            }
+            allwords = vertex.getValue().split(" ");
+            for (String word : allwords) {
+                String keyword = word.replaceAll(regex, "").replaceAll(regexEnd, "");
+                if (!keywordToVertex.containsKey(keyword)) {
+                    keywordToVertex.put(keyword, new HashSet<>());
+                }
+                keywordToVertex.get(keyword).add(vertex);
+            }
+        }
+        System.out.println("keywordToVertex : " + keywordToVertex.size());
     }
 
     // 去除源节点

@@ -483,6 +483,9 @@ public class MergedGraghInfo {
 
         for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy) {
             writer.write(entry.getKey().getId() + "\t" + entry.getValue() + "\n");
+            for (Vertex vertex : entry.getKey().getVertexSet()) {
+                writer.write(vertex.getGraph().getUserName() + "\t" + vertex.getId() + "\n");
+            }
         }
 
         writer.close();

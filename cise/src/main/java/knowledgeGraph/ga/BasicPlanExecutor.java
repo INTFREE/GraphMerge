@@ -20,8 +20,7 @@ public class BasicPlanExecutor implements PlanExecutor {
     }
 
     @Override
-    public void ExecutePlan(MigratePlan migratePlan, boolean relationMigrate) {
-        System.out.println(">>>>> execute plan: " + migratePlan.getPlanArrayList().size());
+    public void ExecutePlan(MigratePlan migratePlan, boolean relationMigrate, boolean cleanGraph) {
         for (Plan plan : migratePlan.getPlanArrayList()) {
             Vertex vertex = plan.getVertex();
             MergedVertex source = plan.getSource();
@@ -42,7 +41,9 @@ public class BasicPlanExecutor implements PlanExecutor {
                 doExecutePlan(relationVertex, relationSource, relationTarget, false);
             }
         }
-        this.cleanGraph();
+        if (cleanGraph){
+            this.cleanGraph();
+        }
     }
 
     // TODO:直接调用计算熵值函数效率太低.

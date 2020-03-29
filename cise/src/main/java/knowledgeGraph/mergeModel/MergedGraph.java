@@ -156,5 +156,10 @@ public class MergedGraph extends DirectedPseudograph<MergedVertex, MergedEdge> {
             System.out.println("save MergedVertex error " + e);
         }
     }
+    public void print(){
+        System.out.println(">>>>>>MergedGraph Info");
+        System.out.println("Vertex size " + this.vertexSet().size());
+        System.out.println("Edge size " + this.edgeSet().size());
+    }
 
 }

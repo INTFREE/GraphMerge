@@ -8,10 +8,12 @@ import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.MergedEdge;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 public class GraphFileImporter {
@@ -26,7 +28,7 @@ public class GraphFileImporter {
     }
 
     public GraphFileImporter(String path) {
-        data_path = System.getProperty("user.dir") + "/" + path ;
+        data_path = System.getProperty("user.dir") + "/" + path;
         graphToidToVertex = new HashMap<>();
         graphToidToEdge = new HashMap<>();
     }
@@ -128,9 +130,9 @@ public class GraphFileImporter {
             inputStream = new FileInputStream(vertexFile);
             Reader reader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(reader);
-            String line;
             Integer vertexNum = Integer.parseInt(bufferedReader.readLine());
             Integer edgeNum = Integer.parseInt(bufferedReader.readLine());
+            String line;
             String[] attrs;
             for (int i = 0; i < vertexNum; i++) {
                 line = bufferedReader.readLine();

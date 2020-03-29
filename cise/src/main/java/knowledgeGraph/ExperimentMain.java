@@ -14,6 +14,7 @@ import knowledgeGraph.mergeModel.MergedEdge;
 import knowledgeGraph.mergeModel.MergedGraghInfo;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
+import knowledgeGraph.wordSim.RelatedWord;
 
 import java.io.*;
 import java.util.*;
@@ -22,16 +23,22 @@ public class ExperimentMain {
     public static HashMap<Integer, Integer> ans;
     public static HashSet<MergedVertex> wrongMergedVertexSet;
     public static int max_lenth = 0;
+    public static RelatedWord relatedWord;
+
+    public static void init() {
+        ans = new HashMap<>();
+        wrongMergedVertexSet = new HashSet<>();
+        relatedWord = new RelatedWord();
+        relatedWord.setRelatedWord();
+        readAns();
+    }
 
     public static void main(String argv[]) throws IOException {
-
+        init();
 //        firstStep();
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
         boolean detailed = false; // 是否对细分信息进行统计
-        ans = new HashMap<>();
-        wrongMergedVertexSet = new HashSet<>();
-        readAns();
 //
         long startTime, endTime;
         GraphFileImporter importer = new GraphFileImporter();
@@ -39,32 +46,45 @@ public class ExperimentMain {
         for (Graph graph : graphInfo.getValue()) {
             graph.print();
         }
-        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphInfo.getKey());
+        Iterator<Graph> graphIterator = graphInfo.getValue().iterator();
+        Graph graph1 = graphIterator.next();
+        Graph graph2 = graphIterator.next();
+        System.out.println(graph1.getUserName() + "\t" + graph2.getUserName());
 
+        MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphInfo.getKey());
         System.out.println("finish mergeGraph read");
+
+        migrateRelation(mergedGraghInfo.getMergedGraph());
+
         startTime = System.currentTimeMillis();
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
         double etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
         endTime = System.currentTimeMillis();
         System.out.println("entropy calculating time:" + (endTime - startTime));
         System.out.println("before entropy : " + etr);
-        mergedGraghInfo.saveEntropy("BeforeMigrateRelationEntropy");
-        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
+        mergedGraghInfo.saveEntropy("BeforeEntropy");
+        System.out.println("before hit one : " + calcuteHitOne(mergedGraghInfo));
+//        writeWrongSet(mergedGraghInfo, "BeforeWrongVertex");
 
-        migrateRelation(mergedGraghInfo.getMergedGraph());
-//        SimilarityMigratePlanner similarityMigratePlanner = new SimilarityMigratePlanner(mergedGraghInfo);
-//        MigratePlan migratePlan = similarityMigratePlanner.getVertexMigratePlan();
-////        BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
-////        MigratePlan migratePlan = bigraphMatchPlanner.getVertexMigratePlan();
-////
-////        System.out.println(">>> migrate info");
-////        System.out.println(migratePlan.getPlanArrayList().size());
-//        BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
-//        planExecutor.ExecutePlan(migratePlan);
-        etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
-        System.out.println("after entropy : " + etr);
-        mergedGraghInfo.saveEntropy("AfterEntropy");
-//        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
+        startTime = endTime;
+
+        SimilarityMigratePlanner similarityMigratePlanner = new SimilarityMigratePlanner(mergedGraghInfo);
+        BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
+        for (int i = 0; i < 1; i++){
+            startTime = System.currentTimeMillis();
+            MigratePlan migratePlan = similarityMigratePlanner.getVertexMigratePlan();
+            endTime = System.currentTimeMillis();
+            System.out.println("plan time " + (endTime - startTime));
+            System.out.println(">>> migrate info");
+            System.out.println(migratePlan.getPlanArrayList().size());
+            planExecutor.ExecutePlan(migratePlan, true, true);
+            mergedGraghInfo.getMergedGraph().print();
+            mergedGraghInfo.saveEntropy("AfterEntropy");
+            etr = basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+            System.out.println("after entropy : " + etr);
+            System.out.println("after hit one : " + calcuteHitOne(mergedGraghInfo));
+        }
+
     }
 
     public static void firstStep() throws IOException {
@@ -135,7 +155,7 @@ public class ExperimentMain {
         startTime = System.currentTimeMillis();
 //        执行迁移方案
         BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
-        planExecutor.ExecutePlan(migratePlan, true);
+        planExecutor.ExecutePlan(migratePlan, true, true);
         endTime = System.currentTimeMillis();
         System.out.println("execute time:" + (endTime - startTime));
         mergedGraghInfo.getMergedGraph().saveToFile();
@@ -181,11 +201,23 @@ public class ExperimentMain {
             }
         }
         System.out.println("wrong set size is : " + tempwrongMergedVertexSet.size());
-        for (MergedVertex mergedVertex : tempwrongMergedVertexSet) {
-            System.out.println(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex));
-        }
         wrongMergedVertexSet = tempwrongMergedVertexSet;
         return (double) correctNum / ans.size();
+    }
+
+    public static void writeWrongSet(MergedGraghInfo mergedGraghInfo, String fileName) {
+        try {
+            File file = new File(fileName);
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            for (MergedVertex mergedVertex : wrongMergedVertexSet) {
+                writer.write(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex) + "\n");
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("read file error" + e.toString());
+        }
     }
 
     public static void saveAns() throws IOException {
@@ -209,7 +241,6 @@ public class ExperimentMain {
             Reader reader1 = new InputStreamReader(inputStream1);
             BufferedReader bufferedReader1 = new BufferedReader(reader1);
             String line1;
-
             while ((line1 = bufferedReader1.readLine()) != null) {
                 String vertexName1 = line1.split("\t")[0];
                 String vertexName2 = line1.split("\t")[1];
