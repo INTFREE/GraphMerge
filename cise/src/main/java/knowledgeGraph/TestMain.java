@@ -1,15 +1,7 @@
 package knowledgeGraph;
 
-import javafx.util.Pair;
-import knowledgeGraph.baseModel.MigratePlan;
-import knowledgeGraph.baseModel.Plan;
+import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.baseModel.Vertex;
-import knowledgeGraph.ga.BasicPlanExecutor;
-import knowledgeGraph.ga.SimilarityMigratePlanner;
-import knowledgeGraph.io.TestFileImporter;
-import knowledgeGraph.mergeModel.MergedGraghInfo;
-import knowledgeGraph.mergeModel.MergedGraph;
-import knowledgeGraph.mergeModel.MergedVertex;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,8 +14,8 @@ public class TestMain {
         HashSet<Pair<String, HashSet<String>>> test = new HashSet<>();
         HashSet<String> value = new HashSet<>();
         value.add("test");
-        test.add(new Pair<>("test", value));
-        test.add(new Pair<>("test", value));
+        test.add(new ImmutablePair<>("test", value));
+        test.add(new ImmutablePair<>("test", value));
         System.out.println(test);
 
 

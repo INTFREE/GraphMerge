@@ -1,6 +1,6 @@
 package knowledgeGraph;
 
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.io.GraphFileImporter;
 import knowledgeGraph.mergeModel.MergedGraghInfo;

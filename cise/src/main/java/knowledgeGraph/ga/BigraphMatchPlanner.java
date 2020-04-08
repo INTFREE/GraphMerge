@@ -11,7 +11,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 public class BigraphMatchPlanner implements MigratePlanner {
     private Graph graph1;
@@ -60,7 +59,11 @@ public class BigraphMatchPlanner implements MigratePlanner {
         HashMap<String, Vertex> sameValueMap = new HashMap<>();
         for (Vertex vertex : graph1.vertexSet()) {
             if (vertex.getType().equalsIgnoreCase("entity")) {
-                sameValueMap.put(vertex.getValue(), vertex);
+                if (sameValueMap.containsKey(vertex.getValue())) {
+                    entityVertexSet1.add(vertex);
+                } else {
+                    sameValueMap.put(vertex.getValue(), vertex);
+                }
             }
         }
         for (Vertex vertex : graph2.vertexSet()) {

@@ -1,22 +1,33 @@
 package knowledgeGraph.ga;
 
-import javafx.util.Pair;
-import knowledgeGraph.baseModel.*;
+import org.apache.commons.lang3.tuple.*;
+
+import knowledgeGraph.baseModel.Edge;
+import knowledgeGraph.baseModel.MigratePlan;
+import knowledgeGraph.baseModel.Plan;
+import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 public class BasicPlanExecutor implements PlanExecutor {
     MergedGraghInfo mergedGraghInfo;
     Set<String> targetGraphSet;
+    Set<MergedEdge> relatedMergedEdges;
+    Set<MergedEdge> targetRelatedMergedEdges;
+    Set<Pair<Vertex, Edge>> relatedVertexAndEdge;
+    HashSet<MergedEdge> removedEdge;
+    HashSet<MergedVertex> removedVertex;
 
     public BasicPlanExecutor(MergedGraghInfo mergedGraghInfo) {
         this.mergedGraghInfo = mergedGraghInfo;
         targetGraphSet = new HashSet<>();
+        relatedMergedEdges = new HashSet<>();
+        targetRelatedMergedEdges = new HashSet<>();
+        relatedVertexAndEdge = new HashSet<>();
+        removedEdge = new HashSet<>();
+        removedVertex = new HashSet<>();
     }
 
     @Override
@@ -25,11 +36,9 @@ public class BasicPlanExecutor implements PlanExecutor {
             Vertex vertex = plan.getVertex();
             MergedVertex source = plan.getSource();
             MergedVertex target = plan.getTarget();
-
             if (checkSameGraph(vertex, target)) {
                 continue;
             }
-
             MigratePlan relationMigratePlan = doExecutePlan(vertex, source, target, relationMigrate);
             for (Plan relationPlan : relationMigratePlan.getPlanArrayList()) {
                 Vertex relationVertex = relationPlan.getVertex();
@@ -41,14 +50,9 @@ public class BasicPlanExecutor implements PlanExecutor {
                 doExecutePlan(relationVertex, relationSource, relationTarget, false);
             }
         }
-        if (cleanGraph){
+        if (cleanGraph) {
             this.cleanGraph();
         }
-    }
-
-    // TODO:直接调用计算熵值函数效率太低.
-    public boolean checkEntropy() {
-        return true;
     }
 
     private boolean checkSameGraph(Vertex vertex, MergedVertex target) {
@@ -65,28 +69,30 @@ public class BasicPlanExecutor implements PlanExecutor {
 
         if (!source.getVertexSet().contains(vertex)) {
             System.out.println("DoExecutionPlan ERROR: vertex not in source MergedVertex.");
+            System.out.println(vertex.getValue() + "\t" + vertex.getType());
+            System.out.println(source.getVertexSet().size());
             return null;
         }
 
         // 找到所有和迁移源点相连的融合边
-        Set<MergedEdge> relatedMergedEdges = new HashSet<>();
+        relatedMergedEdges.clear();
         relatedMergedEdges.addAll(mergedGraph.incomingEdgesOf(source));
         relatedMergedEdges.addAll(mergedGraph.outgoingEdgesOf(source));
 
         // 记录所有和迁移节点有关系的边
-        Set<Pair<Vertex, Edge>> relatedVertexAndEdge = new HashSet<>();
+        relatedVertexAndEdge.clear();
         String type = "";
 
         for (MergedEdge mergedEdge : relatedMergedEdges) {
             for (Edge edge : mergedEdge.getEdgeSet()) {
                 if (edge.getTarget().equals(vertex)) {
                     type = "IN";
-                    relatedVertexAndEdge.add(new Pair<>(edge.getSource(), edge));
+                    relatedVertexAndEdge.add(new ImmutablePair<>(edge.getSource(), edge));
                     mergedEdge.deleteEdge(edge);
                     break;
                 } else if (edge.getSource().equals(vertex)) {
                     type = "OUT";
-                    relatedVertexAndEdge.add(new Pair<>(edge.getTarget(), edge));
+                    relatedVertexAndEdge.add(new ImmutablePair<>(edge.getTarget(), edge));
                     mergedEdge.deleteEdge(edge);
                     break;
                 }
@@ -96,7 +102,7 @@ public class BasicPlanExecutor implements PlanExecutor {
 
         // 如果是实体节点，需要迁移对应的relation节点
         boolean isEntity = vertex.getType().equalsIgnoreCase("entity");
-        Set<MergedEdge> targetRelatedMergedEdges = new HashSet<>();
+        targetRelatedMergedEdges.clear();
         if (isEntity) {
             targetRelatedMergedEdges.addAll(mergedGraph.incomingEdgesOf(target));
             targetRelatedMergedEdges.addAll(mergedGraph.outgoingEdgesOf(target));
@@ -147,7 +153,9 @@ public class BasicPlanExecutor implements PlanExecutor {
 
 
         }
-        source.removeVertex(vertex);
+        if (!source.removeVertex(vertex)) {
+            System.out.println("DoExecutionPlan error : remove vertex error " + source.getId() + "\t" + vertex.getId());
+        }
         // 迁移到新的节点
         target.addVertex(vertex);
         vertex.setMergedVertex(target);
@@ -156,7 +164,8 @@ public class BasicPlanExecutor implements PlanExecutor {
     }
 
     private void cleanGraph() {
-        HashSet<MergedEdge> removedEdge = new HashSet<>();
+        removedVertex.clear();
+        removedEdge.clear();
         MergedGraph mergedGraph = mergedGraghInfo.getMergedGraph();
         for (MergedEdge mergedEdge : mergedGraph.edgeSet()) {
             if (mergedEdge.getEdgeSet().size() == 0) {
@@ -164,7 +173,6 @@ public class BasicPlanExecutor implements PlanExecutor {
             }
         }
         mergedGraph.removeAllEdges(removedEdge);
-        HashSet<MergedVertex> removedVertex = new HashSet<>();
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (mergedVertex.getVertexSet().size() == 0) {
                 if (mergedGraph.incomingEdgesOf(mergedVertex).size() != 0 || mergedGraph.outgoingEdgesOf(mergedVertex).size() != 0) {
@@ -174,7 +182,6 @@ public class BasicPlanExecutor implements PlanExecutor {
                 }
             }
         }
-
         mergedGraph.removeAllVertices(removedVertex);
     }
 

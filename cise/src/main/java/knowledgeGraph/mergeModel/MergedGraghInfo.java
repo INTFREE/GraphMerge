@@ -70,12 +70,13 @@ public class MergedGraghInfo {
             biGraph = new Bigraph();
         }
         mergedVertexListSortedByEntropy = new ArrayList<>();
+        mergedVertexToEntropy = new ArrayList<>();
     }
 
     public MergedGraghInfo(MergedGraph mergedGraph) {
         System.out.println(">>>>>> Initialize MergedGraphInfo");
         this.mergedGraph = mergedGraph;
-
+        mergedVertexToEntropy = new ArrayList<>();
         typeToVertexSetMap = new HashMap<>();
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (!typeToVertexSetMap.containsKey(mergedVertex.getType())) {
@@ -456,7 +457,15 @@ public class MergedGraghInfo {
     public Integer getMergedVertexIndexInEntropy(MergedVertex mergedVertex) {
         return mergedVertexListSortedByEntropy.indexOf(mergedVertex);
     }
-
+    public double calculateEntropy(HashSet<Integer> ids){
+        double res = 0.0;
+        for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy){
+            if (ids.contains(entry.getKey().getId())){
+                res += entry.getValue();
+            }
+        }
+        return res;
+    }
     public void setMergedVertexToEntropy(HashMap<MergedVertex, Double> mergedVertexToEntropy) {
         List<Map.Entry<MergedVertex, Double>> sortedEntropy =
                 new ArrayList<>(mergedVertexToEntropy.entrySet());
@@ -467,6 +476,7 @@ public class MergedGraghInfo {
             }
         });
         mergedVertexListSortedByEntropy.clear();
+        this.mergedVertexToEntropy.clear();
         for (Map.Entry<MergedVertex, Double> entry : sortedEntropy) {
             if (entry.getKey().getType().equalsIgnoreCase("entity")) {
                 mergedVertexListSortedByEntropy.add(entry.getKey());
@@ -483,11 +493,24 @@ public class MergedGraghInfo {
 
         for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy) {
             writer.write(entry.getKey().getId() + "\t" + entry.getValue() + "\n");
+        }
+
+        writer.close();
+        os.close();
+    }
+
+    public void saveDetailEntropy(String file_name) throws IOException {
+        File file = new File(file_name);
+        FileOutputStream os = new FileOutputStream(file);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+        int count = 0;
+        for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy) {
+            writer.write(entry.getKey().getId() + "\t" + entry.getValue() + "\t" + count + "\t" + entry.getKey().getVertexSet().size() + "\n");
             for (Vertex vertex : entry.getKey().getVertexSet()) {
                 writer.write(vertex.getGraph().getUserName() + "\t" + vertex.getId() + "\n");
             }
+            count += 1;
         }
-
         writer.close();
         os.close();
     }

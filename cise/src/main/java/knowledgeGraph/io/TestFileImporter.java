@@ -1,6 +1,6 @@
 package knowledgeGraph.io;
 
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
@@ -108,6 +108,6 @@ public class TestFileImporter {
             System.out.println(mergedEdge.getEdgeSet().size());
         }
 
-        return new Pair<>(vertexHashMap, this.mergedGraph);
+        return new ImmutablePair<>(vertexHashMap, this.mergedGraph);
     }
 }

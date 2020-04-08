@@ -1,6 +1,5 @@
 package knowledgeGraph.baseModel;
 
-import javafx.util.Pair;
 import knowledgeGraph.mergeModel.MergedVertex;
 
 public class Plan {

@@ -10,8 +10,8 @@ import java.util.*;
 
 public class ExperimentFileImporter {
     HashMap<String, Vertex> vertexHashMap;
-    String data_path = System.getProperty("user.dir") + "/src/BootEA_datasets/BootEA_DBP_WD_100K/";
-    String match_path = System.getProperty("user.dir") + "/src/entropy_calc/match/";
+    String data_path = "src/BootEA_datasets/BootEA_DBP_WD_100K/";
+    String match_path = "src/entropy_calc/match/";
     Integer vertexId = 1;
     Integer edgeId = 1;
     Graph graph;
@@ -24,6 +24,7 @@ public class ExperimentFileImporter {
     List<String> allWords;
     String regex = "^[(,!:]+";
     String regexEnd = "[),!:]+$";
+    String pattern = "\\(.*?\\)";
 
 
     public ExperimentFileImporter() {
@@ -74,6 +75,9 @@ public class ExperimentFileImporter {
                 String vertexName = "";
                 if (strings.size() == 2) {
                     vertexName = strings.get(1);
+//                    if (vertexName.endsWith(")")) {
+//                        vertexName = vertexName.replaceAll(pattern, "").trim();
+//                    }
                 }
 
                 if (vertexName.length() > ExperimentMain.max_lenth) {
@@ -176,6 +180,9 @@ public class ExperimentFileImporter {
                 String vertexKey = strings.get(0);
                 String attr = strings.get(1);
                 String value = strings.get(2);
+//                if (attr.trim().equalsIgnoreCase("http://www.w3.org/2000/01/rdf-schema#label") || attr.trim().equalsIgnoreCase("http://xmlns.com/foaf/0.1/name")) {
+//                    continue;
+//                }
                 if (value.length() > ExperimentMain.max_lenth) {
                     ExperimentMain.max_lenth = value.length();
                 }
@@ -260,6 +267,7 @@ public class ExperimentFileImporter {
                 String vertexKey1 = strings.get(0);
                 String attr = strings.get(1);
                 String vertexKey2 = strings.get(2);
+
                 Vertex entity1 = this.vertexHashMap.get(vertexKey1);
                 Vertex entity2 = this.vertexHashMap.get(vertexKey2);
                 s = Entity2Id.get(vertexKey1);

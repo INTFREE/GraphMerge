@@ -1,4 +1,4 @@
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.io.GraphFileImporter;

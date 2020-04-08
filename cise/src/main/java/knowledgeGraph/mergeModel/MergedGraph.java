@@ -1,9 +1,7 @@
 package knowledgeGraph.mergeModel;
 
-import javafx.util.Pair;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Vertex;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.io.*;
@@ -64,8 +62,8 @@ public class MergedGraph extends DirectedPseudograph<MergedVertex, MergedEdge> {
         targetMergedVertex.addVertex(sourceVertex);
     }
 
-    public void saveToFile() throws IOException {
-        File file = new File("MergedGraph");
+    public void saveToFile(String fileName) throws IOException {
+        File file = new File(fileName);
         FileOutputStream os = new FileOutputStream(file);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
         writer.write(this.vertexSet().size() + "\n");

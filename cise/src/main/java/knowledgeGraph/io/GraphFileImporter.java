@@ -1,20 +1,16 @@
 package knowledgeGraph.io;
 
-import javafx.util.Pair;
-import knowledgeGraph.ExperimentMain;
+import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.baseModel.Edge;
 import knowledgeGraph.baseModel.Graph;
 import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.MergedEdge;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class GraphFileImporter {
     String data_path;
@@ -22,13 +18,13 @@ public class GraphFileImporter {
     private HashMap<String, HashMap<Integer, Edge>> graphToidToEdge;
 
     public GraphFileImporter() {
-        data_path = System.getProperty("user.dir");
+        data_path = "";
         graphToidToVertex = new HashMap<>();
         graphToidToEdge = new HashMap<>();
     }
 
     public GraphFileImporter(String path) {
-        data_path = System.getProperty("user.dir") + "/" + path;
+        data_path = path;
         graphToidToVertex = new HashMap<>();
         graphToidToEdge = new HashMap<>();
     }
@@ -40,7 +36,7 @@ public class GraphFileImporter {
             graphs.add(graph);
         }
         MergedGraph mergedGraph = readMergedGraphFromFile();
-        return new Pair<>(mergedGraph, graphs);
+        return new ImmutablePair<>(mergedGraph, graphs);
     }
 
     private void saveRelation(Graph graph) {
@@ -65,7 +61,7 @@ public class GraphFileImporter {
         MergedGraph mergedGraph = new MergedGraph();
         HashMap<Integer, MergedVertex> idToMergedVertex = new HashMap<>();
         try {
-            File mergedGraphFile = new File(data_path + "/MergedGraph");
+            File mergedGraphFile = new File(data_path + "MergedGraph");
             inputStream = new FileInputStream(mergedGraphFile);
             Reader reader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(reader);
@@ -125,7 +121,7 @@ public class GraphFileImporter {
         HashMap<Integer, Edge> idToEdge = new HashMap<>();
         try {
             // read vertex file
-            String vertexFileName = data_path + "/Graph_" + graphName;
+            String vertexFileName = data_path + "Graph_" + graphName;
             File vertexFile = new File(vertexFileName);
             inputStream = new FileInputStream(vertexFile);
             Reader reader = new InputStreamReader(inputStream);

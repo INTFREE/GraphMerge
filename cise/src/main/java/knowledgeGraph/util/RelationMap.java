@@ -1,48 +1,84 @@
 package knowledgeGraph.util;
 
 import knowledgeGraph.ga.VertexSimilarity;
-import knowledgeGraph.mergeModel.MergedVertex;
 import knowledgeGraph.wordSim.RelatedWord;
 import knowledgeGraph.wordSim.WordEmbedding;
-import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.neo4j.register.Register;
 
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 public class RelationMap {
     HashMap<String, String> relationMap; // 直接这么操作会溢出
     HashMap<String, HashMap<String, String>> fileToValueMap;
     static WordEmbedding wordEmbedding;
 
-    RelationMap() {
+    public RelationMap() {
         this.relationMap = new HashMap<>();
         this.fileToValueMap = new HashMap<>();
+    }
+
+    public void setRelationMap() {
+        readData("1");
+        readData("2");
+    }
+
+    public String getRelationMap(String relation) {
+        if (relationMap.size() == 0) {
+            this.setRelationMap();
+        }
+        if (!relationMap.containsKey(relation)) {
+            return relation;
+        }
+        return relationMap.get(relation);
     }
 
     public static void main(String argv[]) {
 //        wordEmbedding = new WordEmbedding();
 //        wordEmbedding.setEmbedding();
         RelationMap relationMap = new RelationMap();
-        HashSet<String> relation_1 = relationMap.readRelationData("1");
-        HashSet<String> relation_2 = relationMap.readRelationData("2");
+        HashSet<String> relation_1 = relationMap.readRelationData("relation_1_map");
+        HashSet<String> relation_2 = relationMap.readRelationData("relation_2_map");
         System.out.println(relation_1.size());
         System.out.println(relation_2.size());
         HashSet<String> same_value = new HashSet<>(relation_1);
         same_value.retainAll(relation_2);
         System.out.println("same size :" + same_value.size());
-//        relation_1.removeAll(same_value);
-//        relation_2.removeAll(same_value);
-//        HashMap<String, String> relations = relationMap.produceRelationMapByEditDistance(relation_1, relation_2);
-//        relationMap.writeRelationData("1", relations);
-//        relationMap.writeRelationData("2", relations);
+        HashMap<String, String> relation_map = relationMap.readFinalRelation();
+////        relation_1.removeAll(same_value);
+////        relation_2.removeAll(same_value);
+////        HashMap<String, String> relations = relationMap.produceRelationMapByEditDistance(relation_1, relation_2);
+        relationMap.writeRelationData("1", relation_map);
+        relationMap.writeRelationData("2", relation_map);
+    }
 
+    public HashMap<String, String> readFinalRelation() {
+        InputStream inputStream;
+        HashMap<String, String> relation_map = new HashMap<>();
+        try {
+            // read embedding file
+            File relation_file = new File(System.getProperty("user.dir") + "/relation_map");
+            inputStream = new FileInputStream(relation_file);
+            Reader reader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] relations = line.split("\t");
+                if (relations.length != 2) {
+                    System.out.println("relation map error " + line);
+                    continue;
+                }
+                relation_map.put(relations[0], relations[1]);
+            }
+        } catch (Exception e) {
+            System.out.println("read file error" + e.toString());
+        }
+        System.out.println("relation map size " + relation_map.size());
+        return relation_map;
     }
 
     public void writeRelationData(String file_name, HashMap<String, String> relations) {
@@ -50,7 +86,7 @@ public class RelationMap {
             File file = new File(file_name);
             FileOutputStream os = new FileOutputStream(file);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-            HashMap<String, String> valueToKey = fileToValueMap.get(file_name);
+            HashMap<String, String> valueToKey = fileToValueMap.get("relation_" + file_name + "_map");
             for (String value : valueToKey.keySet()) {
                 if (file_name.equalsIgnoreCase("1") && relations.containsKey(value)) {
                     writer.write(valueToKey.get(value) + "\t" + relations.get(value) + "\n");
@@ -66,13 +102,33 @@ public class RelationMap {
 
     }
 
+    public void readData(String file_name) {
+        InputStream inputStream;
+        try {
+            File relation_file = new File(System.getProperty("user.dir") + "/" + file_name);
+            inputStream = new FileInputStream(relation_file);
+            Reader reader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] relations = line.split("\t");
+                if (relationMap.containsKey(relations[0])) {
+                    System.out.println("same key " + relations[0]);
+                }
+                relationMap.put(relations[0], relations[1]);
+            }
+            bufferedReader.close();
+        } catch (Exception e) {
+            System.out.println("read file error" + e.toString());
+        }
+    }
+
     public HashSet<String> readRelationData(String file_name) {
         InputStream inputStream;
         HashSet<String> relation = new HashSet<>();
         HashMap<String, String> valueToKey = new HashMap<>();
         try {
-            // read embedding file
-            File relation_file = new File(System.getProperty("user.dir") + "/relation_" + file_name + "_map");
+            File relation_file = new File(System.getProperty("user.dir") + "/" + file_name);
             inputStream = new FileInputStream(relation_file);
             Reader reader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(reader);
@@ -80,7 +136,6 @@ public class RelationMap {
             while ((line = bufferedReader.readLine()) != null) {
                 String[] relations = line.split("\t");
                 relation.add(relations[1]);
-                System.out.println(relations[1]);
                 if (valueToKey.containsKey(relations[1])) {
                     System.out.println("same key " + relations[1]);
                 }

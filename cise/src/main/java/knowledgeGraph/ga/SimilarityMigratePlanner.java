@@ -1,17 +1,22 @@
 package knowledgeGraph.ga;
 
 
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.ExperimentMain;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.*;
-import knowledgeGraph.wordSim.RelatedWord;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm;
+import org.jgrapht.alg.matching.HopcroftKarpMaximumCardinalityBipartiteMatching;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import java.io.*;
+import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.*;
+import java.util.List;
 
 public class SimilarityMigratePlanner implements MigratePlanner {
     private MergedGraghInfo mergedGraghInfo;
@@ -19,10 +24,13 @@ public class SimilarityMigratePlanner implements MigratePlanner {
     String regex = "^[(,!:]+";
     String regexEnd = "[),!:]+$";
     private HashMap<String, HashSet<Vertex>> keywordToVertex;
+    double rate;
 
-    public SimilarityMigratePlanner(MergedGraghInfo mergedGraghInfo) {
+    public SimilarityMigratePlanner(MergedGraghInfo mergedGraghInfo, double rate) {
         keywordToVertex = new HashMap<>();
         this.mergedGraghInfo = mergedGraghInfo;
+        System.out.println("similarity size " + rate);
+        this.rate = rate;
     }
 
     @Override
@@ -43,14 +51,18 @@ public class SimilarityMigratePlanner implements MigratePlanner {
                 bigraphVerties.get(vertex.getGraph().getUserName()).add(vertex);
             }
         }
+        System.out.println("one node graph_1 size " + bigraphVerties.get("1").size());
+        System.out.println("one node graph_2 size " + bigraphVerties.get("2").size());
         // 计算相似度
         // 迁移5%且熵值小于某个阈值
-        double size = mergedGraghInfo.getMergedVertexToEntropy().size() * 0.05;
+        double size = mergedGraghInfo.getMergedVertexToEntropy().size() * rate;
         int new_size = (int) size;
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy().subList(0, new_size);
         System.out.println("entropy list size " + mergedVertexArrayList.size());
+        double beforeEntropy = 0.0;
         for (HashMap.Entry<MergedVertex, Double> entry : mergedVertexArrayList) {
             MergedVertex mergedVertex = entry.getKey();
+            beforeEntropy += entry.getValue();
             if (!mergedVertex.getType().equalsIgnoreCase("entity") || mergedVertex.getVertexSet().size() == 1) {
                 continue;
             }
@@ -76,6 +88,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
 //            migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
 //            break;
         }
+        System.out.println("BeforeEntropy : " + beforeEntropy);
         System.out.println("migrate two2one plan size : " + migratePlan.getPlanArrayList().size());
         executor.ExecutePlan(migratePlan, true, true);
         migratePlan.clear();
@@ -109,31 +122,33 @@ public class SimilarityMigratePlanner implements MigratePlanner {
             bigraph.addVertex(vertex);
         }
         HashSet<Vertex> relatedVertex;
+        long startTime = System.currentTimeMillis();
+        long endTime;
         int count = 0;
         for (Vertex vertex1 : oneNodeVerties.get(key1)) {
             count += 1;
             relatedVertex = getRelatedVertex(vertex1);
-
             for (Vertex vertex2 : relatedVertex) {
                 migratePlan.clear();
                 MergedVertex source = vertex2.getMergedVertex();
                 migratePlan.addPlan(new Plan(vertex2, source, vertex1.getMergedVertex()));
                 executor.ExecutePlan(migratePlan, false, false);
-                double similarity = entropyCalculator.calculateVertexEntropy(vertex1.getMergedVertex());
-                similarity = 1 / (1 + similarity);
+                double similarity = 1 - entropyCalculator.calculateVertexEntropy(vertex1.getMergedVertex());
                 bigraph.setEdgeWeight(bigraph.addEdge(vertex1, vertex2), similarity);
                 migratePlan.clear();
                 migratePlan.addPlan(new Plan(vertex2, vertex1.getMergedVertex(), source));
                 executor.ExecutePlan(migratePlan, false, false);
             }
             if (count % 200 == 0) {
-                System.out.println("calculate : " + count);
+                endTime = System.currentTimeMillis();
+                System.out.println("calculate : " + count + " " + (endTime - startTime));
+                startTime = endTime;
             }
         }
         System.out.println("bigraph size" + bigraph.vertexSet().size() + "\t" + bigraph.edgeSet().size());
         System.out.println("entity1 size " + entity1.size());
         System.out.println("entity2 size " + entity2.size());
-        saveBigraph(bigraph, entity1, entity2);
+//        saveBigraph(bigraph, entity1, entity2);
         MaximumWeightBipartiteMatching<Vertex, DefaultWeightedEdge> bipartiteMatching
                 = new MaximumWeightBipartiteMatching<>(bigraph, entity1, entity2);
         MatchingAlgorithm.Matching<Vertex, DefaultWeightedEdge> matching = bipartiteMatching.getMatching();
@@ -141,6 +156,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         for (DefaultWeightedEdge edge : matching.getEdges()) {
             migratePlan.addPlan(new Plan(bigraph.getEdgeSource(edge), bigraph.getEdgeSource(edge).getMergedVertex(), bigraph.getEdgeTarget(edge).getMergedVertex()));
         }
+
         System.out.println("plan size " + migratePlan.getPlanArrayList().size());
         return migratePlan;
     }
@@ -163,6 +179,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
                 }
             }
         }
+//        System.out.println("related vertex size " + relatedVertex.size());
 //        if (relatedVertex.size() == 0) {
 //            System.out.println("zero vertex : " + vertex.getId());
 //        }
@@ -280,7 +297,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
             }
         }
         Set<MergedVertex> mergedVertices = vertexToMergedVertex.get(mostDifferentVertex);
-        return new Pair<>(mostDifferentVertex, mergedVertices);
+        return new ImmutablePair<>(mostDifferentVertex, mergedVertices);
     }
 
     private double getSimilarity(Set<MergedVertex> baseSet, Set<MergedVertex> givenSet) {

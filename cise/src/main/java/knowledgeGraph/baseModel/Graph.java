@@ -1,6 +1,5 @@
 package knowledgeGraph.baseModel;
 
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.io.*;

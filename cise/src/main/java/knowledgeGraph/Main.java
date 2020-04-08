@@ -1,16 +1,16 @@
 package knowledgeGraph;
 
-import knowledgeGraph.baseModel.*;
-import knowledgeGraph.ga.BasicEntropyCalculator;
-import knowledgeGraph.ga.SimilarityMigratePlanner;
-import knowledgeGraph.io.GraphImporter;
-import knowledgeGraph.io.Importer;
+import knowledgeGraph.baseModel.Edge;
+import knowledgeGraph.baseModel.Graph;
+import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.MergedEdge;
-import knowledgeGraph.mergeModel.MergedGraghInfo;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 
 public class Main {
