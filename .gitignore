@@ -3,6 +3,7 @@ cise/src/offline_data/*
 .DS_Store
 cise/target/*
 target/*
+cise/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
