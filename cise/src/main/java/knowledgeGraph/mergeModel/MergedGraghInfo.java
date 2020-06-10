@@ -1,6 +1,7 @@
 package knowledgeGraph.mergeModel;
 
 import knowledgeGraph.baseModel.*;
+import knowledgeGraph.ga.VertexSimilarity;
 import knowledgeGraph.util.UtilFunction;
 
 import java.io.*;
@@ -365,7 +366,7 @@ public class MergedGraghInfo {
             this.typeToVertexSetMap.get("Entity").add(mergedVertex);
         }
 
-        System.out.println("initialize entity vertex");
+        System.out.println("initialize entity vertex " + this.typeToVertexSetMap.get("Entity").size());
 
         // initialize value mergeVertex
         this.typeToVertexSetMap.put("Value", new HashSet<>());
@@ -385,7 +386,7 @@ public class MergedGraghInfo {
             mergedVertexSet.add(mergedVertex);
             this.typeToVertexSetMap.get("Value").add(mergedVertex);
         }
-        System.out.println("initialize value vertex");
+        System.out.println("initialize value vertex " + this.typeToVertexSetMap.get("Value").size());
 
         // initialize relation mergeVertex
         this.typeToVertexSetMap.put("Relation", new HashSet<>());
@@ -406,7 +407,7 @@ public class MergedGraghInfo {
             this.typeToVertexSetMap.get("Relation").add(mergedVertex);
             mergedVertexSet.add(mergedVertex);
         }
-        System.out.println("initialize relation vertex");
+        System.out.println("initialize relation vertex"+ this.typeToVertexSetMap.get("Relation").size());
 
         for (MergedVertex mergedVertex : mergedVertexSet) {
             this.mergedGraph.addVertex(mergedVertex);
@@ -433,10 +434,6 @@ public class MergedGraghInfo {
         }
 
         for (MergedEdge mergedEdge : mergedEdgeHashSet) {
-            HashSet<String> typeSet = new HashSet<>();
-            for (Edge edge : mergedEdge.getEdgeSet()) {
-                typeSet.add(edge.getRoleName());
-            }
             this.mergedGraph.addEdge(mergedEdge.getSource(), mergedEdge.getTarget(), mergedEdge);
         }
 
@@ -457,15 +454,17 @@ public class MergedGraghInfo {
     public Integer getMergedVertexIndexInEntropy(MergedVertex mergedVertex) {
         return mergedVertexListSortedByEntropy.indexOf(mergedVertex);
     }
-    public double calculateEntropy(HashSet<Integer> ids){
+
+    public double calculateEntropy(HashSet<Integer> ids) {
         double res = 0.0;
-        for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy){
-            if (ids.contains(entry.getKey().getId())){
+        for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy) {
+            if (ids.contains(entry.getKey().getId())) {
                 res += entry.getValue();
             }
         }
         return res;
     }
+
     public void setMergedVertexToEntropy(HashMap<MergedVertex, Double> mergedVertexToEntropy) {
         List<Map.Entry<MergedVertex, Double>> sortedEntropy =
                 new ArrayList<>(mergedVertexToEntropy.entrySet());
@@ -492,9 +491,16 @@ public class MergedGraghInfo {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
 
         for (Map.Entry<MergedVertex, Double> entry : mergedVertexToEntropy) {
-            writer.write(entry.getKey().getId() + "\t" + entry.getValue() + "\n");
+            if (entry.getKey().getVertexSet().size() == 2) {
+                Iterator<Vertex> it = entry.getKey().getVertexSet().iterator();
+                Vertex vertex1 = it.next();
+                Vertex vertex2 = it.next();
+                writer.write(entry.getKey().getId() + "\t" + entry.getValue() + "\t"
+                        + vertex1.getValue() + "\t" + vertex2.getValue() + "\t"
+                        + VertexSimilarity.getEditDistance(vertex1.getValue(), vertex2.getValue()) + "\t"
+                        + VertexSimilarity.getEmbeddingSimilarity(vertex1, vertex2) + "\n");
+            }
         }
-
         writer.close();
         os.close();
     }

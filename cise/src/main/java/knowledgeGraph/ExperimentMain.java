@@ -1,14 +1,15 @@
 package knowledgeGraph;
 
+import knowledgeGraph.io.*;
 import knowledgeGraph.mergeModel.*;
+import knowledgeGraph.wordSim.WordEmbedding;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.ga.BasicEntropyCalculator;
 import knowledgeGraph.ga.BasicPlanExecutor;
 import knowledgeGraph.ga.BigraphMatchPlanner;
 import knowledgeGraph.ga.SimilarityMigratePlanner;
-import knowledgeGraph.io.ExperimentFileImporter;
-import knowledgeGraph.io.GraphFileImporter;
 import knowledgeGraph.util.RelationMap;
 import knowledgeGraph.wordSim.RelatedWord;
 
@@ -20,36 +21,64 @@ public class ExperimentMain {
     public static HashSet<MergedVertex> wrongMergedVertexSet;
     public static int max_lenth = 0;
     public static RelatedWord relatedWord;
-    public static Graph graph1, graph2;
-
+    public static String exp_dir;
+    public static HashMap<Integer, String> exp_files;
+    public static WordEmbedding wordEmbedding;
 
     public static void init() {
         ans = new HashMap<>();
         wrongMergedVertexSet = new HashSet<>();
         relatedWord = new RelatedWord();
         relatedWord.setRelatedWord();
-        graph1 = null;
-        graph2 = null;
+        wordEmbedding = new WordEmbedding();
+        wordEmbedding.setEmbedding();
+        exp_files = new HashMap<>();
     }
 
-    public static void main(String argv[]) throws IOException {
+    public static void main(String args[]) throws IOException, ParseException {
         init();
 
         MergedGraghInfo mergedGraghInfo;
+        Options options = new Options();
+        Option dirName = Option.builder("d")
+                .required(true).hasArgs().argName("数据目录")
+                .desc("输入数据所在文件夹").build();
+        options.addOption(dirName);
+        Option fileName = Option.builder("f").hasArgs()
+                .required(true).numberOfArgs(2).argName("图文件")
+                .desc("图文件，至少需要两个").build();
+        options.addOption(fileName);
+        Option round = Option.builder("r").hasArgs()
+                .required(true).argName("迭代轮数")
+                .desc("迭代算法迭代轮数").build();
+        options.addOption(round);
+        Option percent = Option.builder("p").hasArgs()
+                .required(true).argName("迭代比例")
+                .desc("迭代算法每轮迭代比例").build();
+        options.addOption(percent);
+        Option type = Option.builder("t").hasArgs()
+                .required(true).argName("数据类型")
+                .desc("数据类型").build();
+        options.addOption(type);
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
 
-        if (argv[0].equalsIgnoreCase("init")) {
-            mergedGraghInfo = firstStep();
-        } else if (argv[0].equalsIgnoreCase("ans")) {
-            firstStepByAns();
-            return;
-        } else {
-            mergedGraghInfo = readData();
+        String dir = cmd.getOptionValue("d");
+        System.out.println("dirName: " + dir);
+        exp_dir = dir;
+
+        String[] files = cmd.getOptionValues("f");
+        for (int i = 1; i <= files.length; i++) {
+            exp_files.put(i, files[i - 1]);
         }
-        int num = Integer.parseInt(argv[1]);
-        if (num == 0) {
-            return;
-        }
-        double rate = Double.parseDouble(argv[2]);
+
+        Integer round_num = Integer.parseInt(cmd.getOptionValue("r"));
+
+        double rate = Double.parseDouble(cmd.getOptionValue("p"));
+
+        int index = exp_files.get(1).indexOf(".");
+        String fileType = cmd.getOptionValue("t");
+        mergedGraghInfo = firstStep(fileType);
 
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
@@ -58,7 +87,7 @@ public class ExperimentMain {
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
         SimilarityMigratePlanner similarityMigratePlanner = new SimilarityMigratePlanner(mergedGraghInfo, rate);
         BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
-        for (int i = 1; i <= num; i++) {
+        for (int i = 1; i <= round_num; i++) {
             step(i, basicEntropyCalculator, similarityMigratePlanner, planExecutor, mergedGraghInfo);
         }
 
@@ -108,9 +137,10 @@ public class ExperimentMain {
         System.out.println(round + "hit one : " + calcuteHitOne(mergedGraghInfo));
         mergedGraghInfo.getMergedGraph().saveToFile(round + "/MergedGraph");
         writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeWrongSetName(mergedGraghInfo, round + "/WrongVertexName");
     }
 
-    public static void firstStepByAns() throws IOException {
+    public static void mergeByAns(String fileType) throws IOException {
         String round = "RoundAns";
         System.out.println(round);
         File dir = new File(round);
@@ -120,15 +150,19 @@ public class ExperimentMain {
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
         boolean detailed = false; // 是否对细分信息进行统计
-
         // 大规模实验数据
-        ExperimentFileImporter fileImporter = new ExperimentFileImporter();
-        Graph graph1 = fileImporter.readGraph(1);
-        checkGraph(graph1);
-        Graph graph2 = fileImporter.readGraph(2);
-        checkGraph(graph2);
-
-        fileImporter.readAns();
+        Graph graph1, graph2;
+        BasicImporter importer;
+        if (fileType.equalsIgnoreCase("owl")) {
+            importer = new OWLImporter(exp_dir);
+        } else if (fileType.equalsIgnoreCase("rdf")) {
+            importer = new RDFImporter(exp_dir);
+        } else {
+            importer = new ExperimentFileImporter(exp_dir);
+        }
+        graph1 = importer.readGraph(1, exp_files.get(1));
+        graph2 = importer.readGraph(2, exp_files.get(2));
+        importer.readAns();
         saveAns();
 
         graph1.print();
@@ -147,8 +181,9 @@ public class ExperimentMain {
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo, true);
         mergedGraghInfo.generateMergeGraphByMatch2();
 
-        migrateRelation(mergedGraghInfo.getMergedGraph());
-
+        if (fileType.equalsIgnoreCase("normal")) {
+            migrateRelation(mergedGraghInfo.getMergedGraph());
+        }
         endTime = System.currentTimeMillis();
         System.out.println("merge time:" + (endTime - startTime));
         checkMergedGraph(mergedGraghInfo.getMergedGraph());
@@ -199,9 +234,10 @@ public class ExperimentMain {
         mergedGraghInfo.saveDetailEntropy(round + "/DetailEntropy");
         System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
         writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeWrongSetName(mergedGraghInfo, round + "/WrongVertexName");
     }
 
-    public static MergedGraghInfo firstStep() throws IOException {
+    public static MergedGraghInfo firstStep(String fileType) throws IOException {
         String round = "Round0";
         System.out.println(round);
         File dir = new File(round);
@@ -211,15 +247,22 @@ public class ExperimentMain {
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
         boolean detailed = false; // 是否对细分信息进行统计
+        Graph graph1, graph2;
+        BasicImporter importer;
+        if (fileType.equalsIgnoreCase("owl")) {
+            importer = new OWLImporter(exp_dir);
+        } else if (fileType.equalsIgnoreCase("rdf")) {
+            importer = new RDFImporter(exp_dir);
+        } else {
+            importer = new ExperimentFileImporter(exp_dir);
+        }
+        graph1 = importer.readGraph(1, exp_files.get(1));
+        graph2 = importer.readGraph(2, exp_files.get(2));
+        importer.readAns();
 
-        // 大规模实验数据
-        ExperimentFileImporter fileImporter = new ExperimentFileImporter();
-        Graph graph1 = fileImporter.readGraph(1);
         checkGraph(graph1);
-        Graph graph2 = fileImporter.readGraph(2);
         checkGraph(graph2);
 
-        fileImporter.readAns();
         saveAns();
 
         graph1.print();
@@ -237,9 +280,9 @@ public class ExperimentMain {
         GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo, true);
         mergedGraghInfo.generateMergeGraphByMatch2();
-
-        migrateRelation(mergedGraghInfo.getMergedGraph());
-
+        if (fileType.equalsIgnoreCase("normal")) {
+            migrateRelation(mergedGraghInfo.getMergedGraph());
+        }
         endTime = System.currentTimeMillis();
         System.out.println("merge time:" + (endTime - startTime));
         checkMergedGraph(mergedGraghInfo.getMergedGraph());
@@ -277,12 +320,15 @@ public class ExperimentMain {
         mergedGraghInfo.saveDetailEntropy(round + "/DetailEntropy");
         System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
         writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeWrongSetName(mergedGraghInfo, round + "/WrongVertexName");
+        saveOneNode(mergedGraghInfo, round + "/OneNode");
         return mergedGraghInfo;
     }
 
     public static double calcuteHitOne(MergedGraghInfo mergedGraghInfo) {
         MergedGraph mergedGraph = mergedGraghInfo.getMergedGraph();
         int correctNum = 0;
+        int wrongNum = 0;
         HashSet<MergedVertex> tempwrongMergedVertexSet = new HashSet<>();
         System.out.println("total mergedVertex size : " + mergedGraghInfo.getMergedGraph().vertexSet().size());
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
@@ -293,6 +339,9 @@ public class ExperimentMain {
                     key = iterator.next().getId();
                     value = iterator.next().getId();
                     boolean flag = false;
+                    if (!(ans.containsKey(key) || ans.containsKey(value))) {
+                        continue;
+                    }
                     if (ans.containsKey(key)) {
                         if (ans.get(key).intValue() == value) {
                             flag = true;
@@ -306,12 +355,16 @@ public class ExperimentMain {
                         correctNum += 1;
                     } else {
                         tempwrongMergedVertexSet.add(mergedVertex);
+                        wrongNum += 1;
                     }
                 }
             }
         }
         System.out.println("wrong set size is : " + tempwrongMergedVertexSet.size());
         wrongMergedVertexSet = tempwrongMergedVertexSet;
+        System.out.println("correct Num : " + correctNum);
+        System.out.println("wrong Num : " + wrongNum);
+        System.out.println("precision : " + (double) (correctNum / (correctNum + wrongNum)));
         return (double) correctNum / ans.size();
     }
 
@@ -326,7 +379,43 @@ public class ExperimentMain {
             writer.close();
             os.close();
         } catch (Exception e) {
-            System.out.println("read file error" + e.toString());
+            System.out.println("write file error" + e.toString());
+        }
+    }
+
+    public static void writeWrongSetName(MergedGraghInfo mergedGraghInfo, String fileName) {
+        try {
+            File file = new File(fileName);
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            for (MergedVertex mergedVertex : wrongMergedVertexSet) {
+                writer.write(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex) + "\n");
+                for (Vertex vertex : mergedVertex.getVertexSet()) {
+                    writer.write(vertex.getValue() + "\t");
+                }
+                writer.write("\n");
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("write file error" + e.toString());
+        }
+    }
+
+    public static void saveOneNode(MergedGraghInfo mergedGraghInfo, String fileName) {
+        try {
+            File file = new File(fileName);
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            for (MergedVertex mergedVertex : mergedGraghInfo.getMergedGraph().vertexSet()) {
+                if (mergedVertex.getType().equalsIgnoreCase("entity") && mergedVertex.getVertexSet().size() == 1) {
+                    writer.write(mergedVertex.toString() + "\n");
+                }
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("write file error" + e.toString());
         }
     }
 

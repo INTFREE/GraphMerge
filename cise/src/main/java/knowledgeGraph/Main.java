@@ -6,6 +6,7 @@ import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.mergeModel.MergedEdge;
 import knowledgeGraph.mergeModel.MergedGraph;
 import knowledgeGraph.mergeModel.MergedVertex;
+import org.apache.commons.cli.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,11 +15,12 @@ import java.util.List;
 
 
 public class Main {
-    public static void main(String argv[]) {
-        List<String> a = new ArrayList<>();
-        a.add("test");
-        a.add("test1");
-        System.out.println(a.indexOf("test1"));
+    public static void main(String[] args) throws ParseException{
+        for(String arg:args){
+            System.out.println(arg);
+        }
+        String a = "b.c";
+        System.out.println(a.substring(a.indexOf(".")+1));
 //        Importer importer = new Importer();
 //        ArrayList<String> userNameList = new ArrayList<>();
 //        userNameList.add("jiangy@pku.edu.cn");

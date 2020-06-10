@@ -1,12 +1,57 @@
 package knowledgeGraph.ga;
 
+import knowledgeGraph.ExperimentMain;
 import knowledgeGraph.baseModel.Vertex;
+import knowledgeGraph.wordSim.WordEmbedding;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class VertexSimilarity {
     public static int[][] dp = new int[1500][1500];
+    public static HashSet<String> stopWords = new HashSet<>(Arrays.asList("a", "the", "an", "of", "A", "The", "on", "with"));
 
     public static void main(String argv[]) {
-        System.out.println(getEditDistance("Le Capital", "Capital (film)"));
+        WordEmbedding wordEmbedding = new WordEmbedding();
+        wordEmbedding.setEmbedding();
+        System.out.println("finish reading");
+        String A = "hyoglossus";
+        String B = "hyoglossus muscle";
+        String[] arrayA = A.split(" ");
+        String[] arrayB = B.split(" ");
+        double[] a = new double[200];
+        for (int i = 0; i < arrayA.length; i++) {
+            if (stopWords.contains(arrayA[i])) {
+                continue;
+            }
+            double[] temp = wordEmbedding.getWordEmbedding(arrayA[i]);
+            if (temp.length != 200) {
+                System.out.println("similarity erro" + arrayA[i]);
+                continue;
+            }
+            for (int j = 0; j < 200; j++) {
+                a[j] += temp[j];
+            }
+        }
+        double[] b = new double[200];
+        for (int i = 0; i < arrayB.length; i++) {
+            if (stopWords.contains(arrayB[i])) {
+                continue;
+            }
+            double[] temp = wordEmbedding.getWordEmbedding(arrayB[i]);
+            for (int j = 0; j < 200; j++) {
+                b[j] += temp[j];
+            }
+        }
+        double multiple_ans = 0.0;
+        double multiple_a = 0.0, multiple_b = 0.0;
+        for (int i = 0; i < 200; i++) {
+            multiple_a += a[i] * a[i];
+            multiple_b += b[i] * b[i];
+            multiple_ans += a[i] * b[i];
+        }
+        System.out.println(multiple_ans + "\t" + multiple_a + "\t" + multiple_b);
+        System.out.println(multiple_ans / (Math.sqrt(multiple_a) * Math.sqrt(multiple_b)));
 
     }
 
@@ -15,12 +60,56 @@ public class VertexSimilarity {
 //        if (Double.doubleToLongBits(wordSimilarity) == Double.doubleToLongBits(0)) {
 //            wordSimilarity = VertexSimilarity.getEditDistance(value1, value2);
 //        }
-        double wordSimilarity = getEditDistance(v1.getValue(), v2.getValue());
-        return wordSimilarity;
+        double wordEditDistance = getEditDistance(v1.getValue(), v2.getValue());
+        double embeddingDistance = getEmbeddingSimilarity(v1, v2);
+        return (wordEditDistance + embeddingDistance) / 2;
 //        wordSimilarity = CoreSynonymDictionary.similarity(v1.getValue(), v2.getValue());
 //        System.out.println(v1.getValue() + " " + v2.getValue() + " " + wordSimilarity);
 //        return wordSimilarity;
     }
+
+    public static double getEmbeddingSimilarity(Vertex v1, Vertex v2) {
+        String A = v1.getValue(), B = v2.getValue();
+        String[] arrayA = A.split(" ");
+        String[] arrayB = B.split(" ");
+        double[] a = new double[200];
+        for (int i = 0; i < arrayA.length; i++) {
+            if (stopWords.contains(arrayA[i])) {
+                continue;
+            }
+            double[] temp = ExperimentMain.wordEmbedding.getWordEmbedding(arrayA[i]);
+            if (temp.length != 200) {
+                System.out.println("similarity erro" + arrayA[i]);
+                continue;
+            }
+            for (int j = 0; j < 200; j++) {
+                a[j] += temp[j];
+            }
+        }
+        double[] b = new double[200];
+        for (int i = 0; i < arrayB.length; i++) {
+            if (stopWords.contains(arrayB[i])) {
+                continue;
+            }
+            double[] temp = ExperimentMain.wordEmbedding.getWordEmbedding(arrayB[i]);
+            for (int j = 0; j < 200; j++) {
+                b[j] += temp[j];
+            }
+        }
+        double multiple_ans = 0.0;
+        double multiple_a = 0.0, multiple_b = 0.0;
+        for (int i = 0; i < 200; i++) {
+            multiple_a += a[i] * a[i];
+            multiple_b += b[i] * b[i];
+            multiple_ans += a[i] * b[i];
+        }
+        if (multiple_a == 0.0 || multiple_b == 0.0) {
+            return 0;
+        }
+        double ans = multiple_ans / (Math.sqrt(multiple_a) * Math.sqrt(multiple_b));
+        return ans;
+    }
+
 
     public static double getEditDistance(String A, String B) {
         if (A.equals(B)) {

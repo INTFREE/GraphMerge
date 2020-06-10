@@ -49,10 +49,13 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         double edgeEntropy = 0.0;
         Set<MergedVertex> mergedVertexSet = mergedGraphInfo.getMergedGraph().vertexSet();
         HashMap<MergedVertex, Double> mergedVertexEntropy = new HashMap<>();
+        int countEntity = 0;
+        long startTime = System.currentTimeMillis();
         for (MergedVertex mergedVertex : mergedVertexSet) {
             if (!mergedVertex.getType().equalsIgnoreCase("entity")) {
                 continue;
             }
+            countEntity += 1;
             List<Graph> graphListInMV = new ArrayList<>();
             for (Vertex vertex : mergedVertex.getVertexSet()) {
                 graphListInMV.add(vertex.getGraph());
@@ -133,7 +136,11 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             mergedVertexEntropy.put(mergedVertex, currentEntropy);
             edgeEntropy += currentEntropy;
             finalEntropy += currentEntropy * edgeNum;
-
+            if (countEntity % 1000 == 0) {
+                long endTime = System.currentTimeMillis();
+                System.out.println("caculate size " + countEntity + "\t" + (endTime - startTime));
+                startTime = endTime;
+            }
         }
         mergedGraphInfo.setMergedVertexToEntropy(mergedVertexEntropy);
         if (detailed) {

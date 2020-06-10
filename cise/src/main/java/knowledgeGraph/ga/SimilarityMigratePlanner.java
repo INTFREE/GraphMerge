@@ -75,18 +75,6 @@ public class SimilarityMigratePlanner implements MigratePlanner {
             migratePlan.addPlan(new Plan(migrateVertex, mergedVertex, mergedVertex1));
             bigraphVerties.get(migrateVertex.getGraph().getUserName()).add(migrateVertex);
             bigraphVerties.get(remainVertex.getGraph().getUserName()).add(remainVertex);
-//            System.out.println("Source " + entry.getKey().getVertexSet().size());
-//            EdgeType type = EdgeType.IN;
-//            System.out.println("type " + entry.getKey().getType());
-//            if (entry.getKey().getType().equalsIgnoreCase("relation")) {
-//                type = EdgeType.OUT;
-//            }
-//            Pair<Vertex, Set<MergedVertex>> vertexSetPair = getMostDifferentVertex(mergedGraph, entry.getKey(), type);
-//            Set<MergedVertex> sameTypeMergedVertexSet = mergedGraghInfo.getMergedVertexByType(vertexSetPair.getKey().getType());
-//            MergedVertex mutateTarget = getTargetMergedVertex(mergedGraph, entry.getKey(), sameTypeMergedVertexSet, vertexSetPair.getValue(), type);
-//            System.out.println("Target " + mutateTarget.getVertexSet().size());
-//            migratePlan.addPlan(new Plan(vertexSetPair.getKey(), entry.getKey(), mutateTarget));
-//            break;
         }
         System.out.println("BeforeEntropy : " + beforeEntropy);
         System.out.println("migrate two2one plan size : " + migratePlan.getPlanArrayList().size());
@@ -179,10 +167,6 @@ public class SimilarityMigratePlanner implements MigratePlanner {
                 }
             }
         }
-//        System.out.println("related vertex size " + relatedVertex.size());
-//        if (relatedVertex.size() == 0) {
-//            System.out.println("zero vertex : " + vertex.getId());
-//        }
         return relatedVertex;
     }
 

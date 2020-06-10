@@ -2,12 +2,17 @@ package knowledgeGraph.ga;
 
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.MergedGraghInfo;
+import knowledgeGraph.mergeModel.MergedVertex;
 import knowledgeGraph.mergeModel.MigratePlanner;
 import knowledgeGraph.wordSim.RelatedWord;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,16 +84,6 @@ public class BigraphMatchPlanner implements MigratePlanner {
         System.out.println("Graph1 left vertex size : " + sameValueMap.size());
         System.out.println("Graph2 left vertex size :" + entityVertexSet2.size());
         entityVertexSet1.addAll(sameValueMap.values());
-//        for (Vertex vertex : graph1.vertexSet()) {
-//            if (vertex.getType().equalsIgnoreCase("entity")) {
-//                entityVertexSet1.add(vertex);
-//            }
-//        }
-//        for (Vertex vertex : graph2.vertexSet()) {
-//            if (vertex.getType().equalsIgnoreCase("entity")) {
-//                entityVertexSet2.add(vertex);
-//            }
-//        }
 
         for (Vertex vertex : entityVertexSet1) {
             bigraph.addVertex(vertex);
@@ -101,33 +96,38 @@ public class BigraphMatchPlanner implements MigratePlanner {
         String[] relatedWords;
         String[] allwords;
         HashSet<Vertex> relatedVertex = new HashSet<>();
-        for (Vertex vertex : entityVertexSet1) {
-            relatedVertex.clear();
-            allwords = vertex.getValue().split(" ");
-            for (String word : allwords) {
-                String temp_word = word.replaceAll(regex, "").replaceAll(regexEnd, "");
-                if (stopWords.contains(temp_word)) {
-                    continue;
-                }
-                if (keyWordToVertex2.containsKey(temp_word)) {
-                    relatedVertex.addAll(keyWordToVertex2.get(temp_word));
-                }
-                if (relatedWord.getRelatedWord().containsKey(temp_word)) {
-                    relatedWords = relatedWord.getRelatedWord().get(temp_word);
-                    for (String relatedWord : relatedWords) {
-                        if (keyWordToVertex2.containsKey(relatedWord)) {
-                            relatedVertex.addAll(keyWordToVertex2.get(relatedWord));
+        try {
+            for (Vertex vertex : entityVertexSet1) {
+                relatedVertex.clear();
+                allwords = vertex.getValue().split(" ");
+                for (String word : allwords) {
+                    String temp_word = word.replaceAll(regex, "").replaceAll(regexEnd, "");
+                    if (stopWords.contains(temp_word)) {
+                        continue;
+                    }
+                    if (keyWordToVertex2.containsKey(temp_word)) {
+                        relatedVertex.addAll(keyWordToVertex2.get(temp_word));
+                    }
+                    if (relatedWord.getRelatedWord().containsKey(temp_word)) {
+                        relatedWords = relatedWord.getRelatedWord().get(temp_word);
+                        for (String relatedWord : relatedWords) {
+                            if (keyWordToVertex2.containsKey(relatedWord)) {
+                                relatedVertex.addAll(keyWordToVertex2.get(relatedWord));
+                            }
                         }
                     }
                 }
-            }
-            for (Vertex vertex1 : relatedVertex) {
-                if (entityVertexSet2.contains(vertex1)) {
-                    bigraph.setEdgeWeight(bigraph.addEdge(vertex, vertex1), VertexSimilarity.calcSimilarity(vertex, vertex1));
+                for (Vertex vertex1 : relatedVertex) {
+                    if (entityVertexSet2.contains(vertex1)) {
+                        double sim = VertexSimilarity.calcSimilarity(vertex, vertex1);
+                        bigraph.setEdgeWeight(bigraph.addEdge(vertex, vertex1), sim);
+                    }
                 }
             }
-
+        } catch (Exception e) {
+            System.out.println("write bigraph error");
         }
+
 
         System.out.println("bigraph vertex size : " + bigraph.vertexSet().size());
         System.out.println("bigraph edge size : " + bigraph.edgeSet().size());

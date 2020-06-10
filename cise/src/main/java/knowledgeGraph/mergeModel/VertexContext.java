@@ -90,7 +90,8 @@ public class VertexContext {
 
     public double calculateMergedVertexSimilarity(String type, MergedVertex mergedVertex1, MergedVertex mergedVertex2) {
         if (!mergedVertex1.getType().equalsIgnoreCase(mergedVertex2.getType())) {
-            System.out.println("calculate similarity error " + type + "\t" + mergedVertex1.getId() + "\t" +  mergedVertex2.getId());
+            //System.out.println("calculate similarity error " + type + "\t" + mergedVertex1.getId() + "\t" +  mergedVertex2.getId());
+            return 0;
         }
         if (mergedVertex1.getType().equalsIgnoreCase("entity")) {
             if (mergedVertex1.getId() == mergedVertex2.getId()) {

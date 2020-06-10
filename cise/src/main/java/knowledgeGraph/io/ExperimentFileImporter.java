@@ -8,9 +8,9 @@ import knowledgeGraph.baseModel.Vertex;
 import java.io.*;
 import java.util.*;
 
-public class ExperimentFileImporter {
+public class ExperimentFileImporter implements BasicImporter {
     HashMap<String, Vertex> vertexHashMap;
-    String data_path = "src/BootEA_datasets/BootEA_DBP_WD_100K/";
+    String data_path = "src/BootEA_datasets/";
     String match_path = "src/entropy_calc/match/";
     Integer vertexId = 1;
     Integer edgeId = 1;
@@ -27,15 +27,16 @@ public class ExperimentFileImporter {
     String pattern = "\\(.*?\\)";
 
 
-    public ExperimentFileImporter() {
+    public ExperimentFileImporter(String dirName) {
         this.vertexHashMap = new HashMap<>();
         this.Entity2Id = new HashMap<>();
         this.Val2Id = new HashMap<>();
         this.Edge2Id = new HashMap<>();
         this.Rel2Id = new HashMap<>();
+        this.data_path += dirName + "/";
     }
 
-    public Graph readGraph(Integer order) {
+    public Graph readGraph(Integer order, String fileName) {
         this.order = order;
         this.graph = new Graph(order.toString());
         this.Vaule2Vertex = new HashMap<>();
@@ -58,6 +59,7 @@ public class ExperimentFileImporter {
         try {
             // read vertex file
             String vertexFileName = this.data_path + "entity_local_name_" + this.order.toString();
+            System.out.println("read vertex file " + vertexFileName);
             File vertexFile = new File(vertexFileName);
 
             inputStream = new FileInputStream(vertexFile);
@@ -75,6 +77,7 @@ public class ExperimentFileImporter {
                 String vertexName = "";
                 if (strings.size() == 2) {
                     vertexName = strings.get(1);
+                    vertexName = String.join(" ", vertexName.split("_"));
 //                    if (vertexName.endsWith(")")) {
 //                        vertexName = vertexName.replaceAll(pattern, "").trim();
 //                    }
@@ -116,7 +119,7 @@ public class ExperimentFileImporter {
 //                System.out.println(entity.getId());
 //                System.out.println(value.getValue());
                 graph.addVertex(entity);
-                graph.addVertex(value); //这样是可以的吧，因为如果已包含会返回false
+                graph.addVertex(value);
                 graph.addVertex(relation);
                 relation.addRelatedVertex(entity);
                 relation.addRelatedVertex(value);

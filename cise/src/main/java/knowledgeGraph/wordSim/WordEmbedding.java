@@ -26,7 +26,6 @@ public class WordEmbedding {
         if (embedding.containsKey(word)) {
             return embedding.get(word);
         } else {
-            System.out.println("word " + word + " not exists");
             return new double[200];
         }
     }
@@ -41,11 +40,11 @@ public class WordEmbedding {
             BufferedReader bufferedReader = new BufferedReader(reader);
 
             String line;
-            double[] vector = new double[200];
+
             while ((line = bufferedReader.readLine()) != null) {
                 String[] arr = line.split("\\s+");
                 String w = arr[0];
-
+                double[] vector = new double[200];
                 if (arr.length != 201) {
                     System.out.println("ERROR EMBEDDING LENGTH:" + arr.length);
                     continue;

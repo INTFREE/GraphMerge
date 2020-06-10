@@ -1,5 +1,6 @@
 cise/.idea/*
 cise/src/offline_data/*
+cise/src/BootEA_datasets/
 .DS_Store
 cise/target/*
 target/*
