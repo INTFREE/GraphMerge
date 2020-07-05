@@ -36,14 +36,11 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         mergedGraghInfo = mergedGraphInfo;
         int[] count = {0, 0, 0, 0, 0, 0};
         double[] partEntropy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-        int unusuals = 0;
-        double threshold = 0;
         System.out.println("enter entropy calculate");
         //int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
         int DLT = 2;
         // 初始化熵
         double finalEntropy = 0.0;
-        double maxVertexEntropy = 0.0;
         // 融合图的边数
         int edgeNum = mergedGraphInfo.getMergedGraph().edgeSet().size();
         double edgeEntropy = 0.0;
@@ -147,7 +144,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             for (int i = 0; i < 6; i++)
                 System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);
         }
-//        System.out.println("Unusual Count " + unusuals);
         System.out.println("edge entropy " + edgeEntropy);
         System.out.println("final entropy " + finalEntropy);
         return finalEntropy;

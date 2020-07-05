@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class BigraphMatchPlanner implements MigratePlanner {
+    // TODO:修改为多图
     private Graph graph1;
     private Graph graph2;
     private HashSet<Vertex> entityVertexSet1;
@@ -91,6 +92,7 @@ public class BigraphMatchPlanner implements MigratePlanner {
         for (Vertex vertex : entityVertexSet2) {
             bigraph.addVertex(vertex);
         }
+        // TODO: 修改为多图
         HashMap<String, HashSet<Vertex>> keyWordToVertex1 = graph1.getKeyWordToVertex();
         HashMap<String, HashSet<Vertex>> keyWordToVertex2 = graph2.getKeyWordToVertex();
         String[] relatedWords;
@@ -127,7 +129,6 @@ public class BigraphMatchPlanner implements MigratePlanner {
         } catch (Exception e) {
             System.out.println("write bigraph error");
         }
-
 
         System.out.println("bigraph vertex size : " + bigraph.vertexSet().size());
         System.out.println("bigraph edge size : " + bigraph.edgeSet().size());

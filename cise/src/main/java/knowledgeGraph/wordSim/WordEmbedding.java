@@ -6,6 +6,7 @@ import java.util.HashMap;
 public class WordEmbedding {
     HashMap<String, double[]> embedding; // 直接这么操作会溢出
     Double[] defaultData;
+    double[] defaultValue = new double[200];
     String file_path = System.getProperty("user.dir") + "/src/offline_data/" + "glove.6B.200d.txt";
 
     public WordEmbedding() {
@@ -21,12 +22,12 @@ public class WordEmbedding {
     public double[] getWordEmbedding(String word) {
         if (this.embedding.size() == 0) {
             System.out.println("not initialize");
-            return new double[200];
+            return defaultValue;
         }
         if (embedding.containsKey(word)) {
             return embedding.get(word);
         } else {
-            return new double[200];
+            return defaultValue;
         }
     }
 

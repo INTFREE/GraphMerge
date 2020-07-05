@@ -19,15 +19,18 @@ import java.util.*;
 public class ExperimentMain {
     public static HashMap<Integer, Integer> ans;
     public static HashSet<MergedVertex> wrongMergedVertexSet;
+    public static HashSet<MergedVertex> correctMergedVertexSet;
     public static int max_lenth = 0;
     public static RelatedWord relatedWord;
     public static String exp_dir;
     public static HashMap<Integer, String> exp_files;
     public static WordEmbedding wordEmbedding;
+    public static String fileType;
 
     public static void init() {
         ans = new HashMap<>();
         wrongMergedVertexSet = new HashSet<>();
+        correctMergedVertexSet = new HashSet<>();
         relatedWord = new RelatedWord();
         relatedWord.setRelatedWord();
         wordEmbedding = new WordEmbedding();
@@ -77,7 +80,7 @@ public class ExperimentMain {
         double rate = Double.parseDouble(cmd.getOptionValue("p"));
 
         int index = exp_files.get(1).indexOf(".");
-        String fileType = cmd.getOptionValue("t");
+        fileType = cmd.getOptionValue("t");
         mergedGraghInfo = firstStep(fileType);
 
         boolean opt = true; // 简化运算
@@ -137,6 +140,7 @@ public class ExperimentMain {
         System.out.println(round + "hit one : " + calcuteHitOne(mergedGraghInfo));
         mergedGraghInfo.getMergedGraph().saveToFile(round + "/MergedGraph");
         writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeCorrectSet(mergedGraghInfo, round + "/CorrectVertex");
         writeWrongSetName(mergedGraghInfo, round + "/WrongVertexName");
     }
 
@@ -234,6 +238,7 @@ public class ExperimentMain {
         mergedGraghInfo.saveDetailEntropy(round + "/DetailEntropy");
         System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
         writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeCorrectSet(mergedGraghInfo, round + "/CorrectVertex");
         writeWrongSetName(mergedGraghInfo, round + "/WrongVertexName");
     }
 
@@ -320,6 +325,7 @@ public class ExperimentMain {
         mergedGraghInfo.saveDetailEntropy(round + "/DetailEntropy");
         System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
         writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeCorrectSet(mergedGraghInfo, round + "/CorrectVertex");
         writeWrongSetName(mergedGraghInfo, round + "/WrongVertexName");
         saveOneNode(mergedGraghInfo, round + "/OneNode");
         return mergedGraghInfo;
@@ -330,6 +336,7 @@ public class ExperimentMain {
         int correctNum = 0;
         int wrongNum = 0;
         HashSet<MergedVertex> tempwrongMergedVertexSet = new HashSet<>();
+        HashSet<MergedVertex> tempCorrectMergedVertexSet = new HashSet<>();
         System.out.println("total mergedVertex size : " + mergedGraghInfo.getMergedGraph().vertexSet().size());
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
             if (mergedVertex.getType().equalsIgnoreCase("entity")) {
@@ -353,6 +360,7 @@ public class ExperimentMain {
                     }
                     if (flag) {
                         correctNum += 1;
+                        tempCorrectMergedVertexSet.add(mergedVertex);
                     } else {
                         tempwrongMergedVertexSet.add(mergedVertex);
                         wrongNum += 1;
@@ -361,7 +369,10 @@ public class ExperimentMain {
             }
         }
         System.out.println("wrong set size is : " + tempwrongMergedVertexSet.size());
+
         wrongMergedVertexSet = tempwrongMergedVertexSet;
+        correctMergedVertexSet = tempCorrectMergedVertexSet;
+
         System.out.println("correct Num : " + correctNum);
         System.out.println("wrong Num : " + wrongNum);
         System.out.println("precision : " + (double) (correctNum / (correctNum + wrongNum)));
@@ -375,6 +386,39 @@ public class ExperimentMain {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
             for (MergedVertex mergedVertex : wrongMergedVertexSet) {
                 writer.write(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex) + "\n");
+                if (fileType.equalsIgnoreCase("rdf")) {
+                    for (Vertex vertex : mergedVertex.getVertexSet()) {
+                        writer.write(vertex.getGraph().getUserName() + "\t" + vertex.getId());
+                        for (String type : vertex.getRdfType()) {
+                            writer.write("\t" + type);
+                        }
+                        writer.write("\n");
+                    }
+                }
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("write file error" + e.toString());
+        }
+    }
+
+    public static void writeCorrectSet(MergedGraghInfo mergedGraghInfo, String fileName) {
+        try {
+            File file = new File(fileName);
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            for (MergedVertex mergedVertex : correctMergedVertexSet) {
+                writer.write(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex) + "\n");
+                if (fileType.equalsIgnoreCase("rdf")) {
+                    for (Vertex vertex : mergedVertex.getVertexSet()) {
+                        writer.write(vertex.getGraph().getUserName() + "\t" + vertex.getId());
+                        for (String type : vertex.getRdfType()) {
+                            writer.write("\t" + type);
+                        }
+                        writer.write("\n");
+                    }
+                }
             }
             writer.close();
             os.close();

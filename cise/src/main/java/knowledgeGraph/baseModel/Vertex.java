@@ -8,6 +8,7 @@ public class Vertex {
     private Integer id;
     private String type;   // type分为entity, value, relation
     private String value;  // value节点的value属性即为值，entity节点为核心属性值节点的值
+    private HashSet<String> rdfType; // 对于rdf类型的节点，存储其rdf type
     private Integer modelId;
     private Graph graph;
     private MergedVertex mergedVertex;
@@ -21,6 +22,7 @@ public class Vertex {
         this.graph = null;
         this.mergedVertex = null;
         this.relatedVertex = new HashSet<>();
+        this.rdfType = new HashSet<>();
     }
 
     public Vertex(Integer id, String type) {
@@ -30,11 +32,20 @@ public class Vertex {
         this.modelId = -1;
         this.graph = null;
         this.relatedVertex = new HashSet<>();
+        this.rdfType = new HashSet<>();
     }
 
     @Override
     public String toString() {
         return "graph" + this.graph.getUserName() + " " + this.id.toString() + " " + this.type + " " + this.value + " " + this.modelId.toString();
+    }
+
+    public HashSet<String> getRdfType() {
+        return rdfType;
+    }
+
+    public void addRdfType(String type) {
+        this.rdfType.add(type);
     }
 
     public void setGraph(Graph graph) {

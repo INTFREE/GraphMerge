@@ -42,20 +42,26 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         BasicEntropyCalculator entropyCalculator = new BasicEntropyCalculator(this.mergedGraghInfo);
         BasicPlanExecutor executor = new BasicPlanExecutor(this.mergedGraghInfo);
         // 如果还存在单一节点，首先处理单独节点
+        // TODO:修改为多图
         HashMap<String, HashSet<Vertex>> bigraphVerties = new HashMap<>();
         bigraphVerties.put("1", new HashSet<>());
         bigraphVerties.put("2", new HashSet<>());
+        int twoNodeSize = 0;
         for (MergedVertex mergedVertex : mergedGraph.vertexSet()) {
-            if (mergedVertex.getVertexSet().size() == 1 && mergedVertex.getType().equalsIgnoreCase("entity")) {
-                Vertex vertex = mergedVertex.getVertexSet().iterator().next();
-                bigraphVerties.get(vertex.getGraph().getUserName()).add(vertex);
+            if (mergedVertex.getType().equalsIgnoreCase("entity")) {
+                if (mergedVertex.getVertexSet().size() == 1) {
+                    Vertex vertex = mergedVertex.getVertexSet().iterator().next();
+                    bigraphVerties.get(vertex.getGraph().getUserName()).add(vertex);
+                } else if (mergedVertex.getVertexSet().size() == 2) {
+                    twoNodeSize += 1;
+                }
             }
         }
         System.out.println("one node graph_1 size " + bigraphVerties.get("1").size());
         System.out.println("one node graph_2 size " + bigraphVerties.get("2").size());
         // 计算相似度
         // 迁移5%且熵值小于某个阈值
-        double size = mergedGraghInfo.getMergedVertexToEntropy().size() * rate;
+        double size = twoNodeSize * rate;
         int new_size = (int) size;
         List<HashMap.Entry<MergedVertex, Double>> mergedVertexArrayList = mergedGraghInfo.getMergedVertexToEntropy().subList(0, new_size);
         System.out.println("entropy list size " + mergedVertexArrayList.size());

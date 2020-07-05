@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:ns1="http://dbkwik.webdatacommons.org/stexpanded.wikia.com/property/"
+   xmlns:ns10="http://purl.org/dc/terms/"
+   xmlns:ns2="http://dbkwik.webdatacommons.org/ontology/"
+   xmlns:ns3="http://www.w3.org/2004/02/skos/core#"
+   xmlns:ns4="http://purl.org/dc/elements/1.1/"
+   xmlns:ns5="http://xmlns.com/foaf/0.1/"
+   xmlns:ns6="http://dbkwik.webdatacommons.org/stexpanded.wikia.com/property/spouse(s)"
+   xmlns:ns7="http://dbkwik.webdatacommons.org/stexpanded.wikia.com/property/sibling(s)"
+   xmlns:ns8="http://dbkwik.webdatacommons.org/stexpanded.wikia.com/property/author(s)"
+   xmlns:ns9="http://dbkwik.webdatacommons.org/stexpanded.wikia.com/property/warp%23"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+>
+    <rdf:Description rdf:about="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Tyrus_VIIa">
+        <ns5:thumbnail rdf:resource="http://memory-alpha.wikia.com/wiki/Special:FilePath/Tyrus_VIIa.jpg?width=300"/>
+        <ns7:subject rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Category:Moons"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Category:Moons"/>
+        <rdf:type rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/class/sidebar_planet"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/United_Federation_of_Planets"/>
+        <ns1:imageorbital rdf:datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString">Tyrus VIIa.jpg</ns1:imageorbital>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Orbit"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/USS_Enterprise_(NCC-1701-D)"/>
+        <ns1:satellites rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Tyrus_VIIa_station"/>
+        <ns4:altLabel rdf:datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString">Tyrus VIIa</ns4:altLabel>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Moon"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString">Tyrus VIIa</rdfs:label>
+        <ns1:location rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Tyran_system"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Starfleet"/>
+        <ns5:wikiPageWikiLinkText rdf:datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString">Tyrus VIIa</ns5:wikiPageWikiLinkText>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Tyrus_VII"/>
+        <ns1:location rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Orbit"/>
+        <ns1:name rdf:datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString">Tyrus VIIa</ns1:name>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/2364"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Tyran_system"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Doctor"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Supervisor"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Tyrus_VIIa_station"/>
+        <ns1:location rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Tyrus_VII"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Planet"/>
+        <ns1:type rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Moon"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Farallon"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/2369"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Mining"/>
+        <ns5:abstract xml:lang="en">Tyrus VIIa was a moon of Tyrus VII, an inhabited planet in the Tyran system. The moon was the site of the experimental Particle Fountain Project, which was designed as a new mining technology.
+            In 2364, Dr. Farallon intiated the project as its inventor and supervisor. She remained as project leader at least as late as 2369 when the USS Enterprise-D visited Tyrus VIIa to monitor the project's progress. Starfleet wanted a feasibility study for possible use of a particle fountain on Carema III. (: "")
+            de:Tyrus VIIaes:Tyrus VII Ait:Tyrus VIIa</ns5:abstract>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Inhabited_planets"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Star_Trek:_The_Next_Generation"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Carema_III"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Inventor"/>
+        <rdfs:comment xml:lang="en">Tyrus VIIa was a moon of Tyrus VII, an inhabited planet in the Tyran system. The moon was the site of the experimental Particle Fountain Project, which was designed as a new mining technology.
+            In 2364, Dr. Farallon intiated the project as its inventor and supervisor. She remained as project leader at least as late as 2369 when the USS Enterprise-D visited Tyrus VIIa to monitor the project's progress. Starfleet wanted a feasibility study for possible use of a particle fountain on Carema III. (: "")
+            de:Tyrus VIIaes:Tyrus VII Ait:Tyrus VIIa</rdfs:comment>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/The_Quality_of_Life_(episode)"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Star_system"/>
+        <ns1:affiliation rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/United_Federation_of_Planets"/>
+        <ns5:wikiPageWikiLink rdf:resource="http://dbkwik.webdatacommons.org/memory-alpha.wikia.com/resource/Particle_Fountain_Project"/>
+        <ns3:depiction rdf:resource="http://memory-alpha.wikia.com/wiki/Special:FilePath/Tyrus_VIIa.jpg"/>
+    </rdf:Description>
+  </rdf:RDF>
