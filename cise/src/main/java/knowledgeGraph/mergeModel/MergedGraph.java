@@ -31,37 +31,6 @@ public class MergedGraph extends DirectedPseudograph<MergedVertex, MergedEdge> {
         return mostEntropyMergedVertex;
     }
 
-    public void mutateMergedGraph(MergedVertex targetMergedVertex, Vertex sourceVertex) {
-        System.out.println(targetMergedVertex.toString());
-        MergedVertex source = sourceVertex.getMergedVertex();
-        Set<MergedEdge> changedMergedEdge = new HashSet<>();
-        if (source.getType().equalsIgnoreCase("entity")) {
-            changedMergedEdge = this.incomingEdgesOf(source);
-        } else {
-            changedMergedEdge = this.outgoingEdgesOf(source);
-        }
-        for (MergedEdge mergedEdge : changedMergedEdge) {
-            for (Edge edge : mergedEdge.getEdgeSet()) {
-                if (edge.getSource() == sourceVertex) {
-                    MergedEdge newMergedEdge = new MergedEdge(targetMergedVertex, mergedEdge.getTarget(), edge.getRoleName());
-                    newMergedEdge.addEdge(edge);
-                    this.addEdge(newMergedEdge.getSource(), newMergedEdge.getTarget(), newMergedEdge);
-                    mergedEdge.getEdgeSet().remove(edge);
-                } else if (edge.getTarget() == sourceVertex) {
-                    MergedEdge newMergedEdge = new MergedEdge(mergedEdge.getSource(), targetMergedVertex, edge.getRoleName());
-                    newMergedEdge.addEdge(edge);
-                    this.addEdge(newMergedEdge.getSource(), newMergedEdge.getTarget(), newMergedEdge);
-                    mergedEdge.getEdgeSet().remove(edge);
-                }
-            }
-            if (mergedEdge.getEdgeSet().isEmpty()) {
-                this.removeEdge(mergedEdge);
-            }
-        }
-        source.removeVertex(sourceVertex);
-        targetMergedVertex.addVertex(sourceVertex);
-    }
-
     public void saveToFile(String fileName) throws IOException {
         File file = new File(fileName);
         FileOutputStream os = new FileOutputStream(file);
@@ -101,33 +70,6 @@ public class MergedGraph extends DirectedPseudograph<MergedVertex, MergedEdge> {
         res += builder.toString();
         return res;
     }
-
-    // 假设计算上下文相似度的节点都是实体节点
-//    public VertexContext getVertexContext(Vertex vertex) {
-//        VertexContext vertexContext = new VertexContext();
-//        Set<MergedEdge> relatedEdges = this.incomingEdgesOf(vertex.getMergedVertex());
-//        Set<MergedEdge> tempMergedEdges = new HashSet<>();
-//        for (MergedEdge mergedEdge : relatedEdges) {
-//            boolean flag = false;
-//            for (Edge edge : mergedEdge.getEdgeSet()) {
-//                if (edge.getTarget().equals(vertex)) {
-//                    flag = true;
-//                }
-//            }
-//            if (flag) {
-//                tempMergedEdges = this.outgoingEdgesOf(mergedEdge.getSource());
-//                HashSet<MergedVertex> relatedVertex = new HashSet<>();
-//                for (MergedEdge mergedEdge1 : tempMergedEdges) {
-//                    if (mergedEdge1.equals(mergedEdge)) {
-//                        continue;
-//                    }
-//                    relatedVertex.add(mergedEdge1.getTarget());
-//                }
-//                vertexContext.addContext(new Pair<>(mergedEdge.getRoleName(), relatedVertex));
-//            }
-//        }
-//        return vertexContext;
-//    }
 
     public void saveMergedVertex(MergedVertex mergedVertex) {
         try {

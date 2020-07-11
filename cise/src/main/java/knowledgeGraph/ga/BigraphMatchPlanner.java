@@ -1,5 +1,6 @@
 package knowledgeGraph.ga;
 
+import knowledgeGraph.TripleMain;
 import knowledgeGraph.baseModel.*;
 import knowledgeGraph.mergeModel.MergedGraghInfo;
 import knowledgeGraph.mergeModel.MergedVertex;
@@ -18,14 +19,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class BigraphMatchPlanner implements MigratePlanner {
-    // TODO:修改为多图
+    // TODO:修改为多图，主要是修改生成二部图匹配那里
     private Graph graph1;
     private Graph graph2;
     private HashSet<Vertex> entityVertexSet1;
     private HashSet<Vertex> entityVertexSet2;
     private MergedGraghInfo mergedGraghInfo;
     private MigratePlan migratePlan;
-    private RelatedWord relatedWord;
     String regex = "^[(,!:]+";
     String regexEnd = "[),!:]+$";
     private HashSet<String> stopWords = new HashSet<>(Arrays.asList("a", "the", "an", "of", "A", "The", "on", "with"));
@@ -38,7 +38,6 @@ public class BigraphMatchPlanner implements MigratePlanner {
         this.entityVertexSet1 = new HashSet<>();
         this.entityVertexSet2 = new HashSet<>();
         migratePlan = new MigratePlan();
-        relatedWord = new RelatedWord();
     }
 
     @Override
@@ -98,36 +97,32 @@ public class BigraphMatchPlanner implements MigratePlanner {
         String[] relatedWords;
         String[] allwords;
         HashSet<Vertex> relatedVertex = new HashSet<>();
-        try {
-            for (Vertex vertex : entityVertexSet1) {
-                relatedVertex.clear();
-                allwords = vertex.getValue().split(" ");
-                for (String word : allwords) {
-                    String temp_word = word.replaceAll(regex, "").replaceAll(regexEnd, "");
-                    if (stopWords.contains(temp_word)) {
-                        continue;
-                    }
-                    if (keyWordToVertex2.containsKey(temp_word)) {
-                        relatedVertex.addAll(keyWordToVertex2.get(temp_word));
-                    }
-                    if (relatedWord.getRelatedWord().containsKey(temp_word)) {
-                        relatedWords = relatedWord.getRelatedWord().get(temp_word);
-                        for (String relatedWord : relatedWords) {
-                            if (keyWordToVertex2.containsKey(relatedWord)) {
-                                relatedVertex.addAll(keyWordToVertex2.get(relatedWord));
-                            }
+        for (Vertex vertex : entityVertexSet1) {
+            relatedVertex.clear();
+            allwords = vertex.getValue().split(" ");
+            for (String word : allwords) {
+                String temp_word = word.replaceAll(regex, "").replaceAll(regexEnd, "");
+                if (stopWords.contains(temp_word)) {
+                    continue;
+                }
+                if (keyWordToVertex2.containsKey(temp_word)) {
+                    relatedVertex.addAll(keyWordToVertex2.get(temp_word));
+                }
+                if (TripleMain.relatedWord.getRelatedWord().containsKey(temp_word)) {
+                    relatedWords = TripleMain.relatedWord.getRelatedWord().get(temp_word);
+                    for (String relatedWord : relatedWords) {
+                        if (keyWordToVertex2.containsKey(relatedWord)) {
+                            relatedVertex.addAll(keyWordToVertex2.get(relatedWord));
                         }
                     }
                 }
-                for (Vertex vertex1 : relatedVertex) {
-                    if (entityVertexSet2.contains(vertex1)) {
-                        double sim = VertexSimilarity.calcSimilarity(vertex, vertex1);
-                        bigraph.setEdgeWeight(bigraph.addEdge(vertex, vertex1), sim);
-                    }
+            }
+            for (Vertex vertex1 : relatedVertex) {
+                if (entityVertexSet2.contains(vertex1)) {
+                    double sim = VertexSimilarity.calcSimilarity(vertex, vertex1);
+                    bigraph.setEdgeWeight(bigraph.addEdge(vertex, vertex1), sim);
                 }
             }
-        } catch (Exception e) {
-            System.out.println("write bigraph error");
         }
 
         System.out.println("bigraph vertex size : " + bigraph.vertexSet().size());

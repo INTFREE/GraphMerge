@@ -1,6 +1,7 @@
 package knowledgeGraph.ga;
 
 import knowledgeGraph.ExperimentMain;
+import knowledgeGraph.TripleMain;
 import knowledgeGraph.baseModel.Vertex;
 import knowledgeGraph.wordSim.WordEmbedding;
 
@@ -29,16 +30,9 @@ public class VertexSimilarity {
     }
 
     public static double calcSimilarity(Vertex v1, Vertex v2) {
-//        double wordSimilarity = WordSimilarityForCh.simWord(value1, value2);
-//        if (Double.doubleToLongBits(wordSimilarity) == Double.doubleToLongBits(0)) {
-//            wordSimilarity = VertexSimilarity.getEditDistance(value1, value2);
-//        }
         double wordEditDistance = getEditDistance(v1.getValue(), v2.getValue());
         double embeddingDistance = getEmbeddingSimilarity(v1, v2);
         return (wordEditDistance + embeddingDistance) / 2;
-//        wordSimilarity = CoreSynonymDictionary.similarity(v1.getValue(), v2.getValue());
-//        System.out.println(v1.getValue() + " " + v2.getValue() + " " + wordSimilarity);
-//        return wordSimilarity;
     }
 
     public static double getEmbeddingSimilarity(Vertex v1, Vertex v2) {
@@ -52,7 +46,7 @@ public class VertexSimilarity {
             if (stopWords.contains(arrayA[i])) {
                 continue;
             }
-            tempEmbedding = ExperimentMain.wordEmbedding.getWordEmbedding(arrayA[i]);
+            tempEmbedding = TripleMain.wordEmbedding.getWordEmbedding(arrayA[i]);
             for (int j = 0; j < 200; j++) {
                 a[j] += tempEmbedding[j];
             }
@@ -61,7 +55,7 @@ public class VertexSimilarity {
             if (stopWords.contains(arrayB[i])) {
                 continue;
             }
-            tempEmbedding = ExperimentMain.wordEmbedding.getWordEmbedding(arrayB[i]);
+            tempEmbedding = TripleMain.wordEmbedding.getWordEmbedding(arrayB[i]);
             for (int j = 0; j < 200; j++) {
                 b[j] += tempEmbedding[j];
             }

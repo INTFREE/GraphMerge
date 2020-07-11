@@ -12,30 +12,19 @@ import java.util.*;
 
 public class BasicEntropyCalculator implements EntropyCalculator {
 
-    boolean opt = false;
-    boolean calcValue = true;
-    boolean detailed = false;
-    HashSet<MergedVertex> unusualMergedVertexSet = new HashSet<>();
     MergedGraghInfo mergedGraghInfo;
 
-    public BasicEntropyCalculator() {
-    }
 
     public BasicEntropyCalculator(MergedGraghInfo mergedGraghInfo) {
         this.mergedGraghInfo = mergedGraghInfo;
     }
 
     public BasicEntropyCalculator(boolean opt, boolean calcValue, boolean detailed) {
-        this.opt = opt;
-        this.calcValue = calcValue;
-        this.detailed = detailed;
     }
 
     @Override
     public double calculateEntropy(MergedGraghInfo mergedGraphInfo) {
         mergedGraghInfo = mergedGraphInfo;
-        int[] count = {0, 0, 0, 0, 0, 0};
-        double[] partEntropy = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         System.out.println("enter entropy calculate");
         //int DLT = mergedGraphInfo.getGraphsInfo().getGraphNum();
         int DLT = 2;
@@ -79,20 +68,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 if (res.getValue() == 2) {
                     count_type += 1;
                 }
-                if (detailed && tmpEntropy != 0) {
-                    int pos = 0;
-                    if (inType.substring(0, 4).equals("name")) pos += 0;
-                    else if (inType.substring(0, 4).equals("attr")) pos += 2;
-                    else if (inType.substring(0, 3).equals("rel")) pos += 4;
-                    else System.out.println("Error1: " + inType + (inType.substring(0, 4) == "name"));
-
-                    if (inType.substring(inType.length() - 6, inType.length()).equals("source")) pos += 0;
-                    else if (inType.substring(inType.length() - 6, inType.length()).equals("target")) pos += 1;
-                    else System.out.println("Error2:" + inType.substring(inType.length() - 6, inType.length()));
-
-                    count[pos]++;
-                    partEntropy[pos] += tmpEntropy;
-                }
                 currentEntropy += tmpEntropy;
             }
 
@@ -113,20 +88,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
                 if (res.getValue() == 2) {
                     count_type += 1;
                 }
-                if (detailed && tmpEntropy != 0) {
-                    int pos = 0;
-                    if (outType.substring(0, 4).equals("name")) pos += 0;
-                    else if (outType.substring(0, 4).equals("attr")) pos += 2;
-                    else if (outType.substring(0, 3).equals("rel")) pos += 4;
-                    else System.out.println("Error3: " + outType + (outType.substring(0, 4) == "name"));
-
-                    if (outType.substring(outType.length() - 6, outType.length()).equals("source")) pos += 0;
-                    else if (outType.substring(outType.length() - 6, outType.length()).equals("target")) pos += 1;
-                    else System.out.println("Error4" + outType);
-
-                    count[pos]++;
-                    partEntropy[pos] += tmpEntropy;
-                }
                 currentEntropy += tmpEntropy;
             }
             currentEntropy = currentEntropy / count_type;
@@ -140,10 +101,6 @@ public class BasicEntropyCalculator implements EntropyCalculator {
             }
         }
         mergedGraphInfo.setMergedVertexToEntropy(mergedVertexEntropy);
-        if (detailed) {
-            for (int i = 0; i < 6; i++)
-                System.out.println("Entropy Part " + i + ": " + count[i] + ", " + partEntropy[i]);
-        }
         System.out.println("edge entropy " + edgeEntropy);
         System.out.println("final entropy " + finalEntropy);
         return finalEntropy;
@@ -205,76 +162,7 @@ public class BasicEntropyCalculator implements EntropyCalculator {
         return currentEntropy / count_type;
     }
 
-    /**
-     * 计算融合节点自身的熵，这个熵不考虑节点相关的边，只计算来自融合节点自身内容的不一致
-     *
-     * @return
-     */
-    private double calculateVertexContentEntropy(MergedGraghInfo mergedGraphInfo, Set<Graph> graphInThisMv, MergedVertex mergedVertex) {
 
-        int graphNum = graphInThisMv.size();
-
-        double entropy = 0.0;
-
-        for (Vertex vX : mergedVertex.getVertexSet()) {
-            double pX = 1.0 / graphNum;
-            double rstSumPySxy = 0.0;
-            for (Vertex vY : mergedVertex.getVertexSet()) {
-                double pY = 1.0 / graphNum;
-                double sXY = VertexSimilarity.calcSimilarity(vX, vY); // 需要确定节点相似度算法，如果是0.0会报Infinity
-                rstSumPySxy += pY * sXY;
-            }
-            entropy += pX * Math.log(rstSumPySxy) / Math.log(2);
-        }
-
-        return Math.abs(entropy);
-    }
-
-    public static int ld(String s, String t) {
-        int d[][];
-        int sLen = s.length();
-        int tLen = t.length();
-        int si;
-        int ti;
-        char ch1;
-        char ch2;
-        int cost;
-        if (sLen == 0) {
-            return tLen;
-        }
-        if (tLen == 0) {
-            return sLen;
-        }
-        d = new int[sLen + 1][tLen + 1];
-        for (si = 0; si <= sLen; si++) {
-            d[si][0] = si;
-        }
-        for (ti = 0; ti <= tLen; ti++) {
-            d[0][ti] = ti;
-        }
-        for (si = 1; si <= sLen; si++) {
-            ch1 = s.charAt(si - 1);
-            for (ti = 1; ti <= tLen; ti++) {
-                ch2 = t.charAt(ti - 1);
-                if (ch1 == ch2) {
-                    cost = 0;
-                } else {
-                    cost = 1;
-                }
-                d[si][ti] = Math.min(Math.min(d[si - 1][ti] + 1, d[si][ti - 1] + 1), d[si - 1][ti - 1] + cost);
-            }
-        }
-        return d[sLen][tLen];
-    }
-
-    private double getSimilarity(String src, String tar) {
-        int ld = ld(src, tar);
-        return 1 - (double) ld / Math.max(src.length(), tar.length());
-    }
-
-    public HashSet<MergedVertex> getUnusualMergedVertexSet() {
-        return this.unusualMergedVertexSet;
-    }
 
     private Pair<Double, Integer> calculateEdgeEntropyForVertex(List<Graph> graphInThisMV,
                                                                 List<MergedEdge> targetMergedEdgeSet,

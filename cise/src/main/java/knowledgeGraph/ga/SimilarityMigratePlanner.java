@@ -1,6 +1,7 @@
 package knowledgeGraph.ga;
 
 
+import knowledgeGraph.TripleMain;
 import org.apache.commons.lang3.tuple.*;
 import knowledgeGraph.ExperimentMain;
 import knowledgeGraph.baseModel.*;
@@ -25,6 +26,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
     String regexEnd = "[),!:]+$";
     private HashMap<String, HashSet<Vertex>> keywordToVertex;
     double rate;
+
 
     public SimilarityMigratePlanner(MergedGraghInfo mergedGraghInfo, double rate) {
         keywordToVertex = new HashMap<>();
@@ -69,7 +71,7 @@ public class SimilarityMigratePlanner implements MigratePlanner {
         for (HashMap.Entry<MergedVertex, Double> entry : mergedVertexArrayList) {
             MergedVertex mergedVertex = entry.getKey();
             beforeEntropy += entry.getValue();
-            if (!mergedVertex.getType().equalsIgnoreCase("entity") || mergedVertex.getVertexSet().size() == 1) {
+            if (!mergedVertex.getType().equalsIgnoreCase("entity") || mergedVertex.getVertexSet().size() != 2) {
                 continue;
             }
             Iterator<Vertex> vertexIterator = mergedVertex.getVertexSet().iterator();
@@ -164,8 +166,8 @@ public class SimilarityMigratePlanner implements MigratePlanner {
             if (keywordToVertex.containsKey(temp_word)) {
                 relatedVertex.addAll(keywordToVertex.get(temp_word));
             }
-            if (ExperimentMain.relatedWord.getRelatedWord().containsKey(temp_word)) {
-                relatedWords = ExperimentMain.relatedWord.getRelatedWord().get(temp_word);
+            if (TripleMain.relatedWord.getRelatedWord().containsKey(temp_word)) {
+                relatedWords = TripleMain.relatedWord.getRelatedWord().get(temp_word);
                 for (String temp : relatedWords) {
                     if (keywordToVertex.containsKey(temp)) {
                         relatedVertex.addAll(keywordToVertex.get(temp));

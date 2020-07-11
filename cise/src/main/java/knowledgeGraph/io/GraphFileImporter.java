@@ -12,6 +12,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// 读取符合本算法图定义的数据集
 public class GraphFileImporter {
     String data_path;
     private HashMap<String, HashMap<Integer, Vertex>> graphToidToVertex;
@@ -19,12 +20,6 @@ public class GraphFileImporter {
 
     public GraphFileImporter() {
         data_path = "";
-        graphToidToVertex = new HashMap<>();
-        graphToidToEdge = new HashMap<>();
-    }
-
-    public GraphFileImporter(String path) {
-        data_path = path;
         graphToidToVertex = new HashMap<>();
         graphToidToEdge = new HashMap<>();
     }

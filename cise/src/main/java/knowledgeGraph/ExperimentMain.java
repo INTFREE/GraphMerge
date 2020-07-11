@@ -252,6 +252,8 @@ public class ExperimentMain {
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
         boolean detailed = false; // 是否对细分信息进行统计
+
+        // TODO: 修改为多图
         Graph graph1, graph2;
         BasicImporter importer;
         if (fileType.equalsIgnoreCase("owl")) {
