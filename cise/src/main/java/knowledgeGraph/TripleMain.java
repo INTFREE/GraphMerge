@@ -29,6 +29,7 @@ public class TripleMain {
     public static String expDir;
     public static WordEmbedding wordEmbedding;
     public static String fileType;
+    public static HashMap<Vertex, String> vertexToNodeId;
 
     public static void init() {
         ans = new HashMap<>();
@@ -38,6 +39,7 @@ public class TripleMain {
         relatedWord.setRelatedWord();
         wordEmbedding = new WordEmbedding();
         wordEmbedding.setEmbedding();
+        vertexToNodeId = new HashMap<>();
     }
 
     public static void main(String args[]) throws IOException, ParseException {
@@ -119,17 +121,31 @@ public class TripleMain {
 
     public static void step(int num, BasicEntropyCalculator basicEntropyCalculator, SimilarityMigratePlanner similarityMigratePlanner, BasicPlanExecutor planExecutor, MergedGraghInfo mergedGraghInfo) throws IOException {
         String round = "Round" + num;
+        File dir = new File(round);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
         MigratePlan migratePlan = similarityMigratePlanner.getVertexMigratePlan();
         planExecutor.ExecutePlan(migratePlan, true, true);
         basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
         System.out.println(round + "hit one : " + calcuteHitOne(mergedGraghInfo));
+        mergedGraghInfo.saveEntropy(round + "/Entropy");
+        mergedGraghInfo.saveDetailEntropy(round + "/DetailEntropy");
+        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
+        writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeCorrectSet(mergedGraghInfo, round + "/CorrectVertex");
     }
 
     public static MergedGraghInfo firstStep(String baseGraphDir, String delGraphDir) throws IOException {
         boolean opt = true; // 简化运算
         boolean calcValue = true; // 是否计算Value节点的入熵
         boolean detailed = false; // 是否对细分信息进行统计
-
+        String round = "Round0";
+        System.out.println(round);
+        File dir = new File(round);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
         Graph graph1, graph2;
         BasicImporter importer = new TripleFileImporter(expDir);
         graph1 = importer.readGraph(1, baseGraphDir);
@@ -147,12 +163,18 @@ public class TripleMain {
         graphHashSet.add(graph1);
         graphHashSet.add(graph2);
 
+        System.out.println("save Graph file");
+        graph1.saveToFile();
+        graph2.saveToFile();
+
         GraphsInfo graphsInfo = new GraphsInfo(graphHashSet);
         MergedGraghInfo mergedGraghInfo = new MergedGraghInfo(graphsInfo, true);
         mergedGraghInfo.generateMergeGraphByMatch2();
 
         BasicEntropyCalculator basicEntropyCalculator = new BasicEntropyCalculator(opt, calcValue, detailed);
         basicEntropyCalculator.calculateEntropy(mergedGraghInfo);
+
+        mergedGraghInfo.getMergedGraph().saveToFile(round + "/MergedGraph");
 
         // 生成迁移方案
         BigraphMatchPlanner bigraphMatchPlanner = new BigraphMatchPlanner(graph1, graph2, mergedGraghInfo);
@@ -161,8 +183,13 @@ public class TripleMain {
         //  执行迁移方案
         BasicPlanExecutor planExecutor = new BasicPlanExecutor(mergedGraghInfo);
         planExecutor.ExecutePlan(migratePlan, true, true);
-
+        mergedGraghInfo.saveEntropy(round + "/Entropy");
+        mergedGraghInfo.saveDetailEntropy(round + "/DetailEntropy");
+        System.out.println("hit one : " + calcuteHitOne(mergedGraghInfo));
+        writeWrongSet(mergedGraghInfo, round + "/WrongVertex");
+        writeCorrectSet(mergedGraghInfo, round + "/CorrectVertex");
         System.out.println("Round 0 hit one : " + calcuteHitOne(mergedGraghInfo));
+
         return mergedGraghInfo;
     }
 
@@ -214,4 +241,39 @@ public class TripleMain {
         return (double) correctNum / ans.size();
     }
 
+    public static void writeWrongSet(MergedGraghInfo mergedGraghInfo, String fileName) {
+        try {
+            File file = new File(fileName);
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            for (MergedVertex mergedVertex : wrongMergedVertexSet) {
+                writer.write(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex) + "\n");
+                for (Vertex vertex : mergedVertex.getVertexSet()){
+                    writer.write(vertex.getId() + "\t" + vertex.getValue() + "\t" + TripleMain.vertexToNodeId.get(vertex) + "\n");
+                }
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("write file error" + e.toString());
+        }
+    }
+
+    public static void writeCorrectSet(MergedGraghInfo mergedGraghInfo, String fileName) {
+        try {
+            File file = new File(fileName);
+            FileOutputStream os = new FileOutputStream(file);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+            for (MergedVertex mergedVertex : correctMergedVertexSet) {
+                writer.write(mergedVertex.getId() + "\t" + mergedGraghInfo.getMergedVertexIndexInEntropy(mergedVertex) + "\n");
+                for (Vertex vertex : mergedVertex.getVertexSet()){
+                    writer.write(vertex.getId() + "\t" + vertex.getValue() + "\t" + TripleMain.vertexToNodeId.get(vertex) + "\n");
+                }
+            }
+            writer.close();
+            os.close();
+        } catch (Exception e) {
+            System.out.println("write file error" + e.toString());
+        }
+    }
 }

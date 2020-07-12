@@ -108,6 +108,7 @@ public class BigraphMatchPlanner implements MigratePlanner {
                 if (keyWordToVertex2.containsKey(temp_word)) {
                     relatedVertex.addAll(keyWordToVertex2.get(temp_word));
                 }
+                // 根据Main函数不同选择不同的relatedWord
                 if (TripleMain.relatedWord.getRelatedWord().containsKey(temp_word)) {
                     relatedWords = TripleMain.relatedWord.getRelatedWord().get(temp_word);
                     for (String relatedWord : relatedWords) {

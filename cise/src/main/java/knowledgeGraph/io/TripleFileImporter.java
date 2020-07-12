@@ -89,6 +89,7 @@ public class TripleFileImporter implements BasicImporter {
                 Vertex entity = new Vertex(s, "Entity", vertexName);
                 dealVertexName(vertexName, entity);
                 vertexHashMap.put(vertexKey, entity);
+                TripleMain.vertexToNodeId.put(entity, vertexKey);
                 //处理Value
                 //value在同一个图谱中是有重名的，重名的只创建一个节点
                 if (!this.Val2Id.containsKey(vertexName)) {
